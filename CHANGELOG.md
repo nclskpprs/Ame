@@ -65,3 +65,5 @@ and this project adheres to
 - Send code to an agent: select lines in the editor and press
   Ctrl/Cmd+Shift+Enter. The agent receives `path:lines` and the code as a
   paste (it is not submitted), ready for your prompt.
+- File type icons in the file tree and the editor tabs (a curated set from
+  Material Icon Theme, MIT); can be hidden in the settings.

@@ -42,6 +42,7 @@
         <FileTree
           tree={session.tree}
           {unsaved}
+          icons={settings.value.fileIcons}
           singleClick={settings.value.fileOpen === 'singleClick'}
           onopen={(path) => void session.editors.open(path)}
         />

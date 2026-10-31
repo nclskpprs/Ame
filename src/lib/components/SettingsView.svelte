@@ -95,6 +95,19 @@
           onchange={(fileOpen: FileOpen) => void settings.update({ fileOpen })}
         />
       </div>
+      <div class="row">
+        <span class="label">{t('settings.fileIcons.label')}</span>
+        <SegmentedControl
+          name="settings-file-icons"
+          label={t('settings.fileIcons.label')}
+          options={[
+            { value: 'on', label: t('settings.fileIcons.on') },
+            { value: 'off', label: t('settings.fileIcons.off') },
+          ]}
+          value={settings.value.fileIcons ? 'on' : 'off'}
+          onchange={(value) => void settings.update({ fileIcons: value === 'on' })}
+        />
+      </div>
     </section>
   </div>
 </section>

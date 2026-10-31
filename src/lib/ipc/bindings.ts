@@ -388,6 +388,8 @@ export type Settings_Deserialize = {
 	density?: Density,
 	/**  How a click in the file tree opens a file. */
 	fileOpen?: FileOpen,
+	/**  Show file type icons in the file tree and the editor tabs. */
+	fileIcons?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents?: AgentProfile_Deserialize[],
 };
@@ -409,6 +411,8 @@ export type Settings_Serialize = {
 	density: Density,
 	/**  How a click in the file tree opens a file. */
 	fileOpen: FileOpen,
+	/**  Show file type icons in the file tree and the editor tabs. */
+	fileIcons: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents: AgentProfile_Serialize[],
 };

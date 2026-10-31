@@ -34,6 +34,8 @@ milestones and marked with 💡.
 - [x] 💡 Command palette (`Ctrl/Cmd+K`): projects, files and commands in one
       input (scripts follow in M5, agents in M2)
 - [x] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
+- [x] File type icons in the tree and tabs (Material Icon Theme subset,
+      maintainer request)
 
 ## M2 — Terminals and agents
 

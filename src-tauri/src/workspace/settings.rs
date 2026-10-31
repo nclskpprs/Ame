@@ -37,6 +37,8 @@ pub struct Settings {
     pub density: Density,
     /// How a click in the file tree opens a file.
     pub file_open: FileOpen,
+    /// Show file type icons in the file tree and the editor tabs.
+    pub file_icons: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
     pub agents: Vec<AgentProfile>,
 }
@@ -50,6 +52,7 @@ impl Default for Settings {
             rain_effects: RainEffects::default(),
             density: Density::default(),
             file_open: FileOpen::default(),
+            file_icons: true,
             agents: Vec::new(),
         }
     }

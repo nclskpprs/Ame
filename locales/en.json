@@ -51,6 +51,11 @@
       "doubleClick": "Double click",
       "singleClick": "Single click"
     },
+    "fileIcons": {
+      "label": "File icons",
+      "on": "Show",
+      "off": "Hide"
+    },
     "saveFailed": "Could not save settings: {message}"
   },
   "projectMenu": {

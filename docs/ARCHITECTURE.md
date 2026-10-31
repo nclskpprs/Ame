@@ -285,6 +285,14 @@ Example agent profile:
   debounced `fs-changed` events (see
   [ADR 0015](decisions/0015-watch-only-visible-directories.md)).
 
+## File icons — implemented
+
+- `src/lib/fs/file-icons.ts` maps file and folder names to icons from
+  Material Icon Theme (MIT, `licenses/material-icon-theme-MIT.txt`). About
+  100 SVGs (~110 KB) live in `public/file-icons/` and are loaded by the
+  browser only when a row shows them; nothing is added to the JS bundle. A
+  test checks that every mapped icon is bundled. Setting: `fileIcons`.
+
 ## Editor — implemented (M1)
 
 - One CodeMirror 6 view per project shows the active tab; every tab keeps

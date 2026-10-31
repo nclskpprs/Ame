@@ -2,16 +2,21 @@
   import { t } from '$lib/i18n';
   import type { FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
   import { treeClick } from '$lib/project/tree-click';
+  import { iconName, iconUrl } from '$lib/fs/file-icons';
+  import { currentTheme } from '$lib/theme/current.svelte';
 
   let {
     tree,
     unsaved = new Set(),
+    icons = true,
     singleClick = false,
     onopen,
   }: {
     tree: FileTreeState;
     /** Files with unsaved changes and the folders that contain them. */
     unsaved?: ReadonlySet<string>;
+    /** Show file type icons. */
+    icons?: boolean;
     /** Open files with a single click instead of a double click. */
     singleClick?: boolean;
     /** Called when a file is activated (click or Enter, see `singleClick`). */
@@ -125,6 +130,16 @@
       {:else}
         <span class="spacer"></span>
       {/if}
+      {#if icons}
+        <img
+          class="icon"
+          src={iconUrl(iconName(row.entry.name, row.entry.kind), currentTheme.name)}
+          alt=""
+          width="16"
+          height="16"
+          draggable="false"
+        />
+      {/if}
       <span class="name">{row.entry.name}</span>
       {#if unsaved.has(row.entry.path) && !row.expanded}
         <span class="unsaved" title={t('fileTree.unsaved')}>
@@ -188,6 +203,12 @@
 
   .chevron.open {
     transform: rotate(90deg);
+  }
+
+  .icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
   }
 
   .name {

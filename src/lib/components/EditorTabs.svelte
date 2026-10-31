@@ -1,6 +1,9 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
+  import { iconName, iconUrl } from '$lib/fs/file-icons';
   import type { EditorGroup } from '$lib/project/editors.svelte';
+  import { settings } from '$lib/stores/settings.svelte';
+  import { currentTheme } from '$lib/theme/current.svelte';
 
   let { group }: { group: EditorGroup } = $props();
 
@@ -19,6 +22,16 @@
         onclick={() => void group.activate(file.path)}
         onauxclick={(event) => onauxclick(event, file.path)}
       >
+        {#if settings.value.fileIcons}
+          <img
+            class="icon"
+            src={iconUrl(iconName(file.name, 'file'), currentTheme.name)}
+            alt=""
+            width="16"
+            height="16"
+            draggable="false"
+          />
+        {/if}
         {file.name}
       </button>
       <button
@@ -62,12 +75,19 @@
   }
 
   .label {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-2);
     padding: var(--ame-space-2) var(--ame-space-1) var(--ame-space-2) var(--ame-space-3);
     border: 0;
     background: transparent;
     color: inherit;
     font: inherit;
     white-space: nowrap;
+  }
+
+  .icon {
+    flex: none;
   }
 
   .close {

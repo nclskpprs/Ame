@@ -11,8 +11,9 @@ Ame is **not** an IDE replacement. There is no indexing and no language
 server by default. It is a cockpit: terminals, agent status, a file tree,
 a lightweight editor and a live diff of what your agents changed.
 
-> **Status:** pre-alpha. Milestone M0 (foundation) is in progress — there is
-> nothing to install yet. See the [roadmap](docs/ROADMAP.md).
+> **Status:** pre-alpha. Projects, file tree, editor and search work (M1);
+> terminals and agents are next (M2). There is nothing to install yet. See
+> the [roadmap](docs/ROADMAP.md).
 
 ## Why
 

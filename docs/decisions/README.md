@@ -20,3 +20,5 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0012](0012-design-tokens-as-css-custom-properties.md) | Design tokens as CSS custom properties                 | Accepted |
 | [0013](0013-dual-license-mit-apache.md)                | Dual license MIT OR Apache-2.0                         | Accepted |
 | [0014](0014-quality-tooling.md)                        | Lint, format, test and git hook tooling                | Accepted |
+| [0015](0015-watch-only-visible-directories.md)         | Watch only visible directories                         | Accepted |
+| [0016](0016-commands-shortcuts-and-palette.md)         | Commands, shortcuts and the command palette            | Accepted |

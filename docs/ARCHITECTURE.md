@@ -65,10 +65,15 @@ src/                  Svelte frontend
   App.svelte          root component
   main.ts             entry point
   app.css             global styles (uses design tokens only)
-  lib/components/     sidebar, file tree, editor, terminal, dashboard, diff
-  lib/stores/         application state (Svelte runes)
+  lib/commands/       command registry, shortcuts, app commands
+  lib/components/     sidebar, file tree, editor, search, palette, …
+  lib/editor/         CodeMirror setup, theme, languages
+  lib/fs/             helpers for project-relative paths
   lib/i18n/           translation helper and tests
-  lib/ipc/            generated bindings (bindings.ts) — do not edit
+  lib/ipc/            generated bindings (bindings.ts) — do not edit; types.ts
+  lib/palette/        palette state, sources, fuzzy matching
+  lib/project/        per-project sessions: file tree, editors, search
+  lib/stores/         app-wide state: settings, workspace, notices
   lib/theme/          design tokens and theme logic
 locales/en.json       source of truth for UI strings
 docs/                 vision, architecture, design, roadmap, progress, ADRs
@@ -131,13 +136,15 @@ Module: `src-tauri/src/workspace/`.
 - A unit test checks WCAG AA contrast: 4.5:1 for text tokens and 3:1 for
   indicator tokens, on `bg` and `surface`.
 
-## Base layout — implemented (M0)
+## Layout — implemented (M0/M1)
 
-- `App.svelte`: a grid of the sidebar and the main area.
-- `Sidebar.svelte`: app name, project list placeholder, theme switcher and a
-  portable-mode badge.
-- `EmptyState.svelte` with `DropMark.svelte` (the drop that is also a text
-  cursor).
+- `App.svelte`: sidebar | main area. The main area shows the active
+  project's `ProjectView` or the `EmptyState` (with the drop/cursor mark).
+- `Sidebar.svelte`: app name, open-folder button, project list (pinned,
+  groups, ungrouped), notices, theme switcher, portable-mode badge.
+- `ProjectView.svelte`: side panel (Files / Search tabs) | `Resizer` |
+  `EditorPane` (tabs, inline bars, editor). The side panel width and tab
+  are part of the project layout.
 
 ## i18n — implemented (M0)
 
@@ -194,10 +201,64 @@ Example agent profile:
 }
 ```
 
-## Projects and views — planned (M1–M5)
+## Projects and layout restoration — implemented (M1)
 
-- **Sidebar:** all open projects with a status dot per agent session;
-  shortcuts `Ctrl/Cmd+1…9`; project groups and pinning.
+- `WorkspaceStore` (`src-tauri/src/workspace/projects.rs`) persists
+  `workspace.json`: open projects (path = id, name, group, pinned), the
+  active project and a `ProjectLayout` per project (open tabs, active tab,
+  expanded directories, side panel tab and width). All mutations are saved
+  immediately; layout changes are debounced in the frontend (500 ms).
+- Shared JSON persistence (`workspace/storage.rs`): atomic writes and
+  `*.corrupt.json` backups, also used by the settings.
+- The frontend keeps a `ProjectSession` per open project
+  (`src/lib/project/session.ts`) with the file tree, editors and search, so
+  switching projects keeps all state.
+- Native context menu on projects: pin, move to group, close.
+  `Mod+1…9` and `Mod+Alt+Up/Down` switch projects; the window title shows
+  the active project.
+
+## File system — implemented (M1)
+
+- All paths crossing IPC are **project-relative with `/`**; the backend
+  resolves them inside the project root and rejects anything escaping it
+  (`fs/path.rs`). Commands only work for open projects.
+- `read_dir` lists one directory (ignore rules, dotfiles visible, `.git`
+  hidden, directories first). `read_file` returns text or flags binary /
+  non-UTF-8 / too large (> 10 MB). `write_file` writes in place to keep
+  permissions, symlinks and hard links.
+- `FsWatcher` watches only visible directories, non-recursively, and emits
+  debounced `fs-changed` events (see
+  [ADR 0015](decisions/0015-watch-only-visible-directories.md)).
+
+## Editor — implemented (M1)
+
+- One CodeMirror 6 view per project shows the active tab; every tab keeps
+  its own `EditorState` (undo history, selection) and scroll snapshot.
+- Lean extension set (no autocompletion or linting), language support
+  loaded on demand, theme built from CSS variables only, CRLF preserved.
+- Changes on disk reload clean tabs with a minimal diff (cursor stays);
+  dirty tabs get an inline "reload / keep mine" bar. Closing a dirty tab
+  asks inline (save / don't save / cancel).
+
+## Search and quick open — implemented (M1)
+
+- Quick open: `fs/quick_open.rs` walks the project on demand (cached 5 s,
+  max 200,000 files) and ranks paths with `nucleo-matcher`.
+- Text search: `fs/search.rs` uses `grep-searcher`/`grep-regex`, streams
+  batches through a Tauri channel, stops at 5,000 matches, and a new search
+  cancels the running one. Ranges are UTF-16 offsets for the frontend.
+
+## Commands and palette — implemented (M1)
+
+- Central command registry with platform-aware shortcuts and a command
+  palette for commands, projects and files (see
+  [ADR 0016](decisions/0016-commands-shortcuts-and-palette.md)).
+- In debug builds, frontend errors and the startup time are forwarded to
+  the backend log.
+
+## Projects and views — planned (M2–M5)
+
+- **Sidebar:** a status dot per agent session.
 - **Dashboard:** grid of all sessions across all projects — project, agent,
   status, runtime, last output line, number of changed files.
 - **Project view:** file tree · editor tabs · terminal panel (multiple
@@ -208,7 +269,5 @@ Example agent profile:
 - **Scripts panel:** detects `package.json` scripts (npm/pnpm/yarn/bun based
   on the lock file) and `composer.json` scripts; each script runs in its own
   task terminal with a status.
-- **Sessions survive project switches;** after an app restart, projects and
-  layout are restored.
 - **Git worktrees (later):** several agents in parallel in the same repo, each
   in its own worktree and branch, created and merged with one click.

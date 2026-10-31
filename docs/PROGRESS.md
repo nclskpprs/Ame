@@ -5,14 +5,57 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M0 — Foundation is done. Next: **M1 — Project shell**.
+- **Milestone:** M1 — Project shell is done on branch
+  `feat/m1-project-shell` (waiting for review and merge). Next: **M2 —
+  Terminals and agents**.
 - **Next steps:**
-  1. Push to GitHub and check that the first CI run is green on all three
-     platforms (fix platform-specific issues, especially Windows).
-  2. Start M1 on a feature branch: open multiple projects and the sidebar
-     list, then the lazy file tree.
+  1. Maintainer reviews and merges `feat/m1-project-shell`; check CI.
+  2. Start M2 on a new branch: PTY manager with ring buffer and xterm.js,
+     agent profiles, sessions in the background.
 
 ## Log
+
+### 2026-10-31 — M1 completed
+
+**Done** (branch `feat/m1-project-shell`, one commit per task)
+
+- Projects: open several folders, pin, group (native context menu, inline
+  group name), close; `workspace.json` with per-project layout (tabs,
+  expanded folders, side panel tab and width) restored on start.
+- File system backend: lazy `read_dir` with ignore rules, `read_file` /
+  `write_file`, path safety, `FsWatcher` for visible directories only
+  (ADR 0015).
+- Layout: side panel (Files / Search) with keyboard-accessible splitter;
+  lazy file tree with full keyboard navigation.
+- Editor: CodeMirror 6 with tabs, per-tab state, on-demand languages,
+  token-based theme (new syntax tokens, WCAG AA), JetBrains Mono bundled
+  (OFL in `licenses/`), save/close with inline prompts, reload on disk
+  changes, conflict bar.
+- Quick open (`Mod+P`, nucleo) and text search (`Mod+Shift+F`, ripgrep
+  libraries, streamed, cancellable).
+- Command registry, shortcuts and command palette (`Mod+K`) (ADR 0016).
+- Debug builds log frontend errors and the startup time to the terminal.
+
+**Verified**
+
+- `cargo clippy -D warnings` clean, 41 Rust tests; `pnpm check` clean,
+  144 frontend tests, ESLint/Prettier clean.
+- `pnpm tauri dev` on Linux (WSLg) with a restored layout (pinned project,
+  group, expanded folders, three tabs): starts without frontend errors,
+  frontend mounted after ~1 s in dev mode on the `/mnt/c` checkout.
+
+**Open**
+
+- Not yet tried interactively by the maintainer; no UI tests exist yet.
+  Worth a manual pass: context menu, group naming, splitter, tree keyboard
+  navigation, editor save/conflict flow, search jump, palette.
+- Performance: CodeMirror is part of the startup bundle (~450 kB JS
+  uncompressed); lazy-loading the editor would help the cold-start target.
+  Measure in M3.
+- Changes in collapsed folders are not watched (by design, ADR 0015); M4
+  needs another signal for git status.
+- Large directories and long result lists are rendered without
+  virtualization (see "Later" in the roadmap).
 
 ### 2026-10-31 — M0 completed
 

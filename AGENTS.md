@@ -91,7 +91,12 @@ Read these before you change anything substantial:
 - Svelte 5 with runes (`$state`, `$derived`, `$effect`) and TypeScript in
   strict mode.
 - Call the backend only through the generated `commands` in
-  `src/lib/ipc/bindings.ts`.
+  `src/lib/ipc/bindings.ts` (friendly type names in `src/lib/ipc/types.ts`).
+- Every user action is a command in the registry
+  (`src/lib/commands/`) with an i18n title and, where useful, a shortcut,
+  so it shows up in the command palette (ADR 0016).
+- Paths crossing IPC are project-relative with `/` separators; never send
+  absolute file paths of project files to the backend.
 - **No UI string without an i18n key.** Add the key to `locales/en.json` and
   render it with `t('key')`. This includes `aria-label`, `title`,
   `placeholder` and `alt`. The test `src/lib/i18n/no-raw-text.test.ts` fails

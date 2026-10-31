@@ -22,3 +22,14 @@ and this project adheres to
   and can be switched in the sidebar.
 - English UI texts with an i18n system ready for more languages.
 - Continuous integration on macOS, Linux and Windows.
+- Open several projects at once; pin them and sort them into groups from
+  the context menu. Switch with Ctrl/Cmd+1…9. Open tabs, expanded folders
+  and panel sizes are restored after a restart.
+- File tree that loads folders on demand, respects `.gitignore` and
+  follows changes on disk.
+- Code editor (CodeMirror 6) with tabs, syntax highlighting for JS/TS,
+  JSON, CSS, HTML, Markdown and PHP, and JetBrains Mono. Files changed by
+  agents reload automatically; unsaved edits are never overwritten
+  silently.
+- Quick open (Ctrl/Cmd+P), search in project (Ctrl/Cmd+Shift+F) and a
+  command palette (Ctrl/Cmd+K).

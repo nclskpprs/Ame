@@ -21,18 +21,18 @@ milestones and marked with 💡.
 
 ## M1 — Project shell
 
-- [ ] Open multiple projects, sidebar, layout restoration
-- [ ] Base layout: panels (file tree · editor · terminal · changes) next to
-      the sidebar from M0; density switch in the UI (the tokens already
-      support comfortable / compact)
-- [ ] Lazy file tree with watcher
-- [ ] CodeMirror editor: view, edit, save; syntax highlighting for common
+- [x] Open multiple projects, sidebar, layout restoration
+- [x] Base layout: resizable side panel (files · search) and editor area;
+      density switch via the command palette. The terminal panel follows in
+      M2, the changes panel in M4 (progressive disclosure).
+- [x] Lazy file tree with watcher
+- [x] CodeMirror editor: view, edit, save; syntax highlighting for common
       languages (PHP, JS/TS, JSON, CSS, HTML, Markdown); theme derived from
       the design tokens; bundled JetBrains Mono
-- [ ] Quick open (fuzzy) and text search
-- [ ] 💡 Command palette (`Ctrl/Cmd+K`): projects, files, scripts, agents and
-      commands in one input
-- [ ] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
+- [x] Quick open (fuzzy) and text search
+- [x] 💡 Command palette (`Ctrl/Cmd+K`): projects, files and commands in one
+      input (scripts follow in M5, agents in M2)
+- [x] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
 
 ## M2 — Terminals and agents
 
@@ -93,6 +93,8 @@ milestones and marked with 💡.
 
 ## Later
 
+- File operations in the tree: new file/folder, rename, delete
+- Virtualized rendering for very large directories and search results
 - Git worktrees for parallel agents in the same repo
 - More UI languages (German first)
 - Themes, keybinding configuration

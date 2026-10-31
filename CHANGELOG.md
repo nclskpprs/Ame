@@ -67,3 +67,5 @@ and this project adheres to
   paste (it is not submitted), ready for your prompt.
 - File type icons in the file tree and the editor tabs (a curated set from
   Material Icon Theme, MIT); can be hidden in the settings.
+- Agents in the settings: see which agents were found and where, change
+  the command line of a built-in agent (and reset it), or add your own.

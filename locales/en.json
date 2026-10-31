@@ -56,6 +56,27 @@
       "on": "Show",
       "off": "Hide"
     },
+    "agents": {
+      "title": "Agents",
+      "description": "Agents are found on the PATH. Change the command line of a built-in agent or add your own.",
+      "add": "Add agent",
+      "edit": "Edit",
+      "customize": "Customize",
+      "reset": "Reset",
+      "remove": "Remove",
+      "custom": "Custom",
+      "changed": "Changed",
+      "name": "Name",
+      "command": "Command",
+      "commandHint": "Program on the PATH or a full path",
+      "shellCommand": "Your default shell",
+      "args": "Arguments",
+      "resumeArgs": "Resume arguments",
+      "resumeHint": "Continue the last conversation, e.g. --continue",
+      "save": "Save",
+      "cancel": "Cancel",
+      "invalid": "A name and a command are required."
+    },
     "saveFailed": "Could not save settings: {message}"
   },
   "projectMenu": {

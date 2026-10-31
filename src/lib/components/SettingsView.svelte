@@ -9,6 +9,7 @@
   } from '$lib/settings/options';
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
+  import AgentSettings from './AgentSettings.svelte';
   import SegmentedControl from './SegmentedControl.svelte';
 
   let root: HTMLElement | undefined = $state();
@@ -109,6 +110,12 @@
         />
       </div>
     </section>
+
+    <section class="group" aria-labelledby="settings-agents">
+      <h2 id="settings-agents">{t('settings.agents.title')}</h2>
+      <p class="intro">{t('settings.agents.description')}</p>
+      <AgentSettings />
+    </section>
   </div>
 </section>
 
@@ -196,6 +203,11 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+  }
+
+  .intro {
+    margin: 0 0 var(--ame-space-2);
+    color: var(--ame-text-muted);
   }
 
   .description {

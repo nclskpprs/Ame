@@ -5,13 +5,15 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M1 — Project shell is done on branch
-  `feat/m1-project-shell` (waiting for review and merge). Next: **M2 —
-  Terminals and agents**.
+- **Milestone:** M1 — Project shell is done. Next: **M2 — Terminals and
+  agents**.
+- **Process (maintainer decision, 2026-10-31):** all further milestones go
+  on the branch `feat/m1-project-shell`, one commit per task. The
+  per-feature acceptance test is paused; the maintainer reviews everything
+  at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. Maintainer reviews and merges `feat/m1-project-shell`; check CI.
-  2. Start M2 on a new branch: PTY manager with ring buffer and xterm.js,
-     agent profiles, sessions in the background.
+  1. M2: PTY manager with ring buffer and xterm.js, agent profiles,
+     sessions in the background.
 
 ## Log
 

@@ -1,0 +1,74 @@
+/* Global styles. Colors come only from the design tokens (--ame-*), which
+   src/lib/theme/theme.ts writes onto <html>. */
+
+:root {
+  --ame-font-ui:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Cantarell, Ubuntu, 'Noto Sans',
+    sans-serif;
+  --ame-font-code: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --ame-font-size: 13px;
+  --ame-font-size-small: 12px;
+  --ame-font-size-title: 18px;
+  --ame-space-1: 4px;
+  --ame-space-2: 8px;
+  --ame-space-3: 12px;
+  --ame-space-4: 16px;
+  --ame-space-6: 24px;
+  --ame-radius: 6px;
+  --ame-sidebar-width: 240px;
+  --ame-transition: 120ms ease-out;
+}
+
+:root[data-density='compact'] {
+  --ame-font-size: 12px;
+  --ame-font-size-small: 11px;
+  --ame-space-1: 2px;
+  --ame-space-2: 6px;
+  --ame-space-3: 8px;
+  --ame-space-4: 12px;
+  --ame-space-6: 16px;
+  --ame-sidebar-width: 208px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--ame-bg);
+  color: var(--ame-text);
+  font-family: var(--ame-font-ui);
+  font-size: var(--ame-font-size);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+#app {
+  height: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ame-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

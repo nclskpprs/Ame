@@ -48,17 +48,17 @@ least WCAG AA. Source of truth in code: `src/lib/theme/tokens.ts`.
 | text             | `--ame-text`        | `#D8E2EE`             | `#1A2433`        |
 | text-muted       | `--ame-text-muted`  | `#8597AD`             | `#5B6B80`        |
 | accent / working | `--ame-accent`      | `#5AA9FF`             | `#2F74D0`        |
-| needs-input      | `--ame-needs-input` | `#F2B84B`             | `#C98A12`        |
+| needs-input      | `--ame-needs-input` | `#F2B84B`             | `#B47A0E`        |
 | done             | `--ame-done`        | `#4FD1B5`             | `#1E9E82`        |
 | error            | `--ame-error`       | `#F06A6A`             | `#D14343`        |
 
 Accent and status colors are meant for indicators (dots, drops, borders,
 focus rings), where WCAG AA requires 3:1 against adjacent colors. In the
-light theme, `accent` (4.35:1 on `bg`), `error` (4.29:1), `done` (3.14:1) and
-`needs-input` (2.76:1) are below the 4.5:1 required for body text, so they
-must not be used for small text. Light `needs-input` is also below 3:1 and
-is an open point for the UX review (see [PROGRESS.md](PROGRESS.md)). The
-contrast test in `src/lib/theme/contrast.test.ts` guards all of this.
+light theme, `accent` (4.35:1 on `bg`), `error` (4.29:1), `needs-input`
+(3.44:1) and `done` (3.14:1) are below the 4.5:1 required for body text, so
+they must not be used for small text. The light `needs-input` was darkened
+from the plan's `#C98A12` (2.76:1) to `#B47A0E` to reach 3:1. The contrast
+test in `src/lib/theme/contrast.test.ts` guards all of this.
 
 ### Theming
 

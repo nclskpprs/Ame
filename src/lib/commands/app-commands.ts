@@ -1,6 +1,6 @@
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
-import { fileSource } from '$lib/palette/sources';
+import { everythingSource, fileSource } from '$lib/palette/sources';
 import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
@@ -31,7 +31,29 @@ export function registerAppCommands(): () => void {
     },
   }));
 
+  const openPalette = () =>
+    palette.open({
+      label: t('palette.label'),
+      placeholder: t('palette.placeholder'),
+      empty: t('palette.empty'),
+      source: everythingSource(activeSession()),
+    });
+
   return registerCommands([
+    {
+      id: 'palette.open',
+      title: 'commands.commandPalette',
+      shortcut: 'Mod+K',
+      hidden: true,
+      run: openPalette,
+    },
+    {
+      id: 'palette.openAlt',
+      title: 'commands.commandPalette',
+      shortcut: 'Mod+Shift+P',
+      hidden: true,
+      run: openPalette,
+    },
     {
       id: 'workspace.openFolder',
       title: 'commands.openFolder',

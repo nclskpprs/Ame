@@ -54,7 +54,8 @@
     "closeEditor": "Close Editor",
     "goToFile": "Go to File…",
     "searchInProject": "Search in Project",
-    "showFiles": "Show Files"
+    "showFiles": "Show Files",
+    "commandPalette": "Show Command Palette"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -103,5 +104,11 @@
     "label": "Go to file",
     "placeholder": "Search files by name",
     "empty": "No matching files"
+  },
+  "palette": {
+    "label": "Command palette",
+    "placeholder": "Type a command, project or file name",
+    "empty": "Nothing found",
+    "kindProject": "Project"
   }
 }

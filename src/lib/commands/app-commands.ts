@@ -3,6 +3,7 @@ import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
 import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
+import { view } from '$lib/stores/view.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { orderedProjects } from '$lib/workspace/sections';
 import { registerCommands, type Command } from './registry';
@@ -138,6 +139,12 @@ export function registerAppCommands(): () => void {
         const file = activeFile();
         if (file) activeSession()?.editors.close(file.path);
       },
+    },
+    {
+      id: 'settings.open',
+      title: 'commands.openSettings',
+      shortcut: 'Mod+,',
+      run: () => view.openSettings(),
     },
     {
       id: 'theme.system',

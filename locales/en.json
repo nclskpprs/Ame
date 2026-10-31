@@ -12,7 +12,8 @@
     "pinned": "Pinned",
     "projects": "Projects",
     "groupName": "Group name",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "settings": "Settings"
   },
   "emptyState": {
     "title": "Open a folder to get started",
@@ -20,11 +21,27 @@
     "openFolder": "Open folder"
   },
   "settings": {
+    "title": "Settings",
+    "close": "Close settings",
+    "closeHint": "Close settings (Esc)",
+    "appearance": "Appearance",
     "theme": {
       "label": "Theme",
       "system": "System",
       "dark": "Dark",
       "light": "Light"
+    },
+    "density": {
+      "label": "Density",
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "rain": {
+      "label": "Rain effects",
+      "description": "Status animations in the sidebar and dashboard. Never in the editor or terminal.",
+      "on": "On",
+      "subtle": "Subtle",
+      "off": "Off"
     },
     "saveFailed": "Could not save settings: {message}"
   },
@@ -55,7 +72,8 @@
     "goToFile": "Go to File…",
     "searchInProject": "Search in Project",
     "showFiles": "Show Files",
-    "commandPalette": "Show Command Palette"
+    "commandPalette": "Show Command Palette",
+    "openSettings": "Open Settings"
   },
   "sidePanel": {
     "label": "Side panel",

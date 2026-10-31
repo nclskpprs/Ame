@@ -1,17 +1,20 @@
 <script lang="ts">
   import { getCurrentWindow } from '@tauri-apps/api/window';
+  import { untrack } from 'svelte';
   import { registerAppCommands } from '$lib/commands/app-commands';
   import { handleShortcut } from '$lib/commands/registry';
   import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import Palette from '$lib/components/Palette.svelte';
   import ProjectView from '$lib/components/ProjectView.svelte';
+  import SettingsView from '$lib/components/SettingsView.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import { t } from '$lib/i18n';
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { palette } from '$lib/palette/palette.svelte';
-  import { listenToFileChanges, pruneSessions } from '$lib/project/session';
+  import { activeSession, listenToFileChanges, pruneSessions } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
+  import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
     applyAppearance,
@@ -33,6 +36,14 @@
   });
 
   $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
+
+  // Switching projects or opening a file (e.g. from the palette) leaves the
+  // settings, so the result is visible.
+  $effect(() => {
+    void workspace.activePath;
+    void activeSession()?.editors.activePath;
+    untrack(() => view.closeSettings());
+  });
 
   $effect(() =>
     watchSystemPreferences(() => {
@@ -61,7 +72,9 @@
 <div class="shell">
   <Sidebar />
   <main class="main">
-    {#if workspace.active}
+    {#if view.settingsOpen}
+      <SettingsView />
+    {:else if workspace.active}
       {#key workspace.active.path}
         <ProjectView project={workspace.active} />
       {/key}

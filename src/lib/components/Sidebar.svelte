@@ -2,6 +2,7 @@
   import { t } from '$lib/i18n';
   import { notices } from '$lib/stores/notices.svelte';
   import { settings } from '$lib/stores/settings.svelte';
+  import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import ProjectList from './ProjectList.svelte';
   import ThemeSwitcher from './ThemeSwitcher.svelte';
@@ -50,7 +51,25 @@
         </button>
       </p>
     {/each}
-    <ThemeSwitcher />
+    <div class="footer-row">
+      <div class="theme"><ThemeSwitcher /></div>
+      <button
+        class="icon-button"
+        class:active={view.settingsOpen}
+        title={t('sidebar.settings')}
+        aria-label={t('sidebar.settings')}
+        aria-pressed={view.settingsOpen}
+        onclick={() => view.toggleSettings()}
+      >
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM6.9 1.5h2.2l.4 1.8 1.2.7 1.8-.6 1.1 1.9-1.4 1.2v1.4l1.4 1.2-1.1 1.9-1.8-.6-1.2.7-.4 1.8H6.9l-.4-1.8-1.2-.7-1.8.6-1.1-1.9 1.4-1.2V7.1L2.4 5.9l1.1-1.9 1.8.6 1.2-.7z"
+            stroke-width="1.2"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
     {#if settings.appInfo?.portable}
       <span class="badge" title={settings.appInfo.configDir}>{t('sidebar.portableMode')}</span>
     {/if}
@@ -105,9 +124,21 @@
   }
 
   .icon-button:hover,
+  .icon-button.active,
   .dismiss:hover {
     background: var(--ame-bg);
     color: var(--ame-text);
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-1);
+  }
+
+  .theme {
+    flex: 1;
+    min-width: 0;
   }
 
   svg path {

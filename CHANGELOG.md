@@ -33,3 +33,5 @@ and this project adheres to
   silently.
 - Quick open (Ctrl/Cmd+P), search in project (Ctrl/Cmd+Shift+F) and a
   command palette (Ctrl/Cmd+K).
+- Settings view (Ctrl/Cmd+, or the gear in the sidebar) for theme,
+  density and rain effects.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { LogicalPosition } from '@tauri-apps/api/dpi';
   import { Menu } from '@tauri-apps/api/menu';
   import { formatShortcut } from '$lib/commands/shortcuts';
   import { shortcutOf } from '$lib/commands/registry';
@@ -27,8 +28,23 @@
     return shortcut ? formatShortcut(shortcut) : '';
   }
 
+  /**
+   * Where to open a context menu. An explicit position is required on Wayland,
+   * where menus without one are attached to the root window and never shown.
+   * Keyboard-triggered menus (Shift+F10) have no pointer position, so they
+   * open at the element instead.
+   */
+  function menuPosition(event: MouseEvent): LogicalPosition {
+    if (event.clientX !== 0 || event.clientY !== 0) {
+      return new LogicalPosition(event.clientX, event.clientY);
+    }
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    return new LogicalPosition(rect.left + 8, rect.bottom);
+  }
+
   async function showMenu(event: MouseEvent, project: Project) {
     event.preventDefault();
+    const position = menuPosition(event);
     const otherGroups = groupNames(workspace.projects).filter((g) => g !== project.group);
     const menu = await Menu.new({
       items: [
@@ -62,7 +78,7 @@
         },
       ],
     });
-    await menu.popup();
+    await menu.popup(position);
   }
 
   function commitGroup(project: Project, input: HTMLInputElement) {

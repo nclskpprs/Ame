@@ -1,0 +1,52 @@
+name: Agent profile request
+description: Ask for built-in support of a terminal coding agent.
+labels: ["agent-profile", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Any CLI agent already works as a custom profile. Use this template to propose a built-in profile or a status adapter.
+  - type: input
+    id: name
+    attributes:
+      label: Agent name
+      placeholder: e.g. OpenCode
+    validations:
+      required: true
+  - type: input
+    id: homepage
+    attributes:
+      label: Homepage or repository
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: Command to start it
+      placeholder: e.g. opencode
+    validations:
+      required: true
+  - type: input
+    id: resume
+    attributes:
+      label: Command to resume the last session (if any)
+      placeholder: e.g. claude --continue
+  - type: textarea
+    id: prompts
+    attributes:
+      label: Prompts that wait for user input
+      description: Example lines the agent prints when it waits for a confirmation or answer. These become needs-input patterns.
+      render: text
+  - type: textarea
+    id: hooks
+    attributes:
+      label: Hooks or notification support
+      description: Does the agent support hooks, notify commands, BEL or OSC 9/777 notifications? Links to the docs help a lot.
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Platforms you tested
+      multiple: true
+      options:
+        - macOS
+        - Linux
+        - Windows

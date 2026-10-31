@@ -103,6 +103,12 @@ milestones and marked with 💡.
 - [ ] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
       portable `.exe` (Windows)
 - [ ] Release workflow per tag (`tauri-action`), auto-update
+- [ ] In-app updates (maintainer request): check on start and periodically
+      (setting + "Check for Updates" command), inline notice and OS
+      notification when an update exists, "Install and restart" with
+      `tauri-plugin-updater` and signed GitHub release artifacts; the
+      portable `.exe` gets a download link instead. The maintainer creates
+      the signing key and stores it as a GitHub secret.
 - [ ] Docs, screenshots, first publication
 
 ## Later

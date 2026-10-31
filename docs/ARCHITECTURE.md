@@ -370,7 +370,10 @@ Module: `src-tauri/src/git/` (git CLI, ADR 0008).
 - `status.rs` parses `git status --porcelain=v2 -z --branch` limited to the
   project folder; paths are made project-relative (projects can be
   subfolders of a repository).
-- Commands: `git_status`, `git_original` (`HEAD` content for diffs).
+- Commands: `git_status`, `git_original` (`HEAD` content for diffs),
+  `git_stage` (`add -A`), `git_unstage` (`restore --staged`, `rm --cached`
+  before the first commit) and `git_commit` (hooks run; their output is the
+  error message). Paths are checked to stay inside the project.
 - Frontend: `GitState` per project (`lib/project/git.svelte.ts`) refreshes
   on file events, window focus and every 3 s while an agent of the project
   is busy (`pollGit`), because the watcher only sees visible folders.

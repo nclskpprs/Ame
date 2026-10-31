@@ -68,6 +68,75 @@ pub async fn git_original(
     .await
 }
 
+/// Adds files (also deletions) to the index.
+#[tauri::command]
+#[specta::specta]
+pub async fn git_stage(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    paths: Vec<String>,
+) -> Result<()> {
+    let root = store.root(&project)?;
+    let paths = checked(&root, paths)?;
+    blocking(move || {
+        let mut args = vec!["add", "-A", "--"];
+        args.extend(paths.iter().map(String::as_str));
+        git(&root, &args).map(drop)
+    })
+    .await
+}
+
+/// Removes files from the index; the working tree stays as it is.
+#[tauri::command]
+#[specta::specta]
+pub async fn git_unstage(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    paths: Vec<String>,
+) -> Result<()> {
+    let root = store.root(&project)?;
+    let paths = checked(&root, paths)?;
+    blocking(move || {
+        let mut restore = vec!["restore", "--staged", "--"];
+        restore.extend(paths.iter().map(String::as_str));
+        match git(&root, &restore) {
+            Ok(_) => Ok(()),
+            // Before the first commit there is nothing to restore from.
+            Err(Error::Git(_)) => {
+                let mut remove = vec!["rm", "--cached", "-r", "--quiet", "--"];
+                remove.extend(paths.iter().map(String::as_str));
+                git(&root, &remove).map(drop)
+            }
+            Err(err) => Err(err),
+        }
+    })
+    .await
+}
+
+/// Commits the staged changes. Hooks run as usual; their output is the
+/// error message when they fail.
+#[tauri::command]
+#[specta::specta]
+pub async fn git_commit(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    message: String,
+) -> Result<()> {
+    let root = store.root(&project)?;
+    if message.trim().is_empty() {
+        return Err(Error::Git("empty commit message".into()));
+    }
+    blocking(move || git(&root, &["commit", "-m", &message]).map(drop)).await
+}
+
+/// Project-relative paths, checked to stay inside the project.
+fn checked(root: &std::path::Path, paths: Vec<String>) -> Result<Vec<String>> {
+    for path in &paths {
+        resolve(root, path)?;
+    }
+    Ok(paths)
+}
+
 async fn blocking<T: Send + 'static>(
     run: impl FnOnce() -> Result<T> + Send + 'static,
 ) -> Result<T> {
@@ -129,6 +198,31 @@ mod tests {
         assert_eq!(paths, vec!["app.ts", "new.ts"]);
         let original = git(&web, &["show", "HEAD:web/app.ts"]).unwrap();
         assert_eq!(original, b"one\n");
+    }
+
+    #[test]
+    fn stages_unstages_and_commits() {
+        let dir = repo();
+        let web = dir.path().join("web");
+        let staged = |dir: &Path| {
+            let output = git(dir, &["diff", "--cached", "--name-only"]).unwrap();
+            String::from_utf8(output).unwrap()
+        };
+        run(&web, &["add", "-A", "--", "app.ts", "new.ts"]);
+        assert_eq!(staged(&web), "web/app.ts\nweb/new.ts\n");
+        run(&web, &["restore", "--staged", "--", "new.ts"]);
+        assert_eq!(staged(&web), "web/app.ts\n");
+        run(&web, &["commit", "-q", "-m", "change app"]);
+        assert_eq!(staged(&web), "");
+        let original = git(&web, &["show", "HEAD:web/app.ts"]).unwrap();
+        assert_eq!(original, b"two\n");
+    }
+
+    #[test]
+    fn rejects_paths_outside_the_project() {
+        let dir = repo();
+        assert!(checked(dir.path(), vec!["../etc/passwd".into()]).is_err());
+        assert!(checked(dir.path(), vec!["web/app.ts".into()]).is_ok());
     }
 
     #[test]

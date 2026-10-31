@@ -54,6 +54,15 @@ export const commands = {
 	 *  the file is new, binary or not valid UTF-8.
 	 */
 	gitOriginal: (project: string, path: string) => typedError<string | null, AppError>(__TAURI_INVOKE("git_original", { project, path })),
+	/**  Adds files (also deletions) to the index. */
+	gitStage: (project: string, paths: string[]) => typedError<null, AppError>(__TAURI_INVOKE("git_stage", { project, paths })),
+	/**  Removes files from the index; the working tree stays as it is. */
+	gitUnstage: (project: string, paths: string[]) => typedError<null, AppError>(__TAURI_INVOKE("git_unstage", { project, paths })),
+	/**
+	 *  Commits the staged changes. Hooks run as usual; their output is the
+	 *  error message when they fail.
+	 */
+	gitCommit: (project: string, message: string) => typedError<null, AppError>(__TAURI_INVOKE("git_commit", { project, message })),
 	/**
 	 *  All profiles with their detected programs. Looks at the `PATH` every
 	 *  time, so newly installed agents show up without a restart.

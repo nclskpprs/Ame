@@ -278,7 +278,16 @@
     "aheadBehind": "↑{ahead} ↓{behind}",
     "none": "No changes",
     "staged": "Staged",
-    "unstaged": "Changes"
+    "unstaged": "Changes",
+    "stage": "Stage",
+    "unstage": "Unstage",
+    "stageAll": "Stage all",
+    "unstageAll": "Unstage all",
+    "message": "Commit message",
+    "messagePlaceholder": "Commit message (Ctrl/Cmd+Enter to commit)",
+    "commit": "Commit",
+    "commitHint": "Commit the staged changes",
+    "nothingStaged": "Stage changes to commit them"
   },
   "diff": {
     "keep": "Keep",

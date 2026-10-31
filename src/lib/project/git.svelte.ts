@@ -1,5 +1,6 @@
-import { commands } from '$lib/ipc/bindings';
-import type { GitStatus } from '$lib/ipc/types';
+import { commands, type AppError } from '$lib/ipc/bindings';
+import { describeError, type GitStatus } from '$lib/ipc/types';
+import { notices } from '$lib/stores/notices.svelte';
 import { treeMarks, type GitMark } from '$lib/git/marks';
 
 /** Delay that merges bursts of refresh requests (saves, file events). */
@@ -16,6 +17,36 @@ export class GitState {
 
   constructor(project: string) {
     this.project = project;
+  }
+
+  /** A git command is running (stage, commit, …). */
+  busy = $state(false);
+
+  stage(paths: string[]): Promise<boolean> {
+    return this.#run(() => commands.gitStage(this.project, paths));
+  }
+
+  unstage(paths: string[]): Promise<boolean> {
+    return this.#run(() => commands.gitUnstage(this.project, paths));
+  }
+
+  commit(message: string): Promise<boolean> {
+    return this.#run(() => commands.gitCommit(this.project, message));
+  }
+
+  /** Runs a git command, reports errors, and refreshes the status. */
+  async #run(
+    action: () => Promise<{ status: 'ok' } | { status: 'error'; error: AppError }>,
+  ): Promise<boolean> {
+    this.busy = true;
+    try {
+      const result = await action();
+      if (result.status === 'error') notices.push(describeError(result.error));
+      return result.status === 'ok';
+    } finally {
+      this.busy = false;
+      await this.refresh();
+    }
   }
 
   /** Refreshes after a short delay; repeated calls are merged. */

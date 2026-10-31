@@ -90,3 +90,5 @@ and this project adheres to
   shows its changes against the last commit inline in the editor, with
   Keep and Revert for every change (Ctrl/Cmd+Alt+D toggles the inline diff
   for any file).
+- Stage and unstage files (one by one or all) and commit from the changes
+  panel; Ctrl/Cmd+Enter in the message commits. Git hooks run as usual.

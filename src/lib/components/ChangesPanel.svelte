@@ -10,9 +10,27 @@
 
   let { session }: { session: ProjectSession } = $props();
 
+  let message = $state('');
+  const git = $derived(session.git);
+
   const status = $derived(session.git.status);
   const staged = $derived(status?.files.filter((file) => file.staged) ?? []);
   const changes = $derived(status?.files.filter((file) => file.unstaged) ?? []);
+
+  async function commit() {
+    if (!message.trim() || staged.length === 0 || git.busy) return;
+    if (await git.commit(message)) {
+      message = '';
+      await session.editors.refreshDiffs();
+    }
+  }
+
+  function onkeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      void commit();
+    }
+  }
 
   function open(file: GitFile) {
     if (file.unstaged === 'deleted' || (!file.unstaged && file.staged === 'deleted')) return;
@@ -20,13 +38,35 @@
   }
 </script>
 
-{#snippet list(title: string, files: GitFile[])}
+{#snippet list(title: string, files: GitFile[], isStaged: boolean)}
   {#if files.length}
-    <h3 class="section">{title} <span class="count">{files.length}</span></h3>
+    <div class="section">
+      <h3>{title} <span class="count">{files.length}</span></h3>
+      <button
+        class="action"
+        disabled={git.busy}
+        title={isStaged ? t('changes.unstageAll') : t('changes.stageAll')}
+        aria-label={isStaged ? t('changes.unstageAll') : t('changes.stageAll')}
+        onclick={() => {
+          const paths = files.map((f) => f.path);
+          void (isStaged ? git.unstage(paths) : git.stage(paths));
+        }}
+      >
+        {#if isStaged}
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <path d="M3 8h10" />
+          </svg>
+        {:else}
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <path d="M8 3v10M3 8h10" />
+          </svg>
+        {/if}
+      </button>
+    </div>
     <ul>
       {#each files as file (file.path)}
         {@const mark = fileMark(file)}
-        <li>
+        <li class="row">
           <button
             class="file {mark ? `git-${mark}` : ''}"
             title={file.origPath ? `${file.origPath} → ${file.path}` : file.path}
@@ -46,6 +86,23 @@
             <span class="dir">{dirname(file.path)}</span>
             {#if mark}
               <span class="letter" title={t(`git.${mark}`)}>{markLetters[mark]}</span>
+            {/if}
+          </button>
+          <button
+            class="action"
+            disabled={git.busy}
+            title={isStaged ? t('changes.unstage') : t('changes.stage')}
+            aria-label={isStaged ? t('changes.unstage') : t('changes.stage')}
+            onclick={() => void (isStaged ? git.unstage([file.path]) : git.stage([file.path]))}
+          >
+            {#if isStaged}
+              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                <path d="M3 8h10" />
+              </svg>
+            {:else}
+              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                <path d="M8 3v10M3 8h10" />
+              </svg>
             {/if}
           </button>
         </li>
@@ -70,11 +127,34 @@
         >
       {/if}
     </div>
+    <form
+      class="commit"
+      onsubmit={(event) => {
+        event.preventDefault();
+        void commit();
+      }}
+    >
+      <textarea
+        bind:value={message}
+        rows="2"
+        placeholder={t('changes.messagePlaceholder')}
+        aria-label={t('changes.message')}
+        spellcheck="false"
+        {onkeydown}></textarea>
+      <button
+        type="submit"
+        class="primary"
+        disabled={!message.trim() || staged.length === 0 || git.busy}
+        title={staged.length === 0 ? t('changes.nothingStaged') : t('changes.commitHint')}
+      >
+        {t('changes.commit')}
+      </button>
+    </form>
     {#if status.files.length === 0}
       <p class="empty">{t('changes.none')}</p>
     {/if}
-    {@render list(t('changes.staged'), staged)}
-    {@render list(t('changes.unstaged'), changes)}
+    {@render list(t('changes.staged'), staged, true)}
+    {@render list(t('changes.unstaged'), changes, false)}
   {/if}
 </div>
 
@@ -109,16 +189,92 @@
     color: var(--ame-text-muted);
   }
 
+  .commit {
+    display: grid;
+    gap: var(--ame-space-2);
+    padding: 0 var(--ame-space-3) var(--ame-space-2);
+  }
+
+  textarea {
+    min-height: 44px;
+    padding: var(--ame-space-1) var(--ame-space-2);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+    background: var(--ame-bg);
+    color: var(--ame-text);
+    font: inherit;
+    resize: vertical;
+    user-select: text;
+  }
+
+  .commit button {
+    padding: 2px var(--ame-space-3);
+    border: 1px solid var(--ame-accent);
+    border-radius: var(--ame-radius);
+    background: var(--ame-bg);
+    color: var(--ame-text);
+    font: inherit;
+  }
+
+  .commit button:disabled {
+    border-color: var(--ame-border);
+    color: var(--ame-text-muted);
+  }
+
   .section {
     display: flex;
-    gap: var(--ame-space-2);
+    align-items: center;
     margin: var(--ame-space-2) 0 var(--ame-space-1);
-    padding: 0 var(--ame-space-3);
+    padding: 0 var(--ame-space-2) 0 var(--ame-space-3);
+  }
+
+  .section h3 {
+    display: flex;
+    flex: 1;
+    gap: var(--ame-space-2);
+    margin: 0;
     color: var(--ame-text-muted);
     font-size: var(--ame-font-size-small);
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+  }
+
+  .row:hover {
+    background: var(--ame-bg);
+  }
+
+  .action {
+    display: grid;
+    flex: none;
+    place-items: center;
+    margin-right: var(--ame-space-2);
+    padding: 2px;
+    border: 0;
+    border-radius: var(--ame-radius);
+    background: transparent;
+    color: var(--ame-text-muted);
+  }
+
+  .action:hover {
+    background: var(--ame-surface);
+    color: var(--ame-text);
+  }
+
+  .row:not(:hover) .action:not(:focus-visible) {
+    opacity: 0;
+  }
+
+  .action path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
   }
 
   .count {
@@ -146,8 +302,9 @@
     white-space: nowrap;
   }
 
-  .file:hover {
-    background: var(--ame-bg);
+  .file {
+    flex: 1;
+    min-width: 0;
   }
 
   .icon {

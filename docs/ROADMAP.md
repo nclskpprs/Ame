@@ -69,7 +69,7 @@ milestones and marked with 💡.
 
 - [x] Git status, diff view, highlighting of changed files
 - [ ] Follow mode
-- [ ] Simple staging/commit (optional)
+- [x] Simple staging/commit (optional)
 - [ ] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden
       ref; roll back agent changes with one click
 - [ ] 💡 Review mode: when an agent is done, walk through the diff,

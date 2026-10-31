@@ -10,6 +10,8 @@ use tauri_specta::{Builder, collect_commands, collect_events};
 
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
+use crate::pty::commands as pty;
+use crate::pty::commands::SessionsChanged;
 use crate::workspace::commands;
 
 /// Path of the generated TypeScript bindings.
@@ -43,8 +45,16 @@ pub fn builder() -> Builder<Wry> {
             fs::quick_open,
             fs::search_text,
             fs::cancel_search,
+            pty::start_session,
+            pty::list_sessions,
+            pty::attach_session,
+            pty::detach_session,
+            pty::write_session,
+            pty::resize_session,
+            pty::stop_session,
+            pty::close_session,
         ])
-        .events(collect_events![FsChanged])
+        .events(collect_events![FsChanged, SessionsChanged])
 }
 
 /// Writes the TypeScript bindings to [`BINDINGS_PATH`].

@@ -42,11 +42,31 @@ export const commands = {
 	 */
 	searchText: (project: string, query: string, options: SearchOptions, onResults: Channel<FileResults[]>) => typedError<SearchSummary, AppError>(__TAURI_INVOKE("search_text", { project, query, options, onResults })),
 	cancelSearch: () => __TAURI_INVOKE<void>("cancel_search"),
+	/**  Starts the user's default shell in the project folder. */
+	startSession: (project: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, cols, rows })),
+	listSessions: () => __TAURI_INVOKE<SessionInfo_Serialize[]>("list_sessions"),
+	/**
+	 *  Connects a terminal view: the buffered output and then live output are
+	 *  sent through `on_output`. Returns a token for [`detach_session`].
+	 */
+	attachSession: (id: number, onOutput: Channel<string>) => typedError<number, AppError>(__TAURI_INVOKE("attach_session", { id, onOutput })),
+	detachSession: (id: number, token: number) => typedError<null, AppError>(__TAURI_INVOKE("detach_session", { id, token })),
+	/**
+	 *  Sends input (typed keys, pasted text) to the program. The frontend sends
+	 *  one write at a time, so the order of keystrokes is kept.
+	 */
+	writeSession: (id: number, data: string) => typedError<null, AppError>(__TAURI_INVOKE("write_session", { id, data })),
+	resizeSession: (id: number, cols: number, rows: number) => typedError<null, AppError>(__TAURI_INVOKE("resize_session", { id, cols, rows })),
+	/**  Ends the program; the session and its output stay until it is closed. */
+	stopSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("stop_session", { id })),
+	/**  Ends the program if needed and removes the session. */
+	closeSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("close_session", { id })),
 };
 
 /** Events */
 export const events = {
 	fsChanged: makeEvent<FsChanged, FsChanged>("fs-changed"),
+	sessionsChanged: makeEvent<SessionsChanged_Serialize, SessionsChanged_Deserialize>("sessions-changed"),
 };
 
 /* Types */
@@ -56,7 +76,7 @@ export const events = {
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -192,6 +212,64 @@ export type SearchSummary = {
 	truncated: boolean,
 	/**  A newer search replaced this one. */
 	cancelled: boolean,
+};
+
+/**  Public information about a session, sent to the frontend. */
+export type SessionInfo = SessionInfo_Serialize | SessionInfo_Deserialize;
+
+/**  Public information about a session, sent to the frontend. */
+export type SessionInfo_Deserialize = {
+	id: number,
+	/**  Path of the project the session belongs to. */
+	project: string,
+	/**  Id of the agent profile that started it. */
+	profile: string,
+	/**  Display title, e.g. the agent name. */
+	title: string,
+	/**  Process id of the agent or shell. */
+	pid?: number | null,
+	/**  Start time in milliseconds since the Unix epoch. */
+	startedAt: number | null,
+	status: SessionStatus_Deserialize,
+};
+
+/**  Public information about a session, sent to the frontend. */
+export type SessionInfo_Serialize = {
+	id: number,
+	/**  Path of the project the session belongs to. */
+	project: string,
+	/**  Id of the agent profile that started it. */
+	profile: string,
+	/**  Display title, e.g. the agent name. */
+	title: string,
+	/**  Process id of the agent or shell. */
+	pid: number | null,
+	/**  Start time in milliseconds since the Unix epoch. */
+	startedAt: number | null,
+	status: SessionStatus_Serialize,
+};
+
+export type SessionStatus = SessionStatus_Serialize | SessionStatus_Deserialize;
+
+export type SessionStatus_Deserialize = { state: "running" } | { state: "exited"; exitCode: number; 
+/**  Name of the signal that ended the process (Unix). */
+signal?: string | null };
+
+export type SessionStatus_Serialize = { state: "running" } | { state: "exited"; exitCode: number; 
+/**  Name of the signal that ended the process (Unix). */
+signal: string | null };
+
+/**  All sessions, sent whenever one starts, exits or is closed. */
+export type SessionsChanged = SessionsChanged_Serialize | SessionsChanged_Deserialize;
+
+/**  All sessions, sent whenever one starts, exits or is closed. */
+export type SessionsChanged_Deserialize = {
+	sessions: SessionInfo_Deserialize[],
+};
+
+/**  All sessions, sent whenever one starts, exits or is closed. */
+export type SessionsChanged_Serialize = {
+	sessions: SessionInfo_Serialize[],
 };
 
 /**

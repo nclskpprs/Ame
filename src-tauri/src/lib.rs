@@ -13,11 +13,14 @@ pub mod pty;
 pub mod scripts;
 pub mod workspace;
 
-use tauri::{App, Manager, WebviewWindowBuilder};
+use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
+use tauri_specta::Event;
 
 use fs::quick_open::QuickOpen;
 use fs::search::SearchControl;
 use fs::watcher::FsWatcher;
+use pty::PtyManager;
+use pty::commands::SessionsChanged;
 use workspace::paths::AppPaths;
 use workspace::projects::WorkspaceStore;
 use workspace::settings::SettingsStore;
@@ -34,7 +37,9 @@ pub fn run() {
         eprintln!("failed to export TypeScript bindings: {err}");
     }
 
-    let result = tauri::Builder::default()
+    pty::env::warm_up();
+
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
@@ -58,15 +63,28 @@ pub fn run() {
             app.manage(FsWatcher::new(app.handle().clone())?);
             app.manage(QuickOpen::default());
             app.manage(SearchControl::default());
+            let handle = app.handle().clone();
+            app.manage(PtyManager::new(move |sessions| {
+                if let Err(err) = (SessionsChanged { sessions }).emit(&handle) {
+                    log::warn!("could not emit session change: {err}");
+                }
+            }));
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())
         })
-        .run(tauri::generate_context!());
+        .build(tauri::generate_context!());
 
-    if let Err(err) = result {
-        eprintln!("error while running Ame: {err}");
-        std::process::exit(1);
+    match app {
+        Ok(app) => app.run(|app, event| {
+            if let RunEvent::Exit = event {
+                app.state::<PtyManager>().shutdown();
+            }
+        }),
+        Err(err) => {
+            eprintln!("error while running Ame: {err}");
+            std::process::exit(1);
+        }
     }
 }
 

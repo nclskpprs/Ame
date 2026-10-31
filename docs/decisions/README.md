@@ -23,3 +23,4 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0015](0015-watch-only-visible-directories.md)         | Watch only visible directories                         | Accepted |
 | [0016](0016-commands-shortcuts-and-palette.md)         | Commands, shortcuts and the command palette            | Accepted |
 | [0017](0017-html-context-menus.md)                     | Context menus in HTML instead of native menus          | Accepted |
+| [0018](0018-pty-sessions-and-output-replay.md)         | PTY sessions: raw output replay and throttled channels | Accepted |

@@ -17,5 +17,6 @@ export type WorkspaceState = WorkspaceState_Serialize;
 
 /** A technical, English description of an IPC error for logs and notices. */
 export function describeError(error: AppError): string {
-  return 'message' in error ? error.message : error.kind;
+  if (!('message' in error)) return error.kind;
+  return typeof error.message === 'string' ? error.message : `${error.kind}: ${error.message}`;
 }

@@ -34,7 +34,7 @@ the architecture changes and record decisions as ADRs in
 | Editor                  | CodeMirror 6                                                       | Much lighter than Monaco, modular, fast on large files       | [0005](decisions/0005-codemirror-6-as-editor.md)                 |
 | Terminal UI             | xterm.js + WebGL addon                                             | Standard, GPU rendering                                      | [0006](decisions/0006-terminal-stack.md)                         |
 | PTY                     | `portable-pty` (from WezTerm)                                      | Works on Windows too (ConPTY)                                | [0006](decisions/0006-terminal-stack.md)                         |
-| Backend terminal buffer | `alacritty_terminal` or `vt100`                                    | Background sessions run without an xterm.js instance         | [0006](decisions/0006-terminal-stack.md)                         |
+| Backend terminal buffer | Raw output ring buffer (1 MiB per session), replayed into xterm.js | Background sessions run without an xterm.js instance         | [0018](decisions/0018-pty-sessions-and-output-replay.md)         |
 | File watching           | `notify` (debounced)                                               | Native per OS                                                | [0007](decisions/0007-filesystem-and-search-crates.md)           |
 | File search / ignore    | `ignore` + `grep` (ripgrep libraries)                              | Fast, respects `.gitignore`                                  | [0007](decisions/0007-filesystem-and-search-crates.md)           |
 | Fuzzy quick open        | `nucleo`                                                           | Very fast fuzzy matcher                                      | [0007](decisions/0007-filesystem-and-search-crates.md)           |
@@ -156,6 +156,24 @@ Module: `src-tauri/src/workspace/`.
   `{name}` placeholders.
 - Tests ensure every locale has exactly the keys of `en.json` and that no
   Svelte component contains raw, untranslated text.
+
+## Terminal sessions — implemented (M2)
+
+Module: `src-tauri/src/pty/` (see
+[ADR 0018](decisions/0018-pty-sessions-and-output-replay.md)).
+
+- `PtyManager` owns all sessions (`portable-pty`). A session runs one
+  program in the project folder with the login shell environment
+  (`pty/env.rs`) plus `TERM=xterm-256color`, `COLORTERM=truecolor`,
+  `TERM_PROGRAM=Ame` and `AME_SESSION_ID`.
+- Output goes into a 1 MiB ring buffer and, batched and throttled (16 ms),
+  to the attached view through a `Channel<String>`. Attaching replays the
+  buffer first.
+- Commands: `start_session`, `list_sessions`, `attach_session`,
+  `detach_session`, `write_session`, `resize_session`, `stop_session`,
+  `close_session`; the `sessions-changed` event carries all sessions when
+  one starts, exits or closes. Closing a project closes its sessions; quitting
+  the app ends all of them.
 
 ## Agent status detection — planned (M3)
 

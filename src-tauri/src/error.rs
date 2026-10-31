@@ -25,6 +25,12 @@ pub enum Error {
     PathOutsideProject(String),
     #[error("invalid search: {0}")]
     InvalidSearch(String),
+    #[error("terminal error: {0}")]
+    Pty(String),
+    #[error("unknown session: {0}")]
+    UnknownSession(u32),
+    #[error("session has exited: {0}")]
+    SessionExited(u32),
 }
 
 impl From<std::io::Error> for Error {

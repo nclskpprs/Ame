@@ -13,6 +13,7 @@ use super::projects::{ProjectLayout, WorkspaceState, WorkspaceStore};
 use super::settings::{Settings, SettingsStore};
 use crate::error::Result;
 use crate::fs::watcher::FsWatcher;
+use crate::pty::PtyManager;
 
 /// Static information about the running app.
 #[derive(Debug, Clone, Serialize, Type)]
@@ -80,9 +81,11 @@ pub async fn add_project(store: State<'_, WorkspaceStore>, path: String) -> Resu
 pub async fn remove_project(
     store: State<'_, WorkspaceStore>,
     watcher: State<'_, FsWatcher>,
+    pty: State<'_, PtyManager>,
     project: String,
 ) -> Result<WorkspaceState> {
     watcher.set_watched(&project, HashSet::new());
+    pty.close_project(&project);
     store.remove(&project)
 }
 

@@ -20,6 +20,7 @@
     existingSession,
     listenToFileChanges,
     persistTerminalSessions,
+    pollGit,
     pruneSessions,
   } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
@@ -56,6 +57,18 @@
   });
 
   $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
+
+  /** Git status of busy projects is refreshed this often. */
+  const GIT_POLL_MS = 3000;
+  $effect(() => {
+    const timer = setInterval(pollGit, GIT_POLL_MS);
+    const onFocus = () => activeSession()?.git.refreshSoon(0);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  });
 
   // Rain animations pause while the window is hidden or not focused.
   $effect(() => {

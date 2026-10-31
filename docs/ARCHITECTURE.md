@@ -359,6 +359,24 @@ Example agent profile:
 - In debug builds, frontend errors and the startup time are forwarded to
   the backend log.
 
+## Git — implemented (M4)
+
+Module: `src-tauri/src/git/` (git CLI, ADR 0008).
+
+- `cli.rs` runs git with `GIT_OPTIONAL_LOCKS=0` (read-only calls never take
+  the index lock an agent might need), `GIT_TERMINAL_PROMPT=0`, the login
+  shell `PATH`, and without a console window on Windows. A missing git or a
+  folder outside a repository simply means "no git" in the UI.
+- `status.rs` parses `git status --porcelain=v2 -z --branch` limited to the
+  project folder; paths are made project-relative (projects can be
+  subfolders of a repository).
+- Commands: `git_status`, `git_original` (`HEAD` content for diffs).
+- Frontend: `GitState` per project (`lib/project/git.svelte.ts`) refreshes
+  on file events, window focus and every 3 s while an agent of the project
+  is busy (`pollGit`), because the watcher only sees visible folders.
+  `lib/git/marks.ts` turns files into tree marks (folders take the strongest
+  mark inside); colors are the `git*` tokens.
+
 ## Projects and views — planned (M2–M5)
 
 - **Sidebar:** a status dot per agent session.

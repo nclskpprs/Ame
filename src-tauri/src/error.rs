@@ -33,6 +33,10 @@ pub enum Error {
     SessionExited(u32),
     #[error("unknown agent profile: {0}")]
     UnknownProfile(String),
+    #[error("git is not installed")]
+    GitMissing,
+    #[error("git: {0}")]
+    Git(String),
 }
 
 impl From<std::io::Error> for Error {

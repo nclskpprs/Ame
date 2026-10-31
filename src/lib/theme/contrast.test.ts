@@ -10,7 +10,7 @@ const backgrounds: TokenName[] = ['bg', 'surface'];
 const textTokens: TokenName[] = [
   'text',
   'textMuted',
-  ...tokenNames.filter((name) => name.startsWith('syntax')),
+  ...tokenNames.filter((name) => name.startsWith('syntax') || name.startsWith('git')),
 ];
 const indicatorTokens: TokenName[] = ['accent', 'needsInput', 'done', 'error'];
 /**

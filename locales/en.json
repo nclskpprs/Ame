@@ -260,5 +260,13 @@
     "done": "{agent} is done",
     "error": "{agent} ended with an error",
     "body": "{project}: {message}"
+  },
+  "git": {
+    "modified": "Modified",
+    "added": "Added",
+    "renamed": "Renamed",
+    "untracked": "Untracked (new file)",
+    "deleted": "Deleted",
+    "conflicted": "Merge conflict"
   }
 }

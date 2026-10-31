@@ -2,8 +2,10 @@ import { commands, events } from '$lib/ipc/bindings';
 import { describeError } from '$lib/ipc/types';
 import { notices } from '$lib/stores/notices.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
+import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
+import { GitState } from './git.svelte';
 import { SearchState } from './search.svelte';
 import { TerminalGroup } from './terminals.svelte';
 
@@ -16,6 +18,7 @@ export class ProjectSession {
   readonly editors: EditorGroup;
   readonly search: SearchState;
   readonly terminals: TerminalGroup;
+  readonly git: GitState;
   #watched = '';
 
   constructor(path: string) {
@@ -31,6 +34,8 @@ export class ProjectSession {
     });
     this.search = new SearchState(path);
     this.terminals = new TerminalGroup(path, layout?.sessions ?? []);
+    this.git = new GitState(path);
+    void this.git.refresh();
     void this.tree.init().then(() => this.syncWatches());
   }
 
@@ -60,6 +65,7 @@ export class ProjectSession {
   onFsChanged(paths: readonly string[]): void {
     void this.tree.refresh(paths);
     void this.editors.onFsChanged(paths);
+    this.git.refreshSoon();
   }
 }
 
@@ -108,6 +114,25 @@ export function sessionFor(path: string): ProjectSession {
 export function pruneSessions(openPaths: readonly string[]): void {
   for (const path of sessions.keys()) {
     if (!openPaths.includes(path)) sessions.delete(path);
+  }
+}
+
+const gitStates = new Map<string, string>();
+
+/**
+ * Refreshes the git status of projects whose agents are busy or just
+ * changed state. The file watcher only sees visible folders (ADR 0015), so
+ * agent changes elsewhere are picked up this way. Call periodically.
+ */
+export function pollGit(): void {
+  for (const session of sessions.values()) {
+    const states = terminalSessions
+      .forProject(session.path)
+      .map((s) => s.state)
+      .join(',');
+    const busy = /working|starting|needsInput/.test(states);
+    if (busy || gitStates.get(session.path) !== states) session.git.refreshSoon(0);
+    gitStates.set(session.path, states);
   }
 }
 

@@ -45,6 +45,16 @@ export const commands = {
 	searchText: (project: string, query: string, options: SearchOptions, onResults: Channel<FileResults[]>) => typedError<SearchSummary, AppError>(__TAURI_INVOKE("search_text", { project, query, options, onResults })),
 	cancelSearch: () => __TAURI_INVOKE<void>("cancel_search"),
 	/**
+	 *  Branch and changed files, or `None` if the project is not in a git
+	 *  repository (or git is not installed).
+	 */
+	gitStatus: (project: string) => typedError<GitStatus_Serialize | null, AppError>(__TAURI_INVOKE("git_status", { project })),
+	/**
+	 *  The committed (`HEAD`) content of a file, for the diff view. `None` if
+	 *  the file is new, binary or not valid UTF-8.
+	 */
+	gitOriginal: (project: string, path: string) => typedError<string | null, AppError>(__TAURI_INVOKE("git_original", { project, path })),
+	/**
 	 *  All profiles with their detected programs. Looks at the `PATH` every
 	 *  time, so newly installed agents show up without a restart.
 	 */
@@ -188,7 +198,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "unknownProfile"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -197,6 +207,8 @@ export type AppInfo = {
 	portable: boolean,
 	configDir: string,
 };
+
+export type Change = "added" | "modified" | "deleted" | "renamed" | "copied" | "typeChanged" | "untracked" | "conflicted";
 
 export type Density = "comfortable" | "compact";
 
@@ -235,6 +247,52 @@ export type FsChanged = {
 	project: string,
 	/**  Project-relative paths of the changed entries. */
 	paths: string[],
+};
+
+/**  A changed file, with project-relative paths (`/` separators). */
+export type GitFile = GitFile_Serialize | GitFile_Deserialize;
+
+/**  A changed file, with project-relative paths (`/` separators). */
+export type GitFile_Deserialize = {
+	path: string,
+	/**  The previous path of a renamed or copied file. */
+	origPath?: string | null,
+	/**  Change in the index (staged), if any. */
+	staged?: Change | null,
+	/**  Change in the working tree (not staged), if any. */
+	unstaged?: Change | null,
+};
+
+/**  A changed file, with project-relative paths (`/` separators). */
+export type GitFile_Serialize = {
+	path: string,
+	/**  The previous path of a renamed or copied file. */
+	origPath: string | null,
+	/**  Change in the index (staged), if any. */
+	staged: Change | null,
+	/**  Change in the working tree (not staged), if any. */
+	unstaged: Change | null,
+};
+
+/**  Branch and changed files of a project. */
+export type GitStatus = GitStatus_Serialize | GitStatus_Deserialize;
+
+/**  Branch and changed files of a project. */
+export type GitStatus_Deserialize = {
+	/**  Current branch, `None` when detached. */
+	branch?: string | null,
+	ahead: number,
+	behind: number,
+	files: GitFile_Deserialize[],
+};
+
+/**  Branch and changed files of a project. */
+export type GitStatus_Serialize = {
+	/**  Current branch, `None` when detached. */
+	branch: string | null,
+	ahead: number,
+	behind: number,
+	files: GitFile_Serialize[],
 };
 
 export type LineMatch = {

@@ -1,3 +1,5 @@
-//! Git status, diffs and worktrees via the git CLI.
-//!
-//! Planned for M4.
+//! Git status and diffs via the git CLI (ADR 0008).
+
+pub mod cli;
+pub mod commands;
+pub mod status;

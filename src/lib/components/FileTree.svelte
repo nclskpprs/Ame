@@ -3,11 +3,13 @@
   import type { FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
   import { treeClick } from '$lib/project/tree-click';
   import { iconName, iconUrl } from '$lib/fs/file-icons';
+  import { markLetters, type GitMark } from '$lib/git/marks';
   import { currentTheme } from '$lib/theme/current.svelte';
 
   let {
     tree,
     unsaved = new Set(),
+    git = new Map(),
     icons = true,
     singleClick = false,
     onopen,
@@ -15,6 +17,8 @@
     tree: FileTreeState;
     /** Files with unsaved changes and the folders that contain them. */
     unsaved?: ReadonlySet<string>;
+    /** Git marks of changed files and the folders that contain them. */
+    git?: ReadonlyMap<string, GitMark>;
     /** Show file type icons. */
     icons?: boolean;
     /** Open files with a single click instead of a double click. */
@@ -107,8 +111,9 @@
     <p class="message">{t('fileTree.empty')}</p>
   {/if}
   {#each rows as row, index (row.entry.path)}
+    {@const mark = git.get(row.entry.path)}
     <div
-      class="row"
+      class="row {mark ? `git-${mark}` : ''}"
       class:selected={row.entry.path === tree.selected}
       role="treeitem"
       aria-level={row.depth + 1}
@@ -141,6 +146,9 @@
         />
       {/if}
       <span class="name">{row.entry.name}</span>
+      {#if mark && row.entry.kind === 'file'}
+        <span class="git-letter" title={t(`git.${mark}`)}>{markLetters[mark]}</span>
+      {/if}
       {#if unsaved.has(row.entry.path) && !row.expanded}
         <span class="unsaved" title={t('fileTree.unsaved')}>
           <span class="visually-hidden">{t('fileTree.unsaved')}</span>
@@ -214,6 +222,44 @@
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .git-letter {
+    flex: none;
+    margin-left: auto;
+    font-family: var(--ame-font-code);
+    font-size: var(--ame-font-size-small);
+  }
+
+  .git-letter + .unsaved {
+    margin-left: var(--ame-space-1);
+  }
+
+  .git-modified .name,
+  .git-modified .git-letter {
+    color: var(--ame-git-modified);
+  }
+
+  .git-added .name,
+  .git-added .git-letter,
+  .git-renamed .name,
+  .git-renamed .git-letter {
+    color: var(--ame-git-added);
+  }
+
+  .git-untracked .name,
+  .git-untracked .git-letter {
+    color: var(--ame-git-untracked);
+  }
+
+  .git-deleted .name,
+  .git-deleted .git-letter {
+    color: var(--ame-git-deleted);
+  }
+
+  .git-conflicted .name,
+  .git-conflicted .git-letter {
+    color: var(--ame-git-conflict);
   }
 
   .unsaved {

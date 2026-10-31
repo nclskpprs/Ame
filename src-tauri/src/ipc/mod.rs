@@ -11,6 +11,7 @@ use tauri_specta::{Builder, collect_commands, collect_events};
 use crate::agents::commands as agents;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
+use crate::git::commands as git;
 use crate::pty::commands as pty;
 use crate::pty::commands::SessionsChanged;
 use crate::workspace::commands;
@@ -47,6 +48,8 @@ pub fn builder() -> Builder<Wry> {
             fs::quick_open,
             fs::search_text,
             fs::cancel_search,
+            git::git_status,
+            git::git_original,
             agents::list_agents,
             pty::start_session,
             pty::list_sessions,

@@ -1,3 +1,4 @@
+import { openAgentPicker } from '$lib/agents/picker';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -163,6 +164,17 @@ export function registerAppCommands(): () => void {
       terminal: true,
       when: hasProject,
       run: () => activeSession()?.terminals.toggle(),
+    },
+    {
+      id: 'agents.start',
+      title: 'commands.startAgent',
+      shortcut: 'Mod+Shift+A',
+      terminal: true,
+      when: hasProject,
+      run: () => {
+        const session = activeSession();
+        if (session) openAgentPicker(session.terminals);
+      },
     },
     {
       id: 'terminal.newShell',

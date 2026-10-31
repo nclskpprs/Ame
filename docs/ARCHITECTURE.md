@@ -187,6 +187,22 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Agent profiles — implemented (M2)
+
+Module: `src-tauri/src/agents/`.
+
+- `profiles.rs`: built-in profiles (Claude Code, Codex CLI, Gemini CLI,
+  OpenCode, Aider, Shell) with command, arguments, environment and resume
+  arguments. Custom profiles live in `settings.json` (`agents`); one with a
+  built-in id replaces that profile.
+- `detect.rs`: resolves commands on the login shell `PATH` (`which`); the
+  shell profile runs the default shell. `list_agents` returns every profile
+  with the found path, so new installs show up without a restart.
+- `start_session(project, profile, resume, cols, rows)` starts a profile;
+  with `resume` its resume arguments are appended (e.g. `claude --continue`).
+- Frontend: `lib/agents/` (store, ordering, palette picker `Mod+Shift+A`);
+  the empty terminal panel offers the installed agents.
+
 ## Agent status detection — planned (M3)
 
 States: `starting` · `working` · `needs_input` · `idle` (done) · `exited` ·

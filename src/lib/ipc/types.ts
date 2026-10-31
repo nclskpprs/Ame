@@ -3,6 +3,7 @@
  * all fields present (`*_Serialize`); see ADR 0009.
  */
 import type {
+  AgentInfo_Serialize,
   AppError,
   ProjectLayout_Serialize,
   Project_Serialize,
@@ -16,6 +17,7 @@ export type Project = Project_Serialize;
 export type ProjectLayout = ProjectLayout_Serialize;
 export type WorkspaceState = WorkspaceState_Serialize;
 export type SessionInfo = SessionInfo_Serialize;
+export type AgentInfo = AgentInfo_Serialize;
 
 /** A technical, English description of an IPC error for logs and notices. */
 export function describeError(error: AppError): string {

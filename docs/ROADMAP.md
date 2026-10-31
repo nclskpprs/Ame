@@ -39,9 +39,9 @@ milestones and marked with 💡.
 
 - [x] PTY manager with ring buffer, xterm.js integration (WebGL with DOM
       renderer fallback; xterm.js 6 has no canvas renderer)
-- [ ] Agent profiles (Claude Code, Codex, Gemini, Aider, generic shell) plus
-      custom profiles; detect installed agents on the `PATH`
-- [ ] Multiple sessions per project; sessions keep running in the background
+- [x] Agent profiles (Claude Code, Codex, Gemini, OpenCode, Aider, generic
+      shell) plus custom profiles; detect installed agents on the `PATH`
+- [x] Multiple sessions per project; sessions keep running in the background
 - [ ] 💡 Background daemon: PTY sessions live in a small Rust process and
       survive a UI crash or close (like tmux)
 - [ ] 💡 Session resume: a resume command per profile (e.g.

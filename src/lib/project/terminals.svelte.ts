@@ -1,3 +1,4 @@
+import { SHELL_PROFILE } from '$lib/agents/agents.svelte';
 import { t } from '$lib/i18n';
 import { commands } from '$lib/ipc/bindings';
 import { describeError, type SessionInfo } from '$lib/ipc/types';
@@ -64,8 +65,10 @@ export class TerminalGroup {
     else this.show();
   }
 
-  async startShell(): Promise<void> {
-    const result = await commands.startSession(this.project, this.size.cols, this.size.rows);
+  /** Starts an agent profile; `resume` continues its last conversation. */
+  async start(profile: string, resume = false): Promise<void> {
+    const { cols, rows } = this.size;
+    const result = await commands.startSession(this.project, profile, resume, cols, rows);
     if (result.status === 'error') {
       notices.push(t('terminal.startFailed', { message: describeError(result.error) }));
       return;
@@ -99,9 +102,14 @@ export class TerminalGroup {
     }
   }
 
-  /** Replaces an exited session with a new one. */
-  async restart(id: number): Promise<void> {
+  startShell(): Promise<void> {
+    return this.start(SHELL_PROFILE);
+  }
+
+  /** Replaces an exited session with a new one of the same profile. */
+  async restart(id: number, resume = false): Promise<void> {
+    const profile = sessions.find(id)?.profile ?? SHELL_PROFILE;
     await this.close(id, true);
-    await this.startShell();
+    await this.start(profile, resume);
   }
 }

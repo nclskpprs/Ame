@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use super::storage;
+use crate::agents::profiles::AgentProfile;
 use crate::error::Result;
 
 pub const SETTINGS_FILE: &str = "settings.json";
@@ -36,6 +37,8 @@ pub struct Settings {
     pub density: Density,
     /// How a click in the file tree opens a file.
     pub file_open: FileOpen,
+    /// Custom agent profiles; one with a built-in id replaces that profile.
+    pub agents: Vec<AgentProfile>,
 }
 
 impl Default for Settings {
@@ -47,6 +50,7 @@ impl Default for Settings {
             rain_effects: RainEffects::default(),
             density: Density::default(),
             file_open: FileOpen::default(),
+            agents: Vec::new(),
         }
     }
 }

@@ -9,8 +9,11 @@ use tauri_specta::Event;
 use super::env;
 use super::manager::{PtyManager, SpawnSpec};
 use super::session::{OutputSink, SessionId, SessionInfo};
+use crate::agents::detect;
+use crate::agents::profiles::merged_profiles;
 use crate::error::{Error, Result};
 use crate::workspace::projects::WorkspaceStore;
+use crate::workspace::settings::SettingsStore;
 
 /// All sessions, sent whenever one starts, exits or is closed.
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
@@ -25,28 +28,42 @@ impl OutputSink for Channel<String> {
     }
 }
 
-/// Starts the user's default shell in the project folder.
+/// Starts an agent profile (or the shell) in the project folder. With
+/// `resume`, the profile's resume arguments continue the last conversation.
 #[tauri::command]
 #[specta::specta]
+#[allow(clippy::too_many_arguments)] // Tauri passes every argument separately.
 pub async fn start_session(
     store: State<'_, WorkspaceStore>,
+    settings: State<'_, SettingsStore>,
     pty: State<'_, PtyManager>,
     project: String,
+    profile: String,
+    resume: bool,
     cols: u16,
     rows: u16,
 ) -> Result<SessionInfo> {
     let cwd = store.root(&project)?;
+    let profile = merged_profiles(&settings.get().agents)
+        .into_iter()
+        .find(|p| p.id == profile)
+        .ok_or(Error::UnknownProfile(profile))?;
     let pty = pty.inner().clone();
     blocking(move || {
-        let (program, args) = env::default_shell();
+        let (program, mut args) = detect::program(&profile);
+        if resume {
+            args.extend(profile.resume_args.iter().cloned());
+        }
+        let mut env = env::session_env();
+        env.extend(profile.env.clone());
         pty.spawn(SpawnSpec {
             project,
-            profile: "shell".to_owned(),
-            title: env::program_name(&program),
+            profile: profile.id,
+            title: profile.name,
             program,
             args,
             cwd,
-            env: env::session_env(),
+            env,
             cols,
             rows,
         })

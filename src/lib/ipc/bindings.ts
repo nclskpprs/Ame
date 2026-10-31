@@ -42,8 +42,16 @@ export const commands = {
 	 */
 	searchText: (project: string, query: string, options: SearchOptions, onResults: Channel<FileResults[]>) => typedError<SearchSummary, AppError>(__TAURI_INVOKE("search_text", { project, query, options, onResults })),
 	cancelSearch: () => __TAURI_INVOKE<void>("cancel_search"),
-	/**  Starts the user's default shell in the project folder. */
-	startSession: (project: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, cols, rows })),
+	/**
+	 *  All profiles with their detected programs. Looks at the `PATH` every
+	 *  time, so newly installed agents show up without a restart.
+	 */
+	listAgents: () => typedError<AgentInfo_Serialize[], AppError>(__TAURI_INVOKE("list_agents")),
+	/**
+	 *  Starts an agent profile (or the shell) in the project folder. With
+	 *  `resume`, the profile's resume arguments continue the last conversation.
+	 */
+	startSession: (project: string, profile: string, resume: boolean, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, profile, resume, cols, rows })),
 	listSessions: () => __TAURI_INVOKE<SessionInfo_Serialize[]>("list_sessions"),
 	/**
 	 *  Connects a terminal view: the buffered output and then live output are
@@ -70,13 +78,79 @@ export const events = {
 };
 
 /* Types */
+/**  A profile together with where its program was found. */
+export type AgentInfo = AgentInfo_Serialize | AgentInfo_Deserialize;
+
+/**  A profile together with where its program was found. */
+export type AgentInfo_Deserialize = {
+	profile: AgentProfile_Deserialize,
+	/**  Full path of the program, `None` if it is not installed. */
+	path?: string | null,
+	/**  Built-in profile (possibly changed in the settings). */
+	builtin: boolean,
+};
+
+/**  A profile together with where its program was found. */
+export type AgentInfo_Serialize = {
+	profile: AgentProfile_Serialize,
+	/**  Full path of the program, `None` if it is not installed. */
+	path: string | null,
+	/**  Built-in profile (possibly changed in the settings). */
+	builtin: boolean,
+};
+
+/**  How to start an agent (or a shell) in a terminal session. */
+export type AgentProfile = AgentProfile_Serialize | AgentProfile_Deserialize;
+
+/**  How to start an agent (or a shell) in a terminal session. */
+export type AgentProfile_Deserialize = {
+	/**
+	 *  Stable id, e.g. `claude`. A custom profile with the id of a built-in
+	 *  one replaces it.
+	 */
+	id?: string,
+	/**  Display name, e.g. `Claude Code`. */
+	name?: string,
+	/**  Program to run, looked up on the `PATH`. Empty for the default shell. */
+	command?: string,
+	args?: string[],
+	/**  Extra environment variables. */
+	env?: { [key in string]: string },
+	/**
+	 *  Arguments that continue the last conversation instead of starting a
+	 *  new one, e.g. `["--continue"]`. Empty when the agent cannot resume.
+	 */
+	resumeArgs?: string[],
+};
+
+/**  How to start an agent (or a shell) in a terminal session. */
+export type AgentProfile_Serialize = {
+	/**
+	 *  Stable id, e.g. `claude`. A custom profile with the id of a built-in
+	 *  one replaces it.
+	 */
+	id: string,
+	/**  Display name, e.g. `Claude Code`. */
+	name: string,
+	/**  Program to run, looked up on the `PATH`. Empty for the default shell. */
+	command: string,
+	args: string[],
+	/**  Extra environment variables. */
+	env: { [key in string]: string },
+	/**
+	 *  Arguments that continue the last conversation instead of starting a
+	 *  new one, e.g. `["--continue"]`. Empty when the agent cannot resume.
+	 */
+	resumeArgs: string[],
+};
+
 /**
  *  An error returned by a Tauri command.
  * 
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "unknownProfile"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -301,6 +375,8 @@ export type Settings_Deserialize = {
 	density?: Density,
 	/**  How a click in the file tree opens a file. */
 	fileOpen?: FileOpen,
+	/**  Custom agent profiles; one with a built-in id replaces that profile. */
+	agents?: AgentProfile_Deserialize[],
 };
 
 /**
@@ -320,6 +396,8 @@ export type Settings_Serialize = {
 	density: Density,
 	/**  How a click in the file tree opens a file. */
 	fileOpen: FileOpen,
+	/**  Custom agent profiles; one with a built-in id replaces that profile. */
+	agents: AgentProfile_Serialize[],
 };
 
 export type SidePanel = "files" | "search";

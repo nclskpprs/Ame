@@ -8,6 +8,7 @@ use specta_typescript::Typescript;
 use tauri::Wry;
 use tauri_specta::{Builder, collect_commands, collect_events};
 
+use crate::agents::commands as agents;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::pty::commands as pty;
@@ -45,6 +46,7 @@ pub fn builder() -> Builder<Wry> {
             fs::quick_open,
             fs::search_text,
             fs::cancel_search,
+            agents::list_agents,
             pty::start_session,
             pty::list_sessions,
             pty::attach_session,

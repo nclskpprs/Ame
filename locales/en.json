@@ -87,7 +87,8 @@
     "toggleTerminal": "Toggle Terminal Panel",
     "nextSession": "Next Terminal Session",
     "previousSession": "Previous Terminal Session",
-    "closeSession": "Close Terminal Session"
+    "closeSession": "Close Terminal Session",
+    "startAgent": "Start Agent…"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -159,17 +160,27 @@
     "sessions": "Terminal sessions",
     "label": "Terminal: {title}",
     "newShell": "New shell",
+    "startAgent": "Start agent…",
     "hide": "Hide terminal panel",
     "resize": "Resize terminal panel",
     "close": "Close {title}",
     "exited": "The process exited with code {code}.",
     "endedBySignal": "The process was ended ({signal}).",
     "restart": "Restart",
+    "resume": "Continue conversation",
     "closeExited": "Close",
     "stopPrompt": "{title} is still running. Stop it and close the session?",
     "stopAndClose": "Stop and close",
     "cancel": "Cancel",
-    "empty": "No terminal sessions in this project yet",
+    "empty": "Start an agent in this project",
     "startFailed": "Could not start the terminal: {message}"
+  },
+  "agents": {
+    "pickerLabel": "Start an agent",
+    "pickerPlaceholder": "Choose an agent or the shell",
+    "pickerEmpty": "No matching agent",
+    "resume": "{name}: continue last conversation",
+    "notInstalled": "Not found on the PATH",
+    "noneFound": "No agents found on the PATH. Install one, or add your own in the settings."
   }
 }

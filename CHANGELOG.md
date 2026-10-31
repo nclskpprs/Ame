@@ -52,3 +52,8 @@ and this project adheres to
   in the browser, copy and paste with Ctrl+Shift+C/V on Linux and Windows.
   While a terminal has focus, Ctrl shortcuts such as Ctrl+K or Ctrl+P go to
   the program in it.
+- Agent profiles for Claude Code, Codex CLI, Gemini CLI, OpenCode, Aider
+  and the shell. Installed agents are detected on the PATH (also the one
+  from your shell profile when Ame was started from a desktop launcher).
+  Start an agent with Ctrl/Cmd+Shift+A or from the terminal panel;
+  exited sessions can be restarted or continue their last conversation.

@@ -1,4 +1,12 @@
 <script lang="ts">
+  import {
+    SHELL_PROFILE,
+    agents,
+    canResume,
+    isInstalled,
+    orderedAgents,
+  } from '$lib/agents/agents.svelte';
+  import { openAgentPicker } from '$lib/agents/picker';
   import { t } from '$lib/i18n';
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
@@ -8,6 +16,12 @@
   let { group }: { group: TerminalGroup } = $props();
 
   const active = $derived(group.active);
+  const installed = $derived(orderedAgents(agents.list).filter(isInstalled));
+  const activeAgent = $derived(active ? agents.find(active.profile) : undefined);
+
+  $effect(() => {
+    void agents.load();
+  });
   const pending = $derived(
     group.pendingClose === null
       ? undefined
@@ -57,9 +71,9 @@
     </div>
     <button
       class="icon"
-      aria-label={t('terminal.newShell')}
-      title={t('terminal.newShell')}
-      onclick={() => void group.startShell()}
+      aria-label={t('terminal.startAgent')}
+      title={t('terminal.startAgent')}
+      onclick={() => openAgentPicker(group)}
     >
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
         <path d="M8 3v10M3 8h10" />
@@ -92,7 +106,15 @@
   {:else if active && !isRunning(active)}
     <div class="notice" role="status">
       <span>{exitText(active)}</span>
-      <button class="primary" onclick={() => void group.restart(active.id)}>
+      {#if activeAgent && canResume(activeAgent)}
+        <button class="primary" onclick={() => void group.restart(active.id, true)}>
+          {t('terminal.resume')}
+        </button>
+      {/if}
+      <button
+        class:primary={!activeAgent || !canResume(activeAgent)}
+        onclick={() => void group.restart(active.id)}
+      >
         {t('terminal.restart')}
       </button>
       <button onclick={() => void group.close(active.id)}>{t('terminal.closeExited')}</button>
@@ -107,9 +129,20 @@
     {:else}
       <div class="empty">
         <p>{t('terminal.empty')}</p>
-        <button class="primary" onclick={() => void group.startShell()}>
-          {t('terminal.newShell')}
-        </button>
+        <div class="agents">
+          {#each installed as agent, index (agent.profile.id)}
+            <button
+              class:primary={index === 0}
+              title={agent.path}
+              onclick={() => void group.start(agent.profile.id)}
+            >
+              {agent.profile.name}
+            </button>
+          {/each}
+        </div>
+        {#if agents.list.length > 0 && installed.every((agent) => agent.profile.id === SHELL_PROFILE)}
+          <p class="hint">{t('agents.noneFound')}</p>
+        {/if}
       </div>
     {/if}
   </div>
@@ -258,5 +291,18 @@
 
   .empty p {
     margin: 0;
+  }
+
+  .agents {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--ame-space-2);
+  }
+
+  .hint {
+    max-width: 360px;
+    font-size: var(--ame-font-size-small);
+    text-align: center;
   }
 </style>

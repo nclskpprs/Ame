@@ -31,6 +31,8 @@ pub enum Error {
     UnknownSession(u32),
     #[error("session has exited: {0}")]
     SessionExited(u32),
+    #[error("unknown agent profile: {0}")]
+    UnknownProfile(String),
 }
 
 impl From<std::io::Error> for Error {

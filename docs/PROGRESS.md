@@ -5,17 +5,74 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M1 — Project shell is done. Next: **M2 — Terminals and
-  agents**.
+- **Milestone:** M2 — Terminals and agents is done except the background
+  daemon (open decision, see below). Next: file icons (maintainer request),
+  then **M3 — Status and dashboard** and **M4 — Git** (the maintainer asked
+  for git highlighting in the file tree).
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M2: PTY manager with ring buffer and xterm.js, agent profiles,
-     sessions in the background.
+  1. File icons from Material Icon Theme (MIT; maintainer asked about Atom
+     Material Icons, see the log entry).
+  2. Settings UI for custom agent profiles.
+  3. M3: status detection, dashboard, notifications.
+  4. M4: git status in the file tree, diff view.
 
 ## Log
+
+### 2026-10-31 — Editor wishes and M2 (terminals and agents)
+
+**Done** (one commit per task)
+
+- Maintainer wishes: settings view (`Mod+,`, gear in the sidebar); files open
+  with a double click (single click is a setting); no autosave (unchanged,
+  saving stays manual) plus "Save All Files"; unsaved markers in the tree
+  and the window title; an inline guard when closing a project or the app
+  with unsaved files; syntax highlighting for many more languages.
+- PTY backend (`pty/`, ADR 0018): sessions with a 1 MiB ring buffer,
+  throttled output channels, replay on attach, bracketed paste tracking,
+  login shell environment capture.
+- Terminal panel with xterm.js 6 (WebGL, DOM fallback), several sessions per
+  project, background sessions without xterm instances, theme from tokens
+  (new ANSI tokens with a contrast test), Ctrl shortcuts reach the program
+  while a terminal has focus (commands opt in with `terminal: true`).
+- Agent profiles (Claude Code, Codex, Gemini, OpenCode, Aider, Shell) with
+  PATH detection and a picker (`Mod+Shift+A`); restart and resume of
+  exited sessions; resume of the last run's sessions after a restart;
+  "Send Selection to Agent" (`Mod+Shift+Enter`); a quit/close guard for
+  running sessions.
+
+**Verified**
+
+- `cargo clippy -D warnings` clean, 73 Rust tests (PTY spawn, output,
+  replay, input, stop/close on Unix); `pnpm check` clean, frontend tests
+  green.
+- Manually in `pnpm tauri dev` on WSLg (driven with XTest, screenshots):
+  shell start, typing, colors, replay after hiding, Ctrl+K reaching bash,
+  new session shortcut, inline stop confirmation, exit code bar and
+  restart, dark theme switch, agent picker (Claude Code detected), session
+  environment, quit guard, resume after restart, send to agent (bracketed
+  paste in bash).
+
+**Open**
+
+- **Background daemon (M2 💡) is deferred — needs a maintainer decision.**
+  Sessions surviving a UI close means a separate process with a local
+  socket (Unix socket / Windows named pipe with a restrictive ACL), detached
+  process handling on three platforms and a protocol version check; and the
+  quit guard would change ("keep agents running?"). It can only be tested on
+  Linux here. Proposal: do it after 0.1, or as its own milestone.
+- Not tested on macOS and Windows yet (ConPTY, `.cmd` shims of npm agents,
+  Cmd shortcuts). Claude Code itself was not started in tests (it would use
+  the maintainer's account).
+- WebGL under WSLg runs without GPU (DRI3 missing); the DOM renderer
+  fallback was not forced in a test.
+- File icons: the maintainer asked whether Atom Material Icons may be used.
+  They are MIT licensed, but the README credits many icon sources (some
+  CC BY from The Noun Project); Material Icon Theme (MIT, based on Apache
+  2.0 Material icons) is cleaner and is the proposal.
 
 ### 2026-10-31 — M1 acceptance: HTML context menu
 

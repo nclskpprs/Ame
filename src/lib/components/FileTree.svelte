@@ -1,0 +1,178 @@
+<script lang="ts">
+  import { t } from '$lib/i18n';
+  import type { FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
+
+  let {
+    tree,
+    onopen,
+  }: {
+    tree: FileTreeState;
+    /** Called when a file is activated (click or Enter). */
+    onopen: (path: string) => void;
+  } = $props();
+
+  const rows = $derived(tree.rows());
+  const root = $derived(tree.children.get(''));
+  let container: HTMLElement | undefined = $state();
+
+  function activate(row: TreeRow) {
+    tree.selected = row.entry.path;
+    if (row.entry.kind === 'dir') void tree.toggle(row.entry.path);
+    else onopen(row.entry.path);
+  }
+
+  function select(index: number) {
+    const row = rows[Math.max(0, Math.min(rows.length - 1, index))];
+    if (!row) return;
+    tree.selected = row.entry.path;
+    queueMicrotask(() =>
+      container?.querySelector<HTMLElement>(`[data-path="${CSS.escape(row.entry.path)}"]`)?.focus(),
+    );
+  }
+
+  function onkeydown(event: KeyboardEvent) {
+    const index = rows.findIndex((row) => row.entry.path === tree.selected);
+    const row = rows[index];
+    switch (event.key) {
+      case 'ArrowDown':
+        select(index + 1);
+        break;
+      case 'ArrowUp':
+        select(index - 1);
+        break;
+      case 'Home':
+        select(0);
+        break;
+      case 'End':
+        select(rows.length - 1);
+        break;
+      case 'ArrowRight':
+        if (row?.entry.kind === 'dir') {
+          if (row.expanded) select(index + 1);
+          else void tree.expand(row.entry.path);
+        }
+        break;
+      case 'ArrowLeft': {
+        if (row?.expanded) {
+          void tree.toggle(row.entry.path);
+        } else if (row) {
+          const parent = rows.findLastIndex(
+            (other, i) => i < index && other.depth === row.depth - 1,
+          );
+          if (parent >= 0) select(parent);
+        }
+        break;
+      }
+      case 'Enter':
+      case ' ':
+        if (row) activate(row);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+  }
+</script>
+
+<div
+  class="file-tree"
+  role="tree"
+  tabindex="-1"
+  aria-label={t('fileTree.label')}
+  bind:this={container}
+  {onkeydown}
+>
+  {#if root?.status === 'error'}
+    <p class="message">{t('fileTree.loadFailed', { message: root.message })}</p>
+  {:else if root?.status === 'loaded' && rows.length === 0}
+    <p class="message">{t('fileTree.empty')}</p>
+  {/if}
+  {#each rows as row, index (row.entry.path)}
+    <div
+      class="row"
+      class:selected={row.entry.path === tree.selected}
+      role="treeitem"
+      aria-level={row.depth + 1}
+      aria-expanded={row.entry.kind === 'dir' ? row.expanded : undefined}
+      aria-selected={row.entry.path === tree.selected}
+      tabindex={row.entry.path === tree.selected || (tree.selected === null && index === 0)
+        ? 0
+        : -1}
+      data-path={row.entry.path}
+      style:padding-left="calc({row.depth} * var(--ame-tree-indent) + var(--ame-space-2))"
+      title={row.entry.path}
+      onclick={() => activate(row)}
+      onkeydown={() => {}}
+    >
+      {#if row.entry.kind === 'dir'}
+        <svg class="chevron" class:open={row.expanded} viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+      {:else}
+        <span class="spacer"></span>
+      {/if}
+      <span class="name">{row.entry.name}</span>
+    </div>
+  {/each}
+</div>
+
+<style>
+  .file-tree {
+    --ame-tree-indent: 12px;
+    padding: var(--ame-space-1) 0;
+    font-size: var(--ame-font-size);
+  }
+
+  .message {
+    margin: 0;
+    padding: var(--ame-space-2) var(--ame-space-3);
+    color: var(--ame-text-muted);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-1);
+    padding-right: var(--ame-space-2);
+    color: var(--ame-text-muted);
+    line-height: 1.7;
+    white-space: nowrap;
+  }
+
+  .row:hover {
+    color: var(--ame-text);
+  }
+
+  .row.selected {
+    background: var(--ame-bg);
+    color: var(--ame-text);
+  }
+
+  .row:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .chevron,
+  .spacer {
+    flex: none;
+    width: 14px;
+    height: 14px;
+  }
+
+  .chevron path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .chevron.open {
+    transform: rotate(90deg);
+  }
+
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>

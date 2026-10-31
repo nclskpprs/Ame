@@ -6,6 +6,7 @@
   import ProjectView from '$lib/components/ProjectView.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import { t } from '$lib/i18n';
+  import { listenToFileChanges, pruneSessions } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
@@ -21,6 +22,13 @@
   let reducedMotion = $state(systemPrefersReducedMotion());
 
   $effect(() => registerAppCommands());
+
+  $effect(() => {
+    const unlisten = listenToFileChanges();
+    return () => void unlisten.then((stop) => stop());
+  });
+
+  $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
 
   $effect(() =>
     watchSystemPreferences(() => {
@@ -68,7 +76,7 @@
 
   .main {
     display: grid;
-    place-items: center;
+    place-items: stretch;
     min-width: 0;
     min-height: 0;
     background: var(--ame-bg);

@@ -1,44 +1,53 @@
 <script lang="ts">
+  import { t } from '$lib/i18n';
   import type { Project } from '$lib/ipc/types';
+  import { sessionFor } from '$lib/project/session';
+  import { workspace } from '$lib/stores/workspace.svelte';
+  import FileTree from './FileTree.svelte';
+  import Resizer from './Resizer.svelte';
 
   let { project }: { project: Project } = $props();
+
+  const session = $derived(sessionFor(project.path));
+
+  function open(path: string) {
+    // The editor arrives in the next step.
+    session.tree.selected = path;
+  }
 </script>
 
-<section class="project-view">
-  <header class="header">
-    <h1 class="name">{project.name}</h1>
-    <span class="path">{project.path}</span>
-  </header>
-</section>
+<div class="project-view" style:--side-width="{project.layout.sidePanelWidth}px">
+  <aside class="side" aria-label={t('sidePanel.label')}>
+    <FileTree tree={session.tree} onopen={open} />
+  </aside>
+  <Resizer
+    value={project.layout.sidePanelWidth}
+    min={160}
+    max={640}
+    label={t('sidePanel.resize')}
+    onchange={(width) => workspace.updateLayout(project.path, { sidePanelWidth: width })}
+  />
+  <section class="editor-area"></section>
+</div>
 
 <style>
   .project-view {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: var(--side-width) auto 1fr;
     width: 100%;
     height: 100%;
     min-width: 0;
+    min-height: 0;
   }
 
-  .header {
-    display: flex;
-    align-items: baseline;
-    gap: var(--ame-space-3);
-    padding: var(--ame-space-3) var(--ame-space-4);
-    border-bottom: 1px solid var(--ame-border);
+  .side {
+    min-width: 0;
+    overflow: auto;
+    background: var(--ame-surface);
   }
 
-  .name {
-    margin: 0;
-    font-size: var(--ame-font-size);
-    font-weight: 600;
-  }
-
-  .path {
-    overflow: hidden;
-    color: var(--ame-text-muted);
-    font-size: var(--ame-font-size-small);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .editor-area {
+    min-width: 0;
+    min-height: 0;
   }
 </style>

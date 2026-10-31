@@ -50,5 +50,14 @@
     "rainOn": "Rain Effects: On",
     "rainSubtle": "Rain Effects: Subtle",
     "rainOff": "Rain Effects: Off"
+  },
+  "sidePanel": {
+    "label": "Side panel",
+    "resize": "Resize side panel"
+  },
+  "fileTree": {
+    "label": "Files",
+    "empty": "This folder is empty",
+    "loadFailed": "Could not read folder: {message}"
   }
 }

@@ -21,6 +21,7 @@
 <style>
   .empty-state {
     display: flex;
+    place-self: center;
     flex-direction: column;
     align-items: center;
     gap: var(--ame-space-2);

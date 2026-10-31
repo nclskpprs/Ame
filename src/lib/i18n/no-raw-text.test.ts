@@ -33,6 +33,8 @@ function findRawText(node: unknown, found: string[]): void {
     if (HAS_LETTER.test(current.data)) found.push(current.data.trim());
     return;
   }
+  // Style values are CSS, not text.
+  if (current.type === 'StyleDirective') return;
   if (current.type === 'Attribute' && typeof current.name === 'string') {
     if (VISIBLE_ATTRIBUTES.has(current.name) && Array.isArray(current.value)) {
       for (const part of current.value as Node[]) {

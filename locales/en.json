@@ -15,7 +15,8 @@
     "projects": "Projects",
     "groupName": "Group name",
     "dismiss": "Dismiss",
-    "settings": "Settings"
+    "settings": "Settings",
+    "dashboard": "Dashboard"
   },
   "emptyState": {
     "title": "Open a folder to get started",
@@ -116,7 +117,8 @@
     "previousSession": "Previous Terminal Session",
     "closeSession": "Close Terminal Session",
     "startAgent": "Start Agent…",
-    "sendToAgent": "Send Selection to Agent"
+    "sendToAgent": "Send Selection to Agent",
+    "showDashboard": "Show Dashboard"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -227,5 +229,24 @@
     "exited": "Exited",
     "error": "Ended with an error",
     "projectLabel": "{project}: {state}"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "close": "Close dashboard (Esc)",
+    "empty": "No agents are running.",
+    "emptyHint": "Open a project and start an agent with {shortcut}.",
+    "count": {
+      "needsInput": "{n} waiting",
+      "error": "{n} failed",
+      "working": "{n} working",
+      "starting": "{n} starting",
+      "idle": "{n} done",
+      "exited": "{n} exited"
+    }
+  },
+  "duration": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{h} h {m} min"
   }
 }

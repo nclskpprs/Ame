@@ -75,3 +75,6 @@ and this project adheres to
   agents that wait for you. Detection works for any program (output
   activity, CPU use, bells and terminal notifications, the exit code) plus
   question patterns per agent profile.
+- Dashboard (Ctrl/Cmd+Shift+D or in the sidebar): every agent of every
+  project as a card with its status, running time and last output line,
+  agents that wait for you first. A click jumps to the session.

@@ -74,6 +74,30 @@ pub async fn start_session(
     .await
 }
 
+/// A glimpse of what a session printed last, for the dashboard.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionPreview {
+    pub id: SessionId,
+    pub last_line: String,
+}
+
+/// The last output line of every session. Polled while the dashboard is
+/// visible instead of being pushed on every change.
+#[tauri::command]
+#[specta::specta]
+pub fn session_previews(pty: State<'_, PtyManager>) -> Vec<SessionPreview> {
+    pty.list()
+        .into_iter()
+        .filter_map(|info| {
+            pty.get(info.id).ok().map(|session| SessionPreview {
+                id: info.id,
+                last_line: session.last_line(),
+            })
+        })
+        .collect()
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn list_sessions(pty: State<'_, PtyManager>) -> Vec<SessionInfo> {

@@ -4,8 +4,13 @@
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
+  import { combinedState } from '$lib/agents/state';
+  import { sessions } from '$lib/terminal/sessions.svelte';
   import ProjectList from './ProjectList.svelte';
+  import StatusDot from './StatusDot.svelte';
   import ThemeSwitcher from './ThemeSwitcher.svelte';
+
+  const overall = $derived(combinedState(sessions.list));
 </script>
 
 <nav class="sidebar" aria-label={t('sidebar.label')}>
@@ -25,6 +30,19 @@
       </svg>
     </button>
   </header>
+
+  <button
+    class="nav"
+    class:active={view.dashboardOpen}
+    aria-pressed={view.dashboardOpen}
+    onclick={() => view.toggle('dashboard')}
+  >
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path d="M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5h-4.5zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5h-4.5z" />
+    </svg>
+    <span class="label">{t('sidebar.dashboard')}</span>
+    {#if overall}<StatusDot state={overall} />{/if}
+  </button>
 
   <div class="projects">
     <ProjectList />
@@ -144,6 +162,37 @@
   svg path {
     fill: none;
     stroke: currentColor;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-2);
+    margin: calc(var(--ame-space-2) * -1) 0;
+    padding: var(--ame-space-1) var(--ame-space-2);
+    border: 0;
+    border-radius: var(--ame-radius);
+    background: transparent;
+    color: var(--ame-text-muted);
+    font: inherit;
+    text-align: left;
+  }
+
+  .nav:hover,
+  .nav.active {
+    background: var(--ame-bg);
+    color: var(--ame-text);
+  }
+
+  .nav .label {
+    flex: 1;
+  }
+
+  .nav path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linejoin: round;
   }
 
   .projects {

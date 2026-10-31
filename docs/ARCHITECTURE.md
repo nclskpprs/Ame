@@ -259,6 +259,11 @@ Implementation (`src-tauri/src/agents/`):
   `state` and `attention` (the notification text).
 - Profiles have `needsInputPatterns` and `idleAfterMs`; common yes/no
   prompts (`(y/n)`, `[y/N]`, …) are always detected.
+- Dashboard (`Dashboard.svelte`, an overlay of the main area like the
+  settings): one card per session, most urgent first; the last output line
+  comes from `session_previews`, polled every second only while the
+  dashboard is shown (the status tracker keeps the last 2 KiB of plain
+  text).
 - Frontend: `StatusDot` (rain style, CSS transforms on pseudo-elements,
   paused when the window is inactive or rain is off), the most urgent state
   per project in the sidebar, the waiting count in the window title.

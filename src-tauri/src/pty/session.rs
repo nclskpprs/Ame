@@ -197,6 +197,11 @@ impl Session {
         changed
     }
 
+    /// The last line of output, see [`StatusTracker::last_line`].
+    pub fn last_line(&self) -> String {
+        lock(&self.status).last_line()
+    }
+
     pub fn set_cpu_busy(&self, busy: bool) {
         lock(&self.status).set_cpu_busy(busy);
     }

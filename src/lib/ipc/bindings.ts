@@ -54,6 +54,11 @@ export const commands = {
 	startSession: (project: string, profile: string, resume: boolean, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, profile, resume, cols, rows })),
 	listSessions: () => __TAURI_INVOKE<SessionInfo_Serialize[]>("list_sessions"),
 	/**
+	 *  The last output line of every session. Polled while the dashboard is
+	 *  visible instead of being pushed on every change.
+	 */
+	sessionPreviews: () => __TAURI_INVOKE<SessionPreview[]>("session_previews"),
+	/**
 	 *  Connects a terminal view: the buffered output and then live output are
 	 *  sent through `on_output`. Returns a token for [`detach_session`].
 	 */
@@ -377,6 +382,12 @@ export type SessionInfo_Serialize = {
 	state: AgentState,
 	/**  Text of the last terminal notification (OSC 9 / 777) not answered yet. */
 	attention: string | null,
+};
+
+/**  A glimpse of what a session printed last, for the dashboard. */
+export type SessionPreview = {
+	id: number,
+	lastLine: string,
 };
 
 export type SessionStatus = SessionStatus_Serialize | SessionStatus_Deserialize;

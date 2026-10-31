@@ -222,6 +222,13 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'dashboard.toggle',
+      title: 'commands.showDashboard',
+      shortcut: 'Mod+Shift+D',
+      terminal: true,
+      run: () => view.toggle('dashboard'),
+    },
+    {
       id: 'settings.open',
       title: 'commands.openSettings',
       shortcut: 'Mod+,',

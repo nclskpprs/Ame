@@ -4,6 +4,7 @@
   import { registerAppCommands } from '$lib/commands/app-commands';
   import { handleShortcut } from '$lib/commands/registry';
   import CloseGuardBar from '$lib/components/CloseGuardBar.svelte';
+  import Dashboard from '$lib/components/Dashboard.svelte';
   import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import Palette from '$lib/components/Palette.svelte';
@@ -85,11 +86,11 @@
   });
 
   // Switching projects or opening a file (e.g. from the palette) leaves the
-  // settings, so the result is visible.
+  // settings and the dashboard, so the result is visible.
   $effect(() => {
     void workspace.activePath;
     void activeSession()?.editors.activePath;
-    untrack(() => view.closeSettings());
+    untrack(() => view.close(false));
   });
 
   $effect(() =>
@@ -132,6 +133,8 @@
     <div class="view">
       {#if view.settingsOpen}
         <SettingsView />
+      {:else if view.dashboardOpen}
+        <Dashboard />
       {:else if workspace.active}
         {#key workspace.active.path}
           <ProjectView project={workspace.active} />

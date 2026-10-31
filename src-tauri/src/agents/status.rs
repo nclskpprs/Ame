@@ -39,6 +39,10 @@ const SETTLE: Duration = Duration::from_millis(400);
 const STARTING_GRACE: Duration = Duration::from_secs(5);
 /// Plain text kept for pattern matching.
 const TAIL_BYTES: usize = 4096;
+/// Plain text kept for the last line shown in the dashboard.
+const RECENT_BYTES: usize = 2048;
+/// Longest last line returned, in characters.
+const MAX_LINE_CHARS: usize = 200;
 
 /// Text that most command-line programs print when they ask a yes/no question.
 const GENERIC_PATTERNS: &[&str] = &[r"\(y/n\)", r"\[y/N\]", r"\[Y/n\]", r"\(yes/no\)"];
@@ -91,6 +95,8 @@ pub struct StatusTracker {
     last_input: Option<Instant>,
     /// Plain text printed since the last input, for the patterns.
     tail: Vec<u8>,
+    /// The most recent plain text, kept across input.
+    recent: Vec<u8>,
     tail_checked: bool,
     /// A bell, notification or matching pattern since the last input.
     attention: bool,
@@ -108,6 +114,7 @@ impl StatusTracker {
             last_output: None,
             last_input: None,
             tail: Vec::new(),
+            recent: Vec::new(),
             tail_checked: true,
             attention: false,
             message: None,
@@ -132,9 +139,8 @@ impl StatusTracker {
             self.last_output = Some(now);
         }
         if !text.is_empty() {
-            self.tail.extend_from_slice(&text);
-            let excess = self.tail.len().saturating_sub(TAIL_BYTES);
-            self.tail.drain(..excess);
+            append_bounded(&mut self.tail, &text, TAIL_BYTES);
+            append_bounded(&mut self.recent, &text, RECENT_BYTES);
             self.tail_checked = false;
         }
     }
@@ -155,6 +161,19 @@ impl StatusTracker {
     /// Whether the process tree uses noticeable CPU (e.g. a build the agent runs).
     pub fn set_cpu_busy(&mut self, busy: bool) {
         self.cpu_busy = busy;
+    }
+
+    /// The last non-empty line of plain output, shortened, e.g. for the
+    /// dashboard. Full-screen programs redraw in place, so this is a hint.
+    pub fn last_line(&self) -> String {
+        let text = String::from_utf8_lossy(&self.recent);
+        let line = text
+            .lines()
+            .rev()
+            .map(|line| line.split_whitespace().collect::<Vec<_>>().join(" "))
+            .find(|line| !line.is_empty())
+            .unwrap_or_default();
+        line.chars().take(MAX_LINE_CHARS).collect()
     }
 
     /// The text of the last terminal notification, if it was not answered yet.
@@ -201,6 +220,12 @@ impl StatusTracker {
             AgentState::Idle
         }
     }
+}
+
+fn append_bounded(buffer: &mut Vec<u8>, text: &[u8], limit: usize) {
+    buffer.extend_from_slice(text);
+    let excess = buffer.len().saturating_sub(limit);
+    buffer.drain(..excess);
 }
 
 #[cfg(test)]
@@ -307,6 +332,15 @@ mod tests {
         assert_eq!(status.state(t0), AgentState::Exited);
         status.on_exit(false);
         assert_eq!(status.state(t0), AgentState::Error);
+    }
+
+    #[test]
+    fn last_line_skips_empty_lines_and_survives_input() {
+        let (mut status, t0) = tracker(&[]);
+        status.on_output(b"first\r\n\x1b[32m  second   line \x1b[0m\r\n\r\n", t0);
+        assert_eq!(status.last_line(), "second line");
+        status.on_input(t0 + ms(10));
+        assert_eq!(status.last_line(), "second line");
     }
 
     #[test]

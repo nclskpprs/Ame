@@ -13,6 +13,8 @@ function info(id: number, project: string, profile: string): SessionInfo {
     pid: null,
     startedAt: 0,
     status: { state: 'running' },
+    state: 'starting',
+    attention: null,
   };
 }
 

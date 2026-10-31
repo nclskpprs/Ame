@@ -6,10 +6,22 @@
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
+  import { combinedState, stateLabels } from '$lib/agents/state';
+  import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
+  import StatusDot from './StatusDot.svelte';
   import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
 
   const sections = $derived(projectSections(workspace.projects));
+  /** The most urgent agent state per project with sessions. */
+  const states = $derived(
+    new Map(
+      workspace.projects.flatMap((project) => {
+        const state = combinedState(sessions.forProject(project.path));
+        return state ? [[project.path, state] as const] : [];
+      }),
+    ),
+  );
   /** Index of each project in sidebar order, for the Mod+1…9 hints. */
   const indexOf = $derived(
     new Map(sections.flatMap((s) => s.projects).map((p, i) => [p.path, i] as const)),
@@ -108,6 +120,15 @@
           >
             <span class="name">{project.name}</span>
             <kbd class="hint">{hint(project)}</kbd>
+            {#if states.has(project.path)}
+              <StatusDot
+                state={states.get(project.path) ?? 'idle'}
+                label={t('status.projectLabel', {
+                  project: project.name,
+                  state: t(stateLabels[states.get(project.path) ?? 'idle']),
+                })}
+              />
+            {/if}
           </button>
           {#if editingGroupOf === project.path}
             <input

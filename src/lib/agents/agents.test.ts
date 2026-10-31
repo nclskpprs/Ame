@@ -5,7 +5,16 @@ import { agentChoices } from './picker';
 
 function agent(id: string, path: string | null, resumeArgs: string[] = []): AgentInfo {
   return {
-    profile: { id, name: id.toUpperCase(), command: id, args: [], env: {}, resumeArgs },
+    profile: {
+      id,
+      name: id.toUpperCase(),
+      command: id,
+      args: [],
+      env: {},
+      resumeArgs,
+      needsInputPatterns: [],
+      idleAfterMs: null,
+    },
     path,
     builtin: true,
   };

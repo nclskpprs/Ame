@@ -123,6 +123,13 @@ export type AgentProfile_Deserialize = {
 	 *  new one, e.g. `["--continue"]`. Empty when the agent cannot resume.
 	 */
 	resumeArgs?: string[],
+	/**
+	 *  Regular expressions for text that means the agent waits for an answer
+	 *  (e.g. a permission prompt). Common yes/no prompts are always detected.
+	 */
+	needsInputPatterns?: string[],
+	/**  Milliseconds without output after which the agent counts as idle. */
+	idleAfterMs?: number | null,
 };
 
 /**  How to start an agent (or a shell) in a terminal session. */
@@ -144,7 +151,29 @@ export type AgentProfile_Serialize = {
 	 *  new one, e.g. `["--continue"]`. Empty when the agent cannot resume.
 	 */
 	resumeArgs: string[],
+	/**
+	 *  Regular expressions for text that means the agent waits for an answer
+	 *  (e.g. a permission prompt). Common yes/no prompts are always detected.
+	 */
+	needsInputPatterns: string[],
+	/**  Milliseconds without output after which the agent counts as idle. */
+	idleAfterMs: number | null,
 };
+
+/**  What an agent is doing, as shown in the sidebar, tabs and dashboard. */
+export type AgentState = 
+/**  Started, nothing printed yet. */
+"starting" | 
+/**  Printing output or busy (CPU). */
+"working" | 
+/**  Asked a question or sent a notification; waits for the user. */
+"needsInput" | 
+/**  Quiet: done, or waiting for the next prompt. */
+"idle" | 
+/**  The process ended successfully. */
+"exited" | 
+/**  The process ended with an error code or a signal. */
+"error";
 
 /**
  *  An error returned by a Tauri command.
@@ -324,6 +353,10 @@ export type SessionInfo_Deserialize = {
 	/**  Start time in milliseconds since the Unix epoch. */
 	startedAt: number | null,
 	status: SessionStatus_Deserialize,
+	/**  What the agent is doing, from output, input and exit. */
+	state: AgentState,
+	/**  Text of the last terminal notification (OSC 9 / 777) not answered yet. */
+	attention?: string | null,
 };
 
 /**  Public information about a session, sent to the frontend. */
@@ -340,6 +373,10 @@ export type SessionInfo_Serialize = {
 	/**  Start time in milliseconds since the Unix epoch. */
 	startedAt: number | null,
 	status: SessionStatus_Serialize,
+	/**  What the agent is doing, from output, input and exit. */
+	state: AgentState,
+	/**  Text of the last terminal notification (OSC 9 / 777) not answered yet. */
+	attention: string | null,
 };
 
 export type SessionStatus = SessionStatus_Serialize | SessionStatus_Deserialize;

@@ -7,10 +7,12 @@
     orderedAgents,
   } from '$lib/agents/agents.svelte';
   import { openAgentPicker } from '$lib/agents/picker';
+  import { stateLabels } from '$lib/agents/state';
   import { t } from '$lib/i18n';
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
   import { isRunning } from '$lib/terminal/sessions.svelte';
+  import StatusDot from './StatusDot.svelte';
   import Terminal from './Terminal.svelte';
 
   let { group }: { group: TerminalGroup } = $props();
@@ -51,11 +53,13 @@
             class="label"
             role="tab"
             aria-selected={session.id === active?.id}
-            title={isRunning(session) ? session.title : exitText(session)}
+            title={isRunning(session)
+              ? (session.attention ?? `${session.title} · ${t(stateLabels[session.state])}`)
+              : exitText(session)}
             onclick={() => group.activate(session.id)}
             onauxclick={(event) => onauxclick(event, session.id)}
           >
-            <span class="state" class:exited={!isRunning(session)} aria-hidden="true"></span>
+            <StatusDot state={session.state} />
             {session.title}
           </button>
           <button
@@ -245,20 +249,11 @@
     white-space: nowrap;
   }
 
-  .state {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--ame-accent);
-  }
-
-  .state.exited {
-    background: var(--ame-text-muted);
-  }
-
   .state.previous {
+    width: 8px;
+    height: 8px;
     border: 1px solid var(--ame-text-muted);
-    background: transparent;
+    border-radius: 50%;
   }
 
   .tab.previous .label {

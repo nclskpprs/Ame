@@ -25,14 +25,27 @@ pub struct AgentProfile {
     /// Arguments that continue the last conversation instead of starting a
     /// new one, e.g. `["--continue"]`. Empty when the agent cannot resume.
     pub resume_args: Vec<String>,
+    /// Regular expressions for text that means the agent waits for an answer
+    /// (e.g. a permission prompt). Common yes/no prompts are always detected.
+    pub needs_input_patterns: Vec<String>,
+    /// Milliseconds without output after which the agent counts as idle.
+    pub idle_after_ms: Option<u32>,
 }
 
-fn profile(id: &str, name: &str, command: &str, resume_args: &[&str]) -> AgentProfile {
+fn profile(
+    id: &str,
+    name: &str,
+    command: &str,
+    resume_args: &[&str],
+    patterns: &[&str],
+) -> AgentProfile {
+    let strings = |items: &[&str]| items.iter().map(|item| (*item).to_owned()).collect();
     AgentProfile {
         id: id.to_owned(),
         name: name.to_owned(),
         command: command.to_owned(),
-        resume_args: resume_args.iter().map(|arg| (*arg).to_owned()).collect(),
+        resume_args: strings(resume_args),
+        needs_input_patterns: strings(patterns),
         ..AgentProfile::default()
     }
 }
@@ -40,12 +53,46 @@ fn profile(id: &str, name: &str, command: &str, resume_args: &[&str]) -> AgentPr
 /// The profiles Ame knows out of the box.
 pub fn builtin_profiles() -> Vec<AgentProfile> {
     vec![
-        profile("claude", "Claude Code", "claude", &["--continue"]),
-        profile("codex", "Codex CLI", "codex", &["resume", "--last"]),
-        profile("gemini", "Gemini CLI", "gemini", &["--resume"]),
-        profile("opencode", "OpenCode", "opencode", &["--continue"]),
-        profile("aider", "Aider", "aider", &["--restore-chat-history"]),
-        profile(SHELL_PROFILE, "Shell", "", &[]),
+        profile(
+            "claude",
+            "Claude Code",
+            "claude",
+            &["--continue"],
+            &["Do you want to", r"❯ 1\. Yes", "Would you like to"],
+        ),
+        profile(
+            "codex",
+            "Codex CLI",
+            "codex",
+            &["resume", "--last"],
+            &["Would you like to", "Yes, proceed", "Allow command"],
+        ),
+        profile(
+            "gemini",
+            "Gemini CLI",
+            "gemini",
+            &["--resume"],
+            &[
+                "Allow execution",
+                "Apply this change",
+                "Waiting for user confirmation",
+            ],
+        ),
+        profile(
+            "opencode",
+            "OpenCode",
+            "opencode",
+            &["--continue"],
+            &["Permission required", "Allow once"],
+        ),
+        profile(
+            "aider",
+            "Aider",
+            "aider",
+            &["--restore-chat-history"],
+            &[r"\(Y\)es/\(N\)o"],
+        ),
+        profile(SHELL_PROFILE, "Shell", "", &[], &[]),
     ]
 }
 
@@ -95,6 +142,11 @@ mod tests {
         ids.dedup();
         assert_eq!(ids.len(), profiles.len());
         assert!(can_resume(&profiles[0]));
+        for profile in &profiles {
+            for pattern in &profile.needs_input_patterns {
+                assert!(regex::Regex::new(pattern).is_ok(), "{pattern}");
+            }
+        }
     }
 
     #[test]

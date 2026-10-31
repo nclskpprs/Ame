@@ -3,12 +3,14 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::{Arc, Mutex, Weak};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 
 use super::session::{Session, SessionId, SessionInfo, SessionStatus, Spawned, lock};
+use crate::agents::cpu::CpuMonitor;
+use crate::agents::status::{AgentState, StatusConfig};
 use crate::error::{Error, Result};
 
 /// What to run in a new session.
@@ -24,7 +26,15 @@ pub struct SpawnSpec {
     pub env: Vec<(String, String)>,
     pub cols: u16,
     pub rows: u16,
+    pub status: StatusConfig,
 }
+
+/// How often agent states are re-evaluated.
+const STATUS_TICK: Duration = Duration::from_millis(250);
+/// CPU use is measured every this many ticks (sysinfo walks all processes).
+const CPU_TICKS: u32 = 8;
+/// Percent of one core above which a process tree counts as busy.
+const CPU_BUSY: f32 = 10.0;
 
 type Listener = dyn Fn(Vec<SessionInfo>) + Send + Sync;
 
@@ -56,13 +66,19 @@ pub struct PtyManager {
 
 impl PtyManager {
     pub fn new(listener: impl Fn(Vec<SessionInfo>) + Send + Sync + 'static) -> Self {
-        Self {
-            inner: Arc::new(Inner {
-                sessions: Mutex::new(BTreeMap::new()),
-                next_id: AtomicU32::new(1),
-                listener: Box::new(listener),
-            }),
+        let inner = Arc::new(Inner {
+            sessions: Mutex::new(BTreeMap::new()),
+            next_id: AtomicU32::new(1),
+            listener: Box::new(listener),
+        });
+        let weak = Arc::downgrade(&inner);
+        let spawned = std::thread::Builder::new()
+            .name("agent-status".into())
+            .spawn(move || status_loop(&weak));
+        if let Err(err) = spawned {
+            log::warn!("could not start the agent status thread: {err}");
         }
+        Self { inner }
     }
 
     pub fn spawn(&self, spec: SpawnSpec) -> Result<SessionInfo> {
@@ -102,10 +118,13 @@ impl PtyManager {
             pid: child.process_id(),
             started_at: now_ms(),
             status: SessionStatus::Running,
+            state: AgentState::Starting,
+            attention: None,
         };
         let weak = Arc::downgrade(&self.inner);
         let session = Session::start(
             info.clone(),
+            spec.status,
             Spawned {
                 master: pair.master,
                 child,
@@ -175,6 +194,41 @@ impl PtyManager {
     }
 }
 
+/// Re-evaluates the agent states and reports changes. Ends with the manager.
+fn status_loop(inner: &Weak<Inner>) {
+    let mut cpu = CpuMonitor::default();
+    let mut tick: u32 = 0;
+    loop {
+        std::thread::sleep(STATUS_TICK);
+        let Some(inner) = inner.upgrade() else { break };
+        let sessions: Vec<_> = lock(&inner.sessions).values().cloned().collect();
+        if tick.is_multiple_of(CPU_TICKS) {
+            let running: Vec<_> = sessions
+                .iter()
+                .filter(|session| session.is_running())
+                .filter_map(|session| session.pid().map(|pid| (session, pid)))
+                .collect();
+            if !running.is_empty() {
+                let pids: Vec<_> = running.iter().map(|(_, pid)| *pid).collect();
+                let usage = cpu.tree_usage(&pids);
+                for (session, pid) in running {
+                    session.set_cpu_busy(usage.get(&pid).is_some_and(|u| u.cpu > CPU_BUSY));
+                }
+            }
+        }
+        let now = Instant::now();
+        // Every session is refreshed, so no short-circuiting `any`.
+        let mut changed = false;
+        for session in &sessions {
+            changed |= session.refresh_state(now);
+        }
+        if changed {
+            inner.notify();
+        }
+        tick = tick.wrapping_add(1);
+    }
+}
+
 fn pty_error(err: impl std::fmt::Display) -> Error {
     Error::Pty(err.to_string())
 }
@@ -237,6 +291,7 @@ mod tests {
             env: Vec::new(),
             cols: 80,
             rows: 24,
+            status: StatusConfig::default(),
         }
     }
 
@@ -350,6 +405,23 @@ mod tests {
         assert_eq!(left, vec![second.id]);
         assert!(manager.get(first.id).is_err());
         manager.shutdown();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn detects_a_question_and_its_answer() {
+        let (manager, _exits) = manager();
+        let info = manager
+            .spawn(spec(
+                "/bin/sh",
+                &["-c", "printf 'Overwrite? [y/N] '; read answer; sleep 30"],
+            ))
+            .unwrap();
+        let state = || manager.get(info.id).unwrap().info().state;
+        wait_until(|| state() == AgentState::NeedsInput);
+        manager.get(info.id).unwrap().write(b"y\r").unwrap();
+        wait_until(|| state() != AgentState::NeedsInput);
+        manager.close(info.id).unwrap();
     }
 
     #[test]

@@ -23,6 +23,7 @@
   import { settings } from '$lib/stores/settings.svelte';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { currentTheme } from '$lib/theme/current.svelte';
+  import { waitingCount } from '$lib/agents/state';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
@@ -52,6 +53,23 @@
   });
 
   $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
+
+  // Rain animations pause while the window is hidden or not focused.
+  $effect(() => {
+    const root = document.documentElement;
+    const update = () => {
+      root.dataset.windowActive = String(document.hasFocus() && !document.hidden);
+    };
+    update();
+    window.addEventListener('focus', update);
+    window.addEventListener('blur', update);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      window.removeEventListener('focus', update);
+      window.removeEventListener('blur', update);
+      document.removeEventListener('visibilitychange', update);
+    };
+  });
 
   $effect(() => {
     if (sessions.initial !== null) persistTerminalSessions();
@@ -94,9 +112,11 @@
   $effect(() => {
     const project = workspace.active;
     const unsaved = (activeSession()?.editors.dirtyFiles.length ?? 0) > 0;
-    const title = project
+    const base = project
       ? t(unsaved ? 'app.windowTitleUnsaved' : 'app.windowTitle', { project: project.name })
       : t('app.name');
+    const waiting = waitingCount(sessions.list);
+    const title = waiting > 0 ? t('app.windowTitleWaiting', { count: waiting, title: base }) : base;
     void getCurrentWindow().setTitle(title);
   });
 </script>

@@ -69,3 +69,9 @@ and this project adheres to
   Material Icon Theme, MIT); can be hidden in the settings.
 - Agents in the settings: see which agents were found and where, change
   the command line of a built-in agent (and reset it), or add your own.
+- Agent status: every session shows whether its agent is working, waits
+  for your input, is done or exited, as a rain-style dot in the terminal
+  tabs and next to the project in the sidebar. The window title counts the
+  agents that wait for you. Detection works for any program (output
+  activity, CPU use, bells and terminal notifications, the exit code) plus
+  question patterns per agent profile.

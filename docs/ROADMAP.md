@@ -53,8 +53,8 @@ milestones and marked with 💡.
 
 ## M3 — Status and dashboard
 
-- [ ] Generic status detection (activity, CPU, BEL/OSC, exit)
-- [ ] Profile patterns for `needs_input`
+- [x] Generic status detection (activity, CPU, BEL/OSC, exit)
+- [x] Profile patterns for `needs_input`
 - [ ] Dashboard view, status dots in the sidebar
 - [ ] OS notifications + dock/taskbar badge (configurable per project)
 - [ ] Claude Code hooks adapter with helper CLI
@@ -85,6 +85,17 @@ milestones and marked with 💡.
 - [ ] 💡 Project config `.ame.json`: default agents, start commands and
       favorite scripts per project, shareable with the team
 
+## M5b — Project groups for agents (maintainer idea)
+
+- [ ] Start an agent for a whole group: it runs in a chosen project and
+      gets the other folders of the group (e.g. Claude Code `--add-dir`,
+      Gemini CLI `--include-directories`), so it knows the projects belong
+      together and can work across them
+- [ ] Broadcast prompt to a group: send the same task to the agents of all
+      projects in a group (moved up from "Later")
+- [ ] Group view in the dashboard: status of all agents of a group at a
+      glance
+
 ## M6 — Release 0.1
 
 - [ ] Icon and branding (a drop that is also a text cursor)
@@ -103,8 +114,6 @@ milestones and marked with 💡.
 - Themes, keybinding configuration
 - Optional LSP support (opt-in per project only)
 - More adapters for agents with hook systems
-- 💡 Broadcast prompt: send the same task to several projects (e.g. update
-  dependencies)
 - 💡 Prompt library: recurring prompts as snippets per project or global
 - 💡 Focus mode: bundle notifications, report only `needs_input` immediately
 - 💡 Push to phone: report status changes e.g. via ntfy or Pushover

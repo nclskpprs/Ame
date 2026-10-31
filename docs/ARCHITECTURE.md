@@ -210,7 +210,7 @@ Module: `src-tauri/src/agents/`.
   with its resume arguments. After a mere reload of the web view the backend
   still has the sessions, so nothing is offered.
 
-## Agent status detection — planned (M3)
+## Agent status detection — implemented (M3, layers 1 and 2)
 
 States: `starting` · `working` · `needs_input` · `idle` (done) · `exited` ·
 `error`.
@@ -238,6 +238,30 @@ Three layers combine into one result:
 
 Adapter signals take precedence over heuristics. Changes to `needs_input` or
 `idle` trigger an OS notification and a badge (can be disabled per project).
+
+Implementation (`src-tauri/src/agents/`):
+
+- `signals.rs` parses output for bells (outside escape sequences), OSC 9 /
+  OSC 777 notifications (OSC 9 progress reports are ignored) and the plain
+  text.
+- `status.rs` (`StatusTracker`, one per session) combines: output within the
+  last 400 ms → `working`; a bell, notification or matching pattern since the
+  last input → `needs_input`; output within `idleAfterMs` (default 3 s) or
+  CPU use → `working`; nothing printed yet → `starting`; else `idle`; exit
+  code 0 → `exited`, otherwise `error`. Output within 250 ms after input is
+  treated as echo. Patterns only see text printed since the last input, so
+  an answered question does not match again. Automatic terminal replies
+  (cursor reports, focus events, color queries) do not count as input.
+- `cpu.rs` sums CPU and memory of each session's process tree (`sysinfo`,
+  every 2 s); above 10 % of a core counts as busy.
+- The `agent-status` thread re-evaluates every 250 ms and emits
+  `sessions-changed` only when a state changed. `SessionInfo` carries
+  `state` and `attention` (the notification text).
+- Profiles have `needsInputPatterns` and `idleAfterMs`; common yes/no
+  prompts (`(y/n)`, `[y/N]`, …) are always detected.
+- Frontend: `StatusDot` (rain style, CSS transforms on pseudo-elements,
+  paused when the window is inactive or rain is off), the most urgent state
+  per project in the sidebar, the waiting count in the window title.
 
 Example agent profile:
 

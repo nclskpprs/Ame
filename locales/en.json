@@ -3,7 +3,8 @@
     "name": "Ame",
     "tagline": "Agent Manager Editor",
     "windowTitle": "{project} — Ame",
-    "windowTitleUnsaved": "● {project} — Ame"
+    "windowTitleUnsaved": "● {project} — Ame",
+    "windowTitleWaiting": "({count}) {title}"
   },
   "sidebar": {
     "label": "Projects",
@@ -217,5 +218,14 @@
     "notInstalled": "Not found on the PATH",
     "noneFound": "No agents found on the PATH. Install one, or add your own in the settings.",
     "noRunningSession": "No agent is running in this project. Start one with {shortcut}."
+  },
+  "status": {
+    "starting": "Starting",
+    "working": "Working",
+    "needsInput": "Needs your input",
+    "idle": "Done, waiting",
+    "exited": "Exited",
+    "error": "Ended with an error",
+    "projectLabel": "{project}: {state}"
   }
 }

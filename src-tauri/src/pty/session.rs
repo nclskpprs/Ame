@@ -13,6 +13,7 @@ use specta::Type;
 use super::modes::ModeTracker;
 use super::ring::RingBuffer;
 use super::utf8::Utf8Decoder;
+use crate::agents::status::{AgentState, StatusConfig, StatusTracker};
 use crate::error::{Error, Result};
 
 /// Bytes of output kept per session for replays.
@@ -50,6 +51,10 @@ pub struct SessionInfo {
     /// Start time in milliseconds since the Unix epoch.
     pub started_at: f64,
     pub status: SessionStatus,
+    /// What the agent is doing, from output, input and exit.
+    pub state: AgentState,
+    /// Text of the last terminal notification (OSC 9 / 777) not answered yet.
+    pub attention: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -81,6 +86,7 @@ struct Output {
 /// of the session.
 pub struct Session {
     info: Mutex<SessionInfo>,
+    status: Mutex<StatusTracker>,
     output: Mutex<Output>,
     writer: Mutex<Option<Box<dyn Write + Send>>>,
     master: Mutex<Option<Box<dyn MasterPty + Send>>>,
@@ -100,6 +106,7 @@ impl Session {
     /// `on_exit` runs once after the process ended and its output is drained.
     pub fn start(
         info: SessionInfo,
+        status: StatusConfig,
         spawned: Spawned,
         on_exit: impl FnOnce() + Send + 'static,
     ) -> Result<Arc<Self>> {
@@ -112,6 +119,7 @@ impl Session {
         let id = info.id;
         let session = Arc::new(Self {
             info: Mutex::new(info),
+            status: Mutex::new(StatusTracker::new(status, Instant::now())),
             output: Mutex::new(Output {
                 ring: RingBuffer::new(SCROLLBACK_BYTES),
                 modes: ModeTracker::default(),
@@ -153,7 +161,16 @@ impl Session {
                     }
                 }
             };
+            let success = matches!(
+                status,
+                SessionStatus::Exited {
+                    exit_code: 0,
+                    signal: None
+                }
+            );
+            lock(&wait_session.status).on_exit(success);
             lock(&wait_session.info).status = status;
+            wait_session.refresh_state(Instant::now());
             on_exit();
         })?;
         Ok(session)
@@ -161,6 +178,27 @@ impl Session {
 
     pub fn info(&self) -> SessionInfo {
         lock(&self.info).clone()
+    }
+
+    pub fn pid(&self) -> Option<u32> {
+        lock(&self.info).pid
+    }
+
+    /// Re-evaluates the agent state; returns whether it changed.
+    pub fn refresh_state(&self, now: Instant) -> bool {
+        let (state, attention) = {
+            let mut status = lock(&self.status);
+            (status.state(now), status.message().map(str::to_owned))
+        };
+        let mut info = lock(&self.info);
+        let changed = info.state != state || info.attention != attention;
+        info.state = state;
+        info.attention = attention;
+        changed
+    }
+
+    pub fn set_cpu_busy(&self, busy: bool) {
+        lock(&self.status).set_cpu_busy(busy);
     }
 
     pub fn is_running(&self) -> bool {
@@ -202,6 +240,9 @@ impl Session {
     }
 
     pub fn write(&self, data: &[u8]) -> Result<()> {
+        if !is_terminal_reply(data) {
+            lock(&self.status).on_input(Instant::now());
+        }
         let mut writer = lock(&self.writer);
         let writer = writer
             .as_mut()
@@ -244,6 +285,7 @@ impl Session {
 
     /// Feeds output into the buffer and the attached view.
     fn push_output(&self, bytes: &[u8]) {
+        lock(&self.status).on_output(bytes, Instant::now());
         let mut output = lock(&self.output);
         output.ring.push(bytes);
         output.modes.feed(bytes);
@@ -259,6 +301,49 @@ impl Session {
         lock(&self.writer).take();
         lock(&self.master).take();
     }
+}
+
+/// Whether input is only an automatic reply of the terminal (cursor
+/// position, device attributes, focus change, color query) rather than
+/// something the user typed. Replies must not count as answering a question.
+fn is_terminal_reply(data: &[u8]) -> bool {
+    let mut rest = data;
+    if rest.is_empty() {
+        return false;
+    }
+    while let Some(sequence) = rest.strip_prefix(b"\x1b") {
+        match sequence.first() {
+            Some(b'[') => {
+                let body = &sequence[1..];
+                let Some(end) = body.iter().position(|byte| (0x40..=0x7e).contains(byte)) else {
+                    return false;
+                };
+                if !matches!(
+                    body[end],
+                    b'R' | b'c' | b'n' | b'I' | b'O' | b't' | b'x' | b'y'
+                ) {
+                    return false;
+                }
+                rest = &body[end + 1..];
+            }
+            Some(b']' | b'P') => {
+                let body = &sequence[1..];
+                let end = body
+                    .iter()
+                    .position(|&byte| byte == 0x07)
+                    .map(|index| index + 1)
+                    .or_else(|| {
+                        body.windows(2)
+                            .position(|pair| pair == b"\x1b\\")
+                            .map(|index| index + 2)
+                    });
+                let Some(end) = end else { return false };
+                rest = &body[end..];
+            }
+            _ => return false,
+        }
+    }
+    rest.is_empty()
 }
 
 const PASTE_START: &str = "\x1b[200~";
@@ -345,6 +430,20 @@ pub(super) fn lock<T: ?Sized>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn terminal_replies_are_not_user_input() {
+        assert!(is_terminal_reply(b"\x1b[12;40R"));
+        assert!(is_terminal_reply(b"\x1b[?1;2c\x1b[I"));
+        assert!(is_terminal_reply(b"\x1b]11;rgb:0e0e/1616/2121\x1b\\"));
+        assert!(!is_terminal_reply(b"y"));
+        assert!(!is_terminal_reply(b"\r"));
+        assert!(!is_terminal_reply(b"\x1b[A"));
+        assert!(!is_terminal_reply(b"\x1bOB"));
+        assert!(!is_terminal_reply(b"\x1b"));
+        assert!(!is_terminal_reply(b"\x1b[Ix"));
+        assert!(!is_terminal_reply(b""));
+    }
 
     #[test]
     fn paste_data_uses_carriage_returns() {

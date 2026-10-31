@@ -11,6 +11,7 @@ use super::manager::{PtyManager, SpawnSpec};
 use super::session::{OutputSink, SessionId, SessionInfo};
 use crate::agents::detect;
 use crate::agents::profiles::merged_profiles;
+use crate::agents::status::StatusConfig;
 use crate::error::{Error, Result};
 use crate::workspace::projects::WorkspaceStore;
 use crate::workspace::settings::SettingsStore;
@@ -56,6 +57,7 @@ pub async fn start_session(
         }
         let mut env = env::session_env();
         env.extend(profile.env.clone());
+        let status = StatusConfig::new(profile.idle_after_ms, &profile.needs_input_patterns);
         pty.spawn(SpawnSpec {
             project,
             profile: profile.id,
@@ -66,6 +68,7 @@ pub async fn start_session(
             env,
             cols,
             rows,
+            status,
         })
     })
     .await

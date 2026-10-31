@@ -533,7 +533,9 @@ export type Settings_Serialize = {
 	agents: AgentProfile_Serialize[],
 };
 
-export type SidePanel = "files" | "search";
+export type SidePanel = "files" | "search" | 
+/**  Git changes; only offered in git repositories. */
+"changes";
 
 export type ThemePreference = 
 /**  Follow the operating system. */

@@ -124,13 +124,16 @@
     "closeSession": "Close Terminal Session",
     "startAgent": "Start Agent…",
     "sendToAgent": "Send Selection to Agent",
-    "showDashboard": "Show Dashboard"
+    "showDashboard": "Show Dashboard",
+    "showChanges": "Show Changes",
+    "toggleDiff": "Toggle Inline Diff"
   },
   "sidePanel": {
     "label": "Side panel",
     "resize": "Resize side panel",
     "files": "Files",
-    "search": "Search"
+    "search": "Search",
+    "changes": "Changes"
   },
   "fileTree": {
     "label": "Files",
@@ -268,5 +271,17 @@
     "untracked": "Untracked (new file)",
     "deleted": "Deleted",
     "conflicted": "Merge conflict"
+  },
+  "changes": {
+    "branch": "Current branch",
+    "detached": "Detached HEAD",
+    "aheadBehind": "↑{ahead} ↓{behind}",
+    "none": "No changes",
+    "staged": "Staged",
+    "unstaged": "Changes"
+  },
+  "diff": {
+    "keep": "Keep",
+    "revert": "Revert"
   }
 }

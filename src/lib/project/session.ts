@@ -44,6 +44,12 @@ export class ProjectSession {
     await Promise.all([this.editors.open(path), this.tree.reveal(path)]);
   }
 
+  /** Opens a file with its changes against `HEAD` shown inline. */
+  async openDiff(path: string): Promise<void> {
+    await this.editors.open(path);
+    await this.editors.setDiff(path, true);
+  }
+
   /** Opens a file and selects a range on a line (columns in UTF-16 units). */
   async openLocation(path: string, line: number, from: number, to: number): Promise<void> {
     await this.editors.reveal(path, line, from, to);

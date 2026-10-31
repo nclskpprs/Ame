@@ -131,6 +131,27 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'git.showChanges',
+      title: 'commands.showChanges',
+      shortcut: 'Mod+Shift+G',
+      terminal: true,
+      when: () => activeSession()?.git.status != null,
+      run: () => {
+        const path = workspace.activePath;
+        if (path) workspace.updateLayout(path, { sidePanel: 'changes' });
+      },
+    },
+    {
+      id: 'editor.toggleDiff',
+      title: 'commands.toggleDiff',
+      shortcut: 'Mod+Alt+D',
+      when: () => activeFile()?.status === 'ready' && activeSession()?.git.status != null,
+      run: () => {
+        const file = activeFile();
+        if (file) return activeSession()?.editors.setDiff(file.path, !file.diff);
+      },
+    },
+    {
       id: 'editor.save',
       title: 'commands.saveFile',
       shortcut: 'Mod+S',

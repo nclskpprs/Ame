@@ -5,6 +5,7 @@
   import { sessionFor } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
+  import ChangesPanel from './ChangesPanel.svelte';
   import EditorPane from './EditorPane.svelte';
   import FileTree from './FileTree.svelte';
   import Resizer from './Resizer.svelte';
@@ -16,10 +17,16 @@
 
   const session = $derived(sessionFor(project.path));
   const unsaved = $derived(withAncestors(session.editors.dirtyFiles.map((file) => file.path)));
-  const panels: { id: SidePanel; label: 'sidePanel.files' | 'sidePanel.search' }[] = [
+  type PanelLabel = 'sidePanel.files' | 'sidePanel.search' | 'sidePanel.changes';
+  /** The changes panel appears only in git repositories (progressive disclosure). */
+  const panels = $derived<{ id: SidePanel; label: PanelLabel }[]>([
     { id: 'files', label: 'sidePanel.files' },
     { id: 'search', label: 'sidePanel.search' },
-  ];
+    ...(session.git.status
+      ? [{ id: 'changes' as const, label: 'sidePanel.changes' as const }]
+      : []),
+  ]);
+  const changeCount = $derived(session.git.status?.files.length ?? 0);
 </script>
 
 <div class="project-view" style:--side-width="{project.layout.sidePanelWidth}px">
@@ -32,12 +39,17 @@
           onclick={() => workspace.updateLayout(project.path, { sidePanel: panel.id })}
         >
           {t(panel.label)}
+          {#if panel.id === 'changes' && changeCount}
+            <span class="count">{changeCount}</span>
+          {/if}
         </button>
       {/each}
     </div>
     <div class="panel" role="tabpanel">
       {#if project.layout.sidePanel === 'search'}
         <SearchPanel {session} />
+      {:else if project.layout.sidePanel === 'changes' && session.git.status}
+        <ChangesPanel {session} />
       {:else}
         <FileTree
           tree={session.tree}
@@ -114,6 +126,11 @@
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .count {
+    margin-left: var(--ame-space-1);
+    font-weight: 400;
   }
 
   .panel-tabs button[aria-selected='true'] {

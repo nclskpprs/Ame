@@ -376,6 +376,11 @@ Module: `src-tauri/src/git/` (git CLI, ADR 0008).
   is busy (`pollGit`), because the watcher only sees visible folders.
   `lib/git/marks.ts` turns files into tree marks (folders take the strongest
   mark inside); colors are the `git*` tokens.
+- Changes panel (`ChangesPanel.svelte`), a side panel tab shown only in git
+  repositories. Diffs are inline in the normal editor tab:
+  `EditorGroup.setDiff` reconfigures a per-tab compartment with
+  `@codemirror/merge`'s `unifiedMergeView` against `git_original` (loaded on
+  demand), with Keep/Revert buttons per chunk; the file stays editable.
 
 ## Projects and views — planned (M2–M5)
 

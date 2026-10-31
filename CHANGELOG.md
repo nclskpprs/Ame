@@ -85,3 +85,8 @@ and this project adheres to
 - Git: changed, new, deleted and conflicted files are colored in the file
   tree with a status letter, and folders show the changes inside them. The
   status follows saves, file changes, window focus and working agents.
+- Changes panel (Ctrl/Cmd+Shift+G, only in git repositories): branch,
+  ahead/behind and the staged and unstaged files. Opening a file from there
+  shows its changes against the last commit inline in the editor, with
+  Keep and Revert for every change (Ctrl/Cmd+Alt+D toggles the inline diff
+  for any file).

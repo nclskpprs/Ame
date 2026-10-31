@@ -65,6 +65,44 @@ const editorTheme = EditorView.theme({
     border: '1px solid var(--ame-border)',
     color: 'var(--ame-text)',
   },
+  // Inline diff (@codemirror/merge), see EditorGroup.setDiff.
+  '.cm-changedLine, .cm-inlineChangedLine': {
+    backgroundColor: 'color-mix(in srgb, var(--ame-git-added) 9%, transparent)',
+  },
+  '.cm-changedText': {
+    background:
+      'linear-gradient(var(--ame-git-added), var(--ame-git-added)) bottom / 100% 2px no-repeat',
+  },
+  '.cm-deletedChunk': {
+    backgroundColor: 'color-mix(in srgb, var(--ame-git-deleted) 9%, transparent)',
+  },
+  '.cm-deletedChunk .cm-deletedText, .cm-deletedText': {
+    background:
+      'linear-gradient(var(--ame-git-deleted), var(--ame-git-deleted)) bottom / 100% 2px no-repeat',
+  },
+  '.cm-changeGutter': { width: '3px', paddingLeft: '0' },
+  '.cm-changedLineGutter': { backgroundColor: 'var(--ame-git-added)' },
+  '.cm-deletedLineGutter': { backgroundColor: 'var(--ame-git-deleted)' },
+  '.cm-deletedChunk .cm-chunkButtons button': {
+    padding: '0 6px',
+    border: '1px solid var(--ame-border)',
+    borderRadius: '4px',
+    backgroundColor: 'var(--ame-surface)',
+    color: 'var(--ame-text)',
+    fontFamily: 'var(--ame-font-ui)',
+  },
+  '.cm-deletedChunk .cm-chunkButtons button[name=accept]': {
+    borderColor: 'var(--ame-git-added)',
+    background: 'var(--ame-surface)',
+  },
+  '.cm-deletedChunk .cm-chunkButtons button[name=reject]': {
+    borderColor: 'var(--ame-git-deleted)',
+    background: 'var(--ame-surface)',
+  },
+  '.cm-collapsedLines': {
+    color: 'var(--ame-text-muted)',
+    background: 'var(--ame-surface)',
+  },
   '.cm-tooltip': {
     backgroundColor: 'var(--ame-surface)',
     border: '1px solid var(--ame-border)',

@@ -89,6 +89,8 @@ pub enum SidePanel {
     #[default]
     Files,
     Search,
+    /// Git changes; only offered in git repositories.
+    Changes,
 }
 
 /// Snapshot of the open projects sent to the frontend.

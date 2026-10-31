@@ -67,7 +67,7 @@ milestones and marked with 💡.
 
 ## M4 — Git and changes
 
-- [ ] Git status, diff view, highlighting of changed files
+- [x] Git status, diff view, highlighting of changed files
 - [ ] Follow mode
 - [ ] Simple staging/commit (optional)
 - [ ] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden

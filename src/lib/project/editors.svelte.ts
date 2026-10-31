@@ -1,4 +1,10 @@
-import { EditorState, type StateEffect, Text } from '@codemirror/state';
+import {
+  Compartment,
+  EditorState,
+  type Extension,
+  type StateEffect,
+  Text,
+} from '@codemirror/state';
 import { EditorView, type ViewUpdate } from '@codemirror/view';
 import { minimalChange } from '$lib/editor/diff';
 import { loadLanguage } from '$lib/editor/languages';
@@ -22,6 +28,9 @@ export class OpenFile {
   deleted = $state(false);
   /** Error message or size, depending on the status. */
   detail = $state('');
+  /** Changes against the committed version are shown inline. */
+  diff = $state(false);
+  readonly diffCompartment = new Compartment();
   editorState: EditorState | null = null;
   saved: Text = Text.empty;
   scroll: StateEffect<unknown> | null = null;
@@ -179,6 +188,47 @@ export class EditorGroup {
     return results.every(Boolean);
   }
 
+  /**
+   * Shows or hides the changes against the committed (`HEAD`) version inline,
+   * with buttons to keep or revert each change. New files show everything as
+   * added.
+   */
+  async setDiff(path: string, on: boolean): Promise<void> {
+    const file = this.find(path);
+    if (!file) return;
+    if (file.status === 'unloaded' || file.status === 'loading') await this.#load(file);
+    if (file.status !== 'ready') return;
+    let extension: Extension = [];
+    if (on) {
+      const [{ unifiedMergeView }, result] = await Promise.all([
+        import('@codemirror/merge'),
+        commands.gitOriginal(this.project, path),
+      ]);
+      const original = result.status === 'ok' ? (result.data ?? '') : '';
+      extension = [
+        unifiedMergeView({
+          original,
+          gutter: true,
+          // Line backgrounds are enough; underlining every word is noisy.
+          highlightChanges: false,
+          mergeControls: true,
+          syntaxHighlightDeletions: true,
+        }),
+        // "Accept" keeps a change, "Reject" restores the committed text.
+        EditorState.phrases.of({ Accept: t('diff.keep'), Reject: t('diff.revert') }),
+      ];
+    }
+    file.diff = on;
+    this.#reconfigure(file, file.diffCompartment.reconfigure(extension));
+  }
+
+  /** Compares diff tabs with the new committed version, e.g. after a commit. */
+  async refreshDiffs(): Promise<void> {
+    await Promise.all(
+      this.files.filter((file) => file.diff).map((file) => this.setDiff(file.path, true)),
+    );
+  }
+
   /** Re-reads open files that changed on disk. */
   async onFsChanged(paths: readonly string[]): Promise<void> {
     const changed = this.files.filter((f) => f.status === 'ready' && paths.includes(f.path));
@@ -228,6 +278,7 @@ export class EditorGroup {
         doc: content.text,
         extensions: [
           baseExtensions(),
+          file.diffCompartment.of([]),
           lineSeparatorFor(content.text),
           language ?? [],
           EditorView.updateListener.of((update) => this.#onViewUpdate(file, update)),
@@ -257,6 +308,14 @@ export class EditorGroup {
     file.saved = file.editorState.doc;
     file.dirty = false;
     file.conflict = false;
+  }
+
+  #reconfigure(file: OpenFile, effects: StateEffect<unknown>): void {
+    if (this.#view && this.activePath === file.path) {
+      this.#view.dispatch({ effects });
+    } else if (file.editorState) {
+      file.editorState = file.editorState.update({ effects }).state;
+    }
   }
 
   /** Applies a change through the view if the file is shown, else directly. */

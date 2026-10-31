@@ -264,6 +264,14 @@ Implementation (`src-tauri/src/agents/`):
   comes from `session_previews`, polled every second only while the
   dashboard is shown (the status tracker keeps the last 2 KiB of plain
   text).
+- Notifications (`lib/notify/`): `transition()` decides per state change
+  (needs input, error, or idle/exited after at least 10 s of work; never for
+  sessions seen the first time). The notifier sends an OS notification
+  (`tauri-plugin-notification`) only when the session is not visible (window
+  unfocused, other project, panel hidden, other tab) and neither the setting
+  `notifications` nor the project's `muted` flag turns it off. The badge
+  shows the waiting count (`setBadgeCount` on macOS/Linux, a drawn overlay
+  icon on Windows).
 - Frontend: `StatusDot` (rain style, CSS transforms on pseudo-elements,
   paused when the window is inactive or rain is off), the most urgent state
   per project in the sidebar, the waiting count in the window title.

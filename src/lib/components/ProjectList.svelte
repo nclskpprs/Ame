@@ -50,6 +50,11 @@
         run: () => workspace.setPinned(project.path, !project.pinned),
       },
       {
+        kind: 'action',
+        label: t(project.muted ? 'projectMenu.unmute' : 'projectMenu.mute'),
+        run: () => workspace.setMuted(project.path, !project.muted),
+      },
+      {
         kind: 'submenu',
         label: t('projectMenu.moveToGroup'),
         items: [

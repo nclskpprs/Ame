@@ -8,6 +8,7 @@ function project(name: string, extra: Partial<Project> = {}): Project {
     name,
     group: null,
     pinned: false,
+    muted: false,
     layout: {
       openFiles: [],
       activeFile: null,

@@ -39,6 +39,8 @@ pub struct Settings {
     pub file_open: FileOpen,
     /// Show file type icons in the file tree and the editor tabs.
     pub file_icons: bool,
+    /// OS notifications when an agent needs input, is done or fails.
+    pub notifications: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
     pub agents: Vec<AgentProfile>,
 }
@@ -53,6 +55,7 @@ impl Default for Settings {
             density: Density::default(),
             file_open: FileOpen::default(),
             file_icons: true,
+            notifications: true,
             agents: Vec::new(),
         }
     }

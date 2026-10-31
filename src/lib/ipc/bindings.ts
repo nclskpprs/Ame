@@ -21,6 +21,8 @@ export const commands = {
 	removeProject: (project: string) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("remove_project", { project })),
 	setActiveProject: (project: string) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_active_project", { project })),
 	setProjectPinned: (project: string, pinned: boolean) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_pinned", { project, pinned })),
+	/**  Turns the OS notifications for the agents of a project off or on. */
+	setProjectMuted: (project: string, muted: boolean) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_muted", { project, muted })),
 	/**  Sets the group of a project; `null` or a blank name removes it. */
 	setProjectGroup: (project: string, group: string | null) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_group", { project, group })),
 	setProjectLayout: (project: string, layout: ProjectLayout_Deserialize) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_layout", { project, layout })),
@@ -299,6 +301,8 @@ export type Project_Deserialize = {
 	group?: string | null,
 	/**  Pinned projects are listed first. */
 	pinned: boolean,
+	/**  No OS notifications for the agents of this project. */
+	muted?: boolean,
 	/**  UI layout restored when the project is shown again. */
 	layout?: ProjectLayout_Deserialize,
 };
@@ -313,6 +317,8 @@ export type Project_Serialize = {
 	group: string | null,
 	/**  Pinned projects are listed first. */
 	pinned: boolean,
+	/**  No OS notifications for the agents of this project. */
+	muted: boolean,
 	/**  UI layout restored when the project is shown again. */
 	layout: ProjectLayout_Serialize,
 };
@@ -438,6 +444,8 @@ export type Settings_Deserialize = {
 	fileOpen?: FileOpen,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons?: boolean,
+	/**  OS notifications when an agent needs input, is done or fails. */
+	notifications?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents?: AgentProfile_Deserialize[],
 };
@@ -461,6 +469,8 @@ export type Settings_Serialize = {
 	fileOpen: FileOpen,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons: boolean,
+	/**  OS notifications when an agent needs input, is done or fails. */
+	notifications: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents: AgentProfile_Serialize[],
 };

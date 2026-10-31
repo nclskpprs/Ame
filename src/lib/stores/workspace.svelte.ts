@@ -59,6 +59,10 @@ class WorkspaceStore {
     this.#handle(await commands.setProjectPinned(path, pinned));
   }
 
+  async setMuted(path: string, muted: boolean): Promise<void> {
+    this.#handle(await commands.setProjectMuted(path, muted));
+  }
+
   async setGroup(path: string, group: string | null): Promise<void> {
     this.#handle(await commands.setProjectGroup(path, group));
   }

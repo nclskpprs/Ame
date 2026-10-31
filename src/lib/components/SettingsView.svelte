@@ -113,6 +113,22 @@
 
     <section class="group" aria-labelledby="settings-agents">
       <h2 id="settings-agents">{t('settings.agents.title')}</h2>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.agents.notifications')}</span>
+          <span class="description">{t('settings.agents.notificationsDescription')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-notifications"
+          label={t('settings.agents.notifications')}
+          options={[
+            { value: 'on', label: t('settings.agents.on') },
+            { value: 'off', label: t('settings.agents.off') },
+          ]}
+          value={settings.value.notifications ? 'on' : 'off'}
+          onchange={(value) => void settings.update({ notifications: value === 'on' })}
+        />
+      </div>
       <p class="intro">{t('settings.agents.description')}</p>
       <AgentSettings />
     </section>
@@ -206,7 +222,7 @@
   }
 
   .intro {
-    margin: 0 0 var(--ame-space-2);
+    margin: var(--ame-space-3) 0 var(--ame-space-2);
     color: var(--ame-text-muted);
   }
 

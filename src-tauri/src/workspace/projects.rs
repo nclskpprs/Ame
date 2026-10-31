@@ -33,6 +33,9 @@ pub struct Project {
     pub group: Option<String>,
     /// Pinned projects are listed first.
     pub pinned: bool,
+    /// No OS notifications for the agents of this project.
+    #[serde(default)]
+    pub muted: bool,
     /// UI layout restored when the project is shown again.
     #[serde(default)]
     pub layout: ProjectLayout,
@@ -151,6 +154,7 @@ impl WorkspaceStore {
                     name,
                     group: None,
                     pinned: false,
+                    muted: false,
                     layout: ProjectLayout::default(),
                 });
             }
@@ -185,6 +189,10 @@ impl WorkspaceStore {
 
     pub fn set_pinned(&self, project: &str, pinned: bool) -> Result<WorkspaceState> {
         self.update_project(project, |p| p.pinned = pinned)
+    }
+
+    pub fn set_muted(&self, project: &str, muted: bool) -> Result<WorkspaceState> {
+        self.update_project(project, |p| p.muted = muted)
     }
 
     /// Sets or clears the group. Blank names clear it.

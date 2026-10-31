@@ -108,6 +108,17 @@ pub async fn set_project_pinned(
     store.set_pinned(&project, pinned)
 }
 
+/// Turns the OS notifications for the agents of a project off or on.
+#[tauri::command]
+#[specta::specta]
+pub async fn set_project_muted(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    muted: bool,
+) -> Result<WorkspaceState> {
+    store.set_muted(&project, muted)
+}
+
 /// Sets the group of a project; `null` or a blank name removes it.
 #[tauri::command]
 #[specta::specta]

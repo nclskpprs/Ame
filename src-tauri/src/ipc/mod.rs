@@ -37,6 +37,7 @@ pub fn builder() -> Builder<Wry> {
             commands::remove_project,
             commands::set_active_project,
             commands::set_project_pinned,
+            commands::set_project_muted,
             commands::set_project_group,
             commands::set_project_layout,
             fs::read_dir,

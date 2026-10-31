@@ -77,7 +77,11 @@
       "resumeHint": "Continue the last conversation, e.g. --continue",
       "save": "Save",
       "cancel": "Cancel",
-      "invalid": "A name and a command are required."
+      "invalid": "A name and a command are required.",
+      "notifications": "Notifications",
+      "notificationsDescription": "When an agent you are not looking at needs your input, finishes a longer task or fails. Projects can be muted in their context menu.",
+      "on": "On",
+      "off": "Off"
     },
     "saveFailed": "Could not save settings: {message}"
   },
@@ -87,7 +91,9 @@
     "moveToGroup": "Move to group",
     "newGroup": "New group…",
     "removeFromGroup": "Remove from group",
-    "close": "Close project"
+    "close": "Close project",
+    "mute": "Mute notifications",
+    "unmute": "Unmute notifications"
   },
   "commands": {
     "openFolder": "Open Folder…",
@@ -248,5 +254,11 @@
     "seconds": "{n} s",
     "minutes": "{n} min",
     "hours": "{h} h {m} min"
+  },
+  "notify": {
+    "needsInput": "{agent} needs your input",
+    "done": "{agent} is done",
+    "error": "{agent} ended with an error",
+    "body": "{project}: {message}"
   }
 }

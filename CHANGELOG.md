@@ -78,3 +78,7 @@ and this project adheres to
 - Dashboard (Ctrl/Cmd+Shift+D or in the sidebar): every agent of every
   project as a card with its status, running time and last output line,
   agents that wait for you first. A click jumps to the session.
+- OS notifications when an agent you are not looking at needs your input,
+  finishes a longer task or fails (can be turned off in the settings or
+  muted per project in its context menu), and the number of waiting agents
+  on the dock/taskbar icon.

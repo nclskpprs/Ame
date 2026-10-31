@@ -17,6 +17,7 @@
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import {
     activeSession,
+    existingSession,
     listenToFileChanges,
     persistTerminalSessions,
     pruneSessions,
@@ -25,6 +26,7 @@
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { currentTheme } from '$lib/theme/current.svelte';
   import { waitingCount } from '$lib/agents/state';
+  import { notifier } from '$lib/notify/notifier';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
@@ -74,6 +76,30 @@
 
   $effect(() => {
     if (sessions.initial !== null) persistTerminalSessions();
+  });
+
+  $effect(() => {
+    const list = sessions.list;
+    untrack(() =>
+      notifier.update(list, {
+        theme: currentTheme.name,
+        projectName: (path) => workspace.projects.find((p) => p.path === path)?.name ?? path,
+        enabled: (session) =>
+          settings.value.notifications &&
+          !workspace.projects.find((p) => p.path === session.project)?.muted,
+        visible: (session) => {
+          if (!document.hasFocus() || document.hidden) return false;
+          if (view.dashboardOpen) return true;
+          const terminals = existingSession(session.project)?.terminals;
+          return (
+            view.overlay === null &&
+            workspace.activePath === session.project &&
+            terminals?.open === true &&
+            terminals.active?.id === session.id
+          );
+        },
+      }),
+    );
   });
 
   $effect(() => {

@@ -92,3 +92,9 @@ and this project adheres to
   for any file).
 - Stage and unstage files (one by one or all) and commit from the changes
   panel; Ctrl/Cmd+Enter in the message commits. Git hooks run as usual.
+
+### Fixed
+
+- The file tree now notices new and changed files in the project folder
+  itself when no subfolder is expanded, and the file watcher no longer
+  reacts to its own reads (on Linux this caused a constant reload loop).

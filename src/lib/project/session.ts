@@ -8,6 +8,7 @@ import { FileTreeState } from './file-tree.svelte';
 import { GitState } from './git.svelte';
 import { SearchState } from './search.svelte';
 import { TerminalGroup } from './terminals.svelte';
+import { WatchSet } from './watch-set';
 
 /**
  * Runtime state of an open project (file tree, editors, terminals). Kept while the app runs, so switching projects is instant.
@@ -19,7 +20,7 @@ export class ProjectSession {
   readonly search: SearchState;
   readonly terminals: TerminalGroup;
   readonly git: GitState;
-  #watched = '';
+  readonly #watched = new WatchSet();
 
   constructor(path: string) {
     this.path = path;
@@ -57,12 +58,8 @@ export class ProjectSession {
 
   /** Tells the backend which directories to watch, if the set changed. */
   syncWatches(): void {
-    const dirs = [...this.tree.watchedDirs(), ...this.editors.watchedDirs()]
-      .filter((dir, index, all) => all.indexOf(dir) === index)
-      .sort();
-    const key = dirs.join('\n');
-    if (key === this.#watched) return;
-    this.#watched = key;
+    const dirs = this.#watched.update([...this.tree.watchedDirs(), ...this.editors.watchedDirs()]);
+    if (!dirs) return;
     void commands.watchDirs(this.path, dirs).then((result) => {
       if (result.status === 'error') notices.push(describeError(result.error));
     });

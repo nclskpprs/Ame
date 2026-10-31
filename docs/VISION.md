@@ -9,13 +9,13 @@ replacement with indexing, but a **cockpit for agentic coding**.
 
 ## Problems it solves
 
-| Problem              | Answer                                                                                   |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| RAM usage and crashes | No indexing, Rust backend, lazy loading.                                                |
-| Switching projects   | All projects in one sidebar, one click or shortcut away.                                 |
-| Agent status         | A dashboard shows which agent is working, waiting, done or crashed, plus OS notifications. |
-| Seeing the code      | File tree, editor and a live diff of agent changes next to the terminal.                 |
-| Scripts              | `package.json` and `composer.json` scripts as buttons.                                   |
+| Problem               | Answer                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| RAM usage and crashes | No indexing, Rust backend, lazy loading.                                                   |
+| Switching projects    | All projects in one sidebar, one click or shortcut away.                                   |
+| Agent status          | A dashboard shows which agent is working, waiting, done or crashed, plus OS notifications. |
+| Seeing the code       | File tree, editor and a live diff of agent changes next to the terminal.                   |
+| Scripts               | `package.json` and `composer.json` scripts as buttons.                                     |
 
 ## Principles
 

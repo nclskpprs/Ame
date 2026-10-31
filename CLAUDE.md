@@ -10,4 +10,4 @@
   open milestone."
 - The Claude Code status adapter planned for M3 uses Claude Code hooks
   (`UserPromptSubmit`, `Notification`, `Stop`, `SessionStart`,
-  `SessionEnd`). See *Agent status detection* in `docs/ARCHITECTURE.md`.
+  `SessionEnd`). See _Agent status detection_ in `docs/ARCHITECTURE.md`.

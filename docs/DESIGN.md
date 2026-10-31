@@ -1,6 +1,6 @@
 # Design and UX: the rain concept
 
-**Ame — Agent Manager Editor.** Ame (雨) is Japanese for *rain*, and that is
+**Ame — Agent Manager Editor.** Ame (雨) is Japanese for _rain_, and that is
 what carries the design: calm, bluish, with rain as a sparse accent that
 transports information.
 
@@ -9,13 +9,13 @@ transports information.
 
 ## Rain as status
 
-| State           | Rain metaphor                | Presentation                                                          |
-| --------------- | ---------------------------- | --------------------------------------------------------------------- |
-| `working`       | It is raining                | Fine falling drops in the status indicator; density follows the output rate (tokens/s) |
-| `needs_input`   | A drop hangs on the window   | A resting, gently pulsing drop in amber                               |
-| `idle` / done   | Puddle with a ripple         | A single ripple animation, then still                                 |
-| `exited`/`error`| Thunderstorm, subtle         | A red drop without animation noise                                    |
-| Prompt sent     | A drop falls                 | A drop falls from the input into the agent panel                      |
+| State            | Rain metaphor              | Presentation                                                                           |
+| ---------------- | -------------------------- | -------------------------------------------------------------------------------------- |
+| `working`        | It is raining              | Fine falling drops in the status indicator; density follows the output rate (tokens/s) |
+| `needs_input`    | A drop hangs on the window | A resting, gently pulsing drop in amber                                                |
+| `idle` / done    | Puddle with a ripple       | A single ripple animation, then still                                                  |
+| `exited`/`error` | Thunderstorm, subtle       | A red drop without animation noise                                                     |
+| Prompt sent      | A drop falls               | A drop falls from the input into the agent panel                                       |
 
 ### Where rain appears
 
@@ -32,25 +32,25 @@ transports information.
 - A single canvas or CSS transforms only — no DOM element per drop.
 - Paused when the window is hidden or unfocused, max 30 fps, budget below
   1 % CPU.
-- `prefers-reduced-motion` is respected; setting *Rain effects: on / subtle /
-  off*.
+- `prefers-reduced-motion` is respected; setting _Rain effects: on / subtle /
+  off_.
 
 ## Color tokens
 
 Starting values; they are fine-tuned in the UX review. Contrast must meet at
 least WCAG AA. Source of truth in code: `src/lib/theme/tokens.ts`.
 
-| Token              | CSS variable          | Ame Dark                  | Ame Light            |
-| ------------------ | --------------------- | ------------------------- | -------------------- |
-| bg                 | `--ame-bg`            | `#0E1621` (night sky)     | `#F5F8FB` (mist)     |
-| surface            | `--ame-surface`       | `#152131`                 | `#FFFFFF`            |
-| border             | `--ame-border`        | `#22324A`                 | `#DCE4EE`            |
-| text               | `--ame-text`          | `#D8E2EE`                 | `#1A2433`            |
-| text-muted         | `--ame-text-muted`    | `#8597AD`                 | `#5B6B80`            |
-| accent / working   | `--ame-accent`        | `#5AA9FF`                 | `#2F74D0`            |
-| needs-input        | `--ame-needs-input`   | `#F2B84B`                 | `#C98A12`            |
-| done               | `--ame-done`          | `#4FD1B5`                 | `#1E9E82`            |
-| error              | `--ame-error`         | `#F06A6A`                 | `#D14343`            |
+| Token            | CSS variable        | Ame Dark              | Ame Light        |
+| ---------------- | ------------------- | --------------------- | ---------------- |
+| bg               | `--ame-bg`          | `#0E1621` (night sky) | `#F5F8FB` (mist) |
+| surface          | `--ame-surface`     | `#152131`             | `#FFFFFF`        |
+| border           | `--ame-border`      | `#22324A`             | `#DCE4EE`        |
+| text             | `--ame-text`        | `#D8E2EE`             | `#1A2433`        |
+| text-muted       | `--ame-text-muted`  | `#8597AD`             | `#5B6B80`        |
+| accent / working | `--ame-accent`      | `#5AA9FF`             | `#2F74D0`        |
+| needs-input      | `--ame-needs-input` | `#F2B84B`             | `#C98A12`        |
+| done             | `--ame-done`        | `#4FD1B5`             | `#1E9E82`        |
+| error            | `--ame-error`       | `#F06A6A`             | `#D14343`        |
 
 Accent and status colors are meant for indicators (dots, drops, borders,
 focus rings), where WCAG AA requires 3:1 against adjacent colors. In the

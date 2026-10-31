@@ -13,14 +13,14 @@ coding, **not** an IDE: no indexing, no language server by default.
 
 Read these before you change anything substantial:
 
-| Document                                     | Content                                    |
-| -------------------------------------------- | ------------------------------------------ |
+| Document                                     | Content                                      |
+| -------------------------------------------- | -------------------------------------------- |
 | [docs/PROGRESS.md](docs/PROGRESS.md)         | What happened last, what is open, next steps |
-| [docs/ROADMAP.md](docs/ROADMAP.md)           | Milestones with checkboxes                 |
-| [docs/VISION.md](docs/VISION.md)             | Goals, principles, scope, risks            |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Current architecture and planned modules   |
-| [docs/DESIGN.md](docs/DESIGN.md)             | Rain concept, design tokens, UX            |
-| [docs/decisions/](docs/decisions/)           | Architecture decision records (ADRs)       |
+| [docs/ROADMAP.md](docs/ROADMAP.md)           | Milestones with checkboxes                   |
+| [docs/VISION.md](docs/VISION.md)             | Goals, principles, scope, risks              |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Current architecture and planned modules     |
+| [docs/DESIGN.md](docs/DESIGN.md)             | Rain concept, design tokens, UX              |
+| [docs/decisions/](docs/decisions/)           | Architecture decision records (ADRs)         |
 
 ## Workflow
 
@@ -34,7 +34,7 @@ Read these before you change anything substantial:
 5. **All checks must be green before every commit** (see below).
 6. **After every task** update `docs/PROGRESS.md` (log entry, open points,
    next steps) and tick or extend `docs/ROADMAP.md`. Add user-visible changes
-   to `CHANGELOG.md` under *Unreleased*.
+   to `CHANGELOG.md` under _Unreleased_.
 7. Record every significant architecture decision as an **ADR** in
    `docs/decisions/NNNN-short-title.md` (copy the format of existing ADRs)
    and update `docs/ARCHITECTURE.md` when the architecture changes.
@@ -42,19 +42,19 @@ Read these before you change anything substantial:
 
 ## Commands
 
-| Command                                                 | Purpose                                     |
-| ------------------------------------------------------- | ------------------------------------------- |
-| `pnpm install`                                          | Install dependencies and git hooks          |
-| `pnpm tauri dev`                                        | Run the app in development mode             |
-| `pnpm tauri build`                                      | Build a release bundle                      |
-| `cargo fmt --all`                                       | Format Rust                                 |
-| `cargo clippy --workspace --all-targets -- -D warnings` | Lint Rust                                   |
+| Command                                                 | Purpose                                           |
+| ------------------------------------------------------- | ------------------------------------------------- |
+| `pnpm install`                                          | Install dependencies and git hooks                |
+| `pnpm tauri dev`                                        | Run the app in development mode                   |
+| `pnpm tauri build`                                      | Build a release bundle                            |
+| `cargo fmt --all`                                       | Format Rust                                       |
+| `cargo clippy --workspace --all-targets -- -D warnings` | Lint Rust                                         |
 | `cargo test --workspace`                                | Rust tests; regenerates `src/lib/ipc/bindings.ts` |
-| `pnpm lint`                                             | Prettier check + ESLint                     |
-| `pnpm format`                                           | Format frontend files with Prettier         |
-| `pnpm check`                                            | `svelte-check` (types)                      |
-| `pnpm test`                                             | Vitest unit tests                           |
-| `pnpm verify`                                           | All checks above in sequence                |
+| `pnpm lint`                                             | Prettier check + ESLint                           |
+| `pnpm format`                                           | Format frontend files with Prettier               |
+| `pnpm check`                                            | `svelte-check` (types)                            |
+| `pnpm test`                                             | Vitest unit tests                                 |
+| `pnpm verify`                                           | All checks above in sequence                      |
 
 ## Language
 
@@ -103,7 +103,7 @@ Read these before you change anything substantial:
 
 ## Design and UX principles
 
-Ame (雨) means *rain*. The design is calm and bluish; rain is a sparse accent
+Ame (雨) means _rain_. The design is calm and bluish; rain is a sparse accent
 that **carries information and is never decoration**. Details and tokens:
 [docs/DESIGN.md](docs/DESIGN.md).
 
@@ -129,8 +129,8 @@ that **carries information and is never decoration**. Details and tokens:
   terminal** — there, only the code matters.
 - **Animation budget:** one canvas or CSS transforms only (no DOM element per
   drop), max 30 fps, paused when the window is hidden or unfocused, < 1 %
-  CPU, respect `prefers-reduced-motion` and the *Rain effects: on / subtle /
-  off* setting.
+  CPU, respect `prefers-reduced-motion` and the _Rain effects: on / subtle /
+  off_ setting.
 
 ## Definition of Done
 

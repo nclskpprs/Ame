@@ -7,11 +7,11 @@ By participating you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Ways to contribute
 
-- **Bug reports** — use the *Bug report* issue template.
-- **Feature ideas** — use the *Feature request* template. Check the
+- **Bug reports** — use the _Bug report_ issue template.
+- **Feature ideas** — use the _Feature request_ template. Check the
   [roadmap](docs/ROADMAP.md) first; maybe it is already planned.
 - **Agent profiles** — know a terminal coding agent Ame should support out of
-  the box? Use the *Agent profile request* template.
+  the box? Use the _Agent profile request_ template.
 - **Code and docs** — pick an open issue or a roadmap item and open a pull
   request.
 
@@ -38,14 +38,14 @@ pnpm tauri dev     # start the app with hot reload
 
 All of these must pass before every commit and in CI:
 
-| Command                                                 | What it does                          |
-| ------------------------------------------------------- | ------------------------------------- |
-| `cargo fmt --all`                                       | Format Rust code                      |
-| `cargo clippy --workspace --all-targets -- -D warnings` | Lint Rust code                        |
+| Command                                                 | What it does                            |
+| ------------------------------------------------------- | --------------------------------------- |
+| `cargo fmt --all`                                       | Format Rust code                        |
+| `cargo clippy --workspace --all-targets -- -D warnings` | Lint Rust code                          |
 | `cargo test --workspace`                                | Rust tests (also regenerates IPC types) |
-| `pnpm lint`                                             | Prettier check + ESLint               |
-| `pnpm check`                                            | Svelte and TypeScript type check      |
-| `pnpm test`                                             | Frontend unit tests (Vitest)          |
+| `pnpm lint`                                             | Prettier check + ESLint                 |
+| `pnpm check`                                            | Svelte and TypeScript type check        |
+| `pnpm test`                                             | Frontend unit tests (Vitest)            |
 
 `pnpm verify` runs all of them in sequence. `pnpm format` formats the
 frontend code.
@@ -101,7 +101,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
   `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `ci:`, `perf:`,
   `build:`. Use a scope when it helps, e.g. `feat(pty): add ring buffer`.
 - Keep commits small: one commit per finished task.
-- Update [CHANGELOG.md](CHANGELOG.md) under *Unreleased* for user-visible
+- Update [CHANGELOG.md](CHANGELOG.md) under _Unreleased_ for user-visible
   changes.
 
 ## Pull requests

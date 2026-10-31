@@ -1,0 +1,24 @@
+{
+  "app": {
+    "name": "Ame",
+    "tagline": "Agent Manager Editor"
+  },
+  "sidebar": {
+    "label": "Projects",
+    "empty": "No projects yet",
+    "portableMode": "Portable mode"
+  },
+  "emptyState": {
+    "title": "Open a folder to get started",
+    "description": "Ame keeps your projects and coding agents side by side. Opening projects arrives in a later milestone."
+  },
+  "settings": {
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "saveFailed": "Could not save settings: {message}"
+  }
+}

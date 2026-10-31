@@ -1,6 +1,6 @@
 # Ame — Agent Manager Editor
 
-> **Ame** (雨) is Japanese for *rain*. Every drop is a signal.
+> **Ame** (雨) is Japanese for _rain_. Every drop is a signal.
 
 Ame is a lean, cross-platform desktop app for **agentic coding**. It keeps
 many projects open at once and runs any terminal coding agent per project —
@@ -22,8 +22,8 @@ a lightweight editor and a live diff of what your agents changed.
 - **Switch projects instantly.** All open projects live in one sidebar,
   one click or `Ctrl/Cmd+1…9` away.
 - **Know what your agents are doing.** A dashboard and status dots show
-  whether each agent is *working*, *needs input*, *idle*, *exited* or in
-  *error*, plus a system notification when it needs you.
+  whether each agent is _working_, _needs input_, _idle_, _exited_ or in
+  _error_, plus a system notification when it needs you.
 - **See the code.** File tree, editor and a live diff of agent changes next
   to the terminal.
 - **Run scripts.** `package.json` and `composer.json` scripts as one-click
@@ -37,11 +37,11 @@ Screenshots will be added with the first release (0.1).
 
 There are no releases yet. Release 0.1 will ship:
 
-| Platform | Format                                   |
-| -------- | ---------------------------------------- |
-| macOS    | `.dmg` (universal)                       |
-| Linux    | AppImage, `.deb`                         |
-| Windows  | Installer and a portable `.exe`          |
+| Platform | Format                          |
+| -------- | ------------------------------- |
+| macOS    | `.dmg` (universal)              |
+| Linux    | AppImage, `.deb`                |
+| Windows  | Installer and a portable `.exe` |
 
 Early builds will not be code-signed. macOS Gatekeeper and Windows
 SmartScreen will warn you before the first launch. The Windows build needs

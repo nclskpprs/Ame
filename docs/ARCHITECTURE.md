@@ -25,24 +25,24 @@ the architecture changes and record decisions as ADRs in
 
 ## Tech stack
 
-| Area                    | Choice                                    | Reason                                                     | ADR |
-| ----------------------- | ----------------------------------------- | ---------------------------------------------------------- | --- |
-| App shell               | Tauri 2                                   | System web view instead of Chromium, small binaries, low RAM | [0002](decisions/0002-tauri-2-as-app-shell.md) |
-| Backend                 | Rust                                      | Heavy work (PTY, files, git, search) off the UI thread     | [0002](decisions/0002-tauri-2-as-app-shell.md) |
-| Frontend                | Svelte 5 + TypeScript + Vite (no SvelteKit) | No virtual DOM, tiny runtime                              | [0003](decisions/0003-svelte-5-and-vite-without-sveltekit.md) |
-| Package manager         | pnpm                                      | Fast, strict, disk-efficient                               | [0004](decisions/0004-pnpm-and-cargo-workspace.md) |
-| Editor                  | CodeMirror 6                              | Much lighter than Monaco, modular, fast on large files     | [0005](decisions/0005-codemirror-6-as-editor.md) |
-| Terminal UI             | xterm.js + WebGL addon                    | Standard, GPU rendering                                    | [0006](decisions/0006-terminal-stack.md) |
-| PTY                     | `portable-pty` (from WezTerm)             | Works on Windows too (ConPTY)                              | [0006](decisions/0006-terminal-stack.md) |
-| Backend terminal buffer | `alacritty_terminal` or `vt100`           | Background sessions run without an xterm.js instance       | [0006](decisions/0006-terminal-stack.md) |
-| File watching           | `notify` (debounced)                      | Native per OS                                              | [0007](decisions/0007-filesystem-and-search-crates.md) |
-| File search / ignore    | `ignore` + `grep` (ripgrep libraries)     | Fast, respects `.gitignore`                                | [0007](decisions/0007-filesystem-and-search-crates.md) |
-| Fuzzy quick open        | `nucleo`                                  | Very fast fuzzy matcher                                    | [0007](decisions/0007-filesystem-and-search-crates.md) |
-| Git                     | git CLI for status/diff, optionally `gix` later | Simple, reliable, no libgit2 dependency              | [0008](decisions/0008-git-via-cli.md) |
-| Typed IPC               | `specta` + `tauri-specta`                 | TypeScript types generated from Rust                       | [0009](decisions/0009-typed-ipc-with-tauri-specta.md) |
-| i18n                    | Own tiny `t()` helper + JSON per locale   | Zero runtime dependencies, typed keys                      | [0010](decisions/0010-i18n-with-json-locale-files.md) |
-| Settings                | JSON in the app config dir, or next to the `.exe` in portable mode | Human-readable, no extra deps  | [0011](decisions/0011-settings-storage-and-portable-mode.md) |
-| Theming                 | Design tokens in TS, applied as CSS custom properties | One source for UI, editor and terminal colors | [0012](decisions/0012-design-tokens-as-css-custom-properties.md) |
+| Area                    | Choice                                                             | Reason                                                       | ADR                                                              |
+| ----------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------- |
+| App shell               | Tauri 2                                                            | System web view instead of Chromium, small binaries, low RAM | [0002](decisions/0002-tauri-2-as-app-shell.md)                   |
+| Backend                 | Rust                                                               | Heavy work (PTY, files, git, search) off the UI thread       | [0002](decisions/0002-tauri-2-as-app-shell.md)                   |
+| Frontend                | Svelte 5 + TypeScript + Vite (no SvelteKit)                        | No virtual DOM, tiny runtime                                 | [0003](decisions/0003-svelte-5-and-vite-without-sveltekit.md)    |
+| Package manager         | pnpm                                                               | Fast, strict, disk-efficient                                 | [0004](decisions/0004-pnpm-and-cargo-workspace.md)               |
+| Editor                  | CodeMirror 6                                                       | Much lighter than Monaco, modular, fast on large files       | [0005](decisions/0005-codemirror-6-as-editor.md)                 |
+| Terminal UI             | xterm.js + WebGL addon                                             | Standard, GPU rendering                                      | [0006](decisions/0006-terminal-stack.md)                         |
+| PTY                     | `portable-pty` (from WezTerm)                                      | Works on Windows too (ConPTY)                                | [0006](decisions/0006-terminal-stack.md)                         |
+| Backend terminal buffer | `alacritty_terminal` or `vt100`                                    | Background sessions run without an xterm.js instance         | [0006](decisions/0006-terminal-stack.md)                         |
+| File watching           | `notify` (debounced)                                               | Native per OS                                                | [0007](decisions/0007-filesystem-and-search-crates.md)           |
+| File search / ignore    | `ignore` + `grep` (ripgrep libraries)                              | Fast, respects `.gitignore`                                  | [0007](decisions/0007-filesystem-and-search-crates.md)           |
+| Fuzzy quick open        | `nucleo`                                                           | Very fast fuzzy matcher                                      | [0007](decisions/0007-filesystem-and-search-crates.md)           |
+| Git                     | git CLI for status/diff, optionally `gix` later                    | Simple, reliable, no libgit2 dependency                      | [0008](decisions/0008-git-via-cli.md)                            |
+| Typed IPC               | `specta` + `tauri-specta`                                          | TypeScript types generated from Rust                         | [0009](decisions/0009-typed-ipc-with-tauri-specta.md)            |
+| i18n                    | Own tiny `t()` helper + JSON per locale                            | Zero runtime dependencies, typed keys                        | [0010](decisions/0010-i18n-with-json-locale-files.md)            |
+| Settings                | JSON in the app config dir, or next to the `.exe` in portable mode | Human-readable, no extra deps                                | [0011](decisions/0011-settings-storage-and-portable-mode.md)     |
+| Theming                 | Design tokens in TS, applied as CSS custom properties              | One source for UI, editor and terminal colors                | [0012](decisions/0012-design-tokens-as-css-custom-properties.md) |
 
 ## Repository layout
 
@@ -109,7 +109,7 @@ Module: `src-tauri/src/workspace/`.
 
 ## Theming — implemented (M0)
 
-- Tokens for *Ame Dark* and *Ame Light* live in `src/lib/theme/tokens.ts`
+- Tokens for _Ame Dark_ and _Ame Light_ live in `src/lib/theme/tokens.ts`
   (values in [DESIGN.md](DESIGN.md)).
 - `applyTheme()` resolves the `theme` setting (`system`, `dark`, `light`)
   with `prefers-color-scheme` and writes the tokens as CSS custom properties
@@ -137,7 +137,7 @@ States: `starting` · `working` · `needs_input` · `idle` (done) · `exited` ·
 Three layers combine into one result:
 
 1. **Generic** (works with any agent):
-   - Output activity: bytes in the last *N* seconds → `working`; silence
+   - Output activity: bytes in the last _N_ seconds → `working`; silence
      above a threshold → `idle`.
    - CPU load of the session's process tree (e.g. via `sysinfo`) as a second
      signal.
@@ -183,7 +183,7 @@ Example agent profile:
 - **Project view:** file tree · editor tabs · terminal panel (multiple
   sessions) · changes panel.
 - **Changes panel:** live `git status` plus diff (CodeMirror merge view);
-  files the agent just changed are highlighted. Optional *follow* mode opens
+  files the agent just changed are highlighted. Optional _follow_ mode opens
   the most recently changed file automatically.
 - **Scripts panel:** detects `package.json` scripts (npm/pnpm/yarn/bun based
   on the lock file) and `composer.json` scripts; each script runs in its own

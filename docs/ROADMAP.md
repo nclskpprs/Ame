@@ -30,7 +30,7 @@ milestones and marked with 💡.
 - [ ] Quick open (fuzzy) and text search
 - [ ] 💡 Command palette (`Ctrl/Cmd+K`): projects, files, scripts, agents and
       commands in one input
-- [ ] 💡 Project groups (e.g. *Client A*, *Private*) and pinning
+- [ ] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
 
 ## M2 — Terminals and agents
 

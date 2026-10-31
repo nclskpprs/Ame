@@ -1,6 +1,6 @@
 name: Agent profile request
 description: Ask for built-in support of a terminal coding agent.
-labels: ["agent-profile", "triage"]
+labels: ['agent-profile', 'triage']
 body:
   - type: markdown
     attributes:

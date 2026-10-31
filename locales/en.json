@@ -149,10 +149,13 @@
     "quitPrompt": "Unsaved changes in {files}. Save before quitting?",
     "closeProjectPrompt": "Unsaved changes in {files} ({project}). Save before closing the project?",
     "moreFiles": "{files} and {count} more",
+    "runningSessions": "Running sessions will be stopped: {sessions}.",
     "saveAndQuit": "Save all and quit",
     "quitWithoutSaving": "Quit without saving",
     "saveAndClose": "Save all and close",
     "closeWithoutSaving": "Close without saving",
+    "quit": "Quit",
+    "closeProject": "Close project",
     "cancel": "Cancel"
   },
   "terminal": {

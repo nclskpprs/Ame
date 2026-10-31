@@ -25,6 +25,17 @@ const sessions = new Map<string, { path: string; editors: FakeEditors }>();
 
 vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ destroy }) }));
 vi.mock('$lib/stores/workspace.svelte', () => ({ workspace: { remove } }));
+const terminalList: { id: number; project: string; title: string; running: boolean }[] = [];
+
+vi.mock('$lib/terminal/sessions.svelte', () => ({
+  sessions: {
+    get list() {
+      return terminalList;
+    },
+    forProject: (project: string) => terminalList.filter((s) => s.project === project),
+  },
+  isRunning: (session: { running: boolean }) => session.running,
+}));
 vi.mock('./session', () => ({
   allSessions: () => [...sessions.values()],
   existingSession: (path: string) => sessions.get(path),
@@ -41,6 +52,7 @@ function addSession(path: string, dirty: string[] = []) {
 describe('closeGuard', () => {
   beforeEach(() => {
     sessions.clear();
+    terminalList.length = 0;
     closeGuard.cancel();
     vi.clearAllMocks();
   });
@@ -108,5 +120,20 @@ describe('closeGuard', () => {
     closeGuard.cancel();
     expect(closeGuard.request).toBeNull();
     expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('holds back closing a project with a running agent', async () => {
+    terminalList.push({ id: 1, project: '/a', title: 'Claude Code', running: true });
+    terminalList.push({ id: 2, project: '/b', title: 'Shell', running: true });
+    await closeGuard.closeProject('/a');
+    expect(remove).not.toHaveBeenCalled();
+    expect(closeGuard.running.map((s) => s.id)).toEqual([1]);
+    expect(closeGuard.unsaved).toEqual([]);
+  });
+
+  it('closes a project whose sessions have exited', async () => {
+    terminalList.push({ id: 1, project: '/a', title: 'Shell', running: false });
+    await closeGuard.closeProject('/a');
+    expect(remove).toHaveBeenCalledWith('/a');
   });
 });

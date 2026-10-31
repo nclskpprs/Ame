@@ -26,11 +26,20 @@
       ? (workspace.projects.find((p) => p.path === request.path)?.name ?? request.path)
       : '',
   );
+  const running = $derived(closeGuard.running.map((session) => session.title).join(', '));
   const prompt = $derived(
-    request.kind === 'app'
-      ? t('closeGuard.quitPrompt', { files: names })
-      : t('closeGuard.closeProjectPrompt', { files: names, project }),
+    [
+      files.length === 0
+        ? ''
+        : request.kind === 'app'
+          ? t('closeGuard.quitPrompt', { files: names })
+          : t('closeGuard.closeProjectPrompt', { files: names, project }),
+      running ? t('closeGuard.runningSessions', { sessions: running }) : '',
+    ]
+      .filter(Boolean)
+      .join(' '),
   );
+  const isApp = $derived(request.kind === 'app');
 
   $effect(() => primary?.focus());
 
@@ -43,14 +52,18 @@
 
 <div class="bar" role="alertdialog" aria-label={prompt} tabindex="-1" {onkeydown}>
   <span>{prompt}</span>
-  <button class="primary" bind:this={primary} onclick={() => void closeGuard.saveAndClose()}>
-    {request.kind === 'app' ? t('closeGuard.saveAndQuit') : t('closeGuard.saveAndClose')}
-  </button>
-  <button onclick={() => void closeGuard.discardAndClose()}>
-    {request.kind === 'app'
-      ? t('closeGuard.quitWithoutSaving')
-      : t('closeGuard.closeWithoutSaving')}
-  </button>
+  {#if files.length > 0}
+    <button class="primary" bind:this={primary} onclick={() => void closeGuard.saveAndClose()}>
+      {isApp ? t('closeGuard.saveAndQuit') : t('closeGuard.saveAndClose')}
+    </button>
+    <button onclick={() => void closeGuard.discardAndClose()}>
+      {isApp ? t('closeGuard.quitWithoutSaving') : t('closeGuard.closeWithoutSaving')}
+    </button>
+  {:else}
+    <button class="primary" bind:this={primary} onclick={() => void closeGuard.discardAndClose()}>
+      {isApp ? t('closeGuard.quit') : t('closeGuard.closeProject')}
+    </button>
+  {/if}
   <button onclick={() => closeGuard.cancel()}>{t('closeGuard.cancel')}</button>
 </div>
 

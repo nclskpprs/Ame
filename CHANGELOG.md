@@ -57,3 +57,5 @@ and this project adheres to
   from your shell profile when Ame was started from a desktop launcher).
   Start an agent with Ctrl/Cmd+Shift+A or from the terminal panel;
   exited sessions can be restarted or continue their last conversation.
+- Quitting the app or closing a project with running terminal sessions
+  asks inline first, since the sessions would be stopped.

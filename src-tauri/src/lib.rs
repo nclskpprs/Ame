@@ -15,6 +15,7 @@ pub mod workspace;
 
 use tauri::{App, Manager, WebviewWindowBuilder};
 
+use fs::watcher::FsWatcher;
 use workspace::paths::AppPaths;
 use workspace::projects::WorkspaceStore;
 use workspace::settings::SettingsStore;
@@ -52,6 +53,7 @@ pub fn run() {
             );
             app.manage(SettingsStore::load(&paths.config_dir));
             app.manage(WorkspaceStore::load(&paths.config_dir));
+            app.manage(FsWatcher::new(app.handle().clone())?);
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())

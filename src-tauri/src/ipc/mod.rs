@@ -6,8 +6,10 @@
 
 use specta_typescript::Typescript;
 use tauri::Wry;
-use tauri_specta::{Builder, collect_commands};
+use tauri_specta::{Builder, collect_commands, collect_events};
 
+use crate::fs::commands as fs;
+use crate::fs::watcher::FsChanged;
 use crate::workspace::commands;
 
 /// Path of the generated TypeScript bindings.
@@ -21,19 +23,25 @@ pub fn builder() -> Builder<Wry> {
     // Types whose serialized and deserialized shapes differ (e.g. structs with
     // `#[serde(default)]`) are exported twice: `Foo_Serialize` is what the
     // backend sends, `Foo_Deserialize` what it accepts.
-    Builder::<Wry>::new().commands(collect_commands![
-        commands::get_settings,
-        commands::set_settings,
-        commands::get_app_info,
-        commands::get_workspace,
-        commands::pick_folder,
-        commands::add_project,
-        commands::remove_project,
-        commands::set_active_project,
-        commands::set_project_pinned,
-        commands::set_project_group,
-        commands::set_project_layout,
-    ])
+    Builder::<Wry>::new()
+        .commands(collect_commands![
+            commands::get_settings,
+            commands::set_settings,
+            commands::get_app_info,
+            commands::get_workspace,
+            commands::pick_folder,
+            commands::add_project,
+            commands::remove_project,
+            commands::set_active_project,
+            commands::set_project_pinned,
+            commands::set_project_group,
+            commands::set_project_layout,
+            fs::read_dir,
+            fs::read_file,
+            fs::write_file,
+            fs::watch_dirs,
+        ])
+        .events(collect_events![FsChanged])
 }
 
 /// Writes the TypeScript bindings to [`BINDINGS_PATH`].

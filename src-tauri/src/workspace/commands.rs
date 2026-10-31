@@ -1,5 +1,6 @@
 //! Tauri commands for projects, settings and app information.
 
+use std::collections::HashSet;
 use std::path::PathBuf;
 
 use serde::Serialize;
@@ -11,6 +12,7 @@ use super::paths::AppPaths;
 use super::projects::{ProjectLayout, WorkspaceState, WorkspaceStore};
 use super::settings::{Settings, SettingsStore};
 use crate::error::Result;
+use crate::fs::watcher::FsWatcher;
 
 /// Static information about the running app.
 #[derive(Debug, Clone, Serialize, Type)]
@@ -77,8 +79,10 @@ pub async fn add_project(store: State<'_, WorkspaceStore>, path: String) -> Resu
 #[specta::specta]
 pub async fn remove_project(
     store: State<'_, WorkspaceStore>,
+    watcher: State<'_, FsWatcher>,
     project: String,
 ) -> Result<WorkspaceState> {
+    watcher.set_watched(&project, HashSet::new());
     store.remove(&project)
 }
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { LogicalPosition } from '@tauri-apps/api/dpi';
-  import { Menu } from '@tauri-apps/api/menu';
   import { formatShortcut } from '$lib/commands/shortcuts';
   import { shortcutOf } from '$lib/commands/registry';
   import { t } from '$lib/i18n';
   import type { Project } from '$lib/ipc/types';
+  import { contextMenu } from '$lib/menu/context-menu.svelte';
+  import type { MenuEntry } from '$lib/menu/menu';
   import { workspace } from '$lib/stores/workspace.svelte';
   import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
 
@@ -28,57 +28,43 @@
     return shortcut ? formatShortcut(shortcut) : '';
   }
 
-  /**
-   * Where to open a context menu. An explicit position is required on Wayland,
-   * where menus without one are attached to the root window and never shown.
-   * Keyboard-triggered menus (Shift+F10) have no pointer position, so they
-   * open at the element instead.
-   */
-  function menuPosition(event: MouseEvent): LogicalPosition {
-    if (event.clientX !== 0 || event.clientY !== 0) {
-      return new LogicalPosition(event.clientX, event.clientY);
-    }
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    return new LogicalPosition(rect.left + 8, rect.bottom);
-  }
-
-  async function showMenu(event: MouseEvent, project: Project) {
-    event.preventDefault();
-    const position = menuPosition(event);
+  function showMenu(event: MouseEvent, project: Project) {
     const otherGroups = groupNames(workspace.projects).filter((g) => g !== project.group);
-    const menu = await Menu.new({
-      items: [
-        {
-          text: t(project.pinned ? 'projectMenu.unpin' : 'projectMenu.pin'),
-          action: () => void workspace.setPinned(project.path, !project.pinned),
-        },
-        {
-          text: t('projectMenu.moveToGroup'),
-          items: [
-            ...otherGroups.map((group) => ({
-              text: group,
-              action: () => void workspace.setGroup(project.path, group),
-            })),
-            ...(otherGroups.length ? [{ item: 'Separator' as const }] : []),
-            { text: t('projectMenu.newGroup'), action: () => (editingGroupOf = project.path) },
-            ...(project.group
-              ? [
-                  {
-                    text: t('projectMenu.removeFromGroup'),
-                    action: () => void workspace.setGroup(project.path, null),
-                  },
-                ]
-              : []),
-          ],
-        },
-        { item: 'Separator' },
-        {
-          text: t('projectMenu.close'),
-          action: () => void workspace.remove(project.path),
-        },
-      ],
-    });
-    await menu.popup(position);
+    contextMenu.show(event, project.name, [
+      {
+        kind: 'action',
+        label: t(project.pinned ? 'projectMenu.unpin' : 'projectMenu.pin'),
+        run: () => workspace.setPinned(project.path, !project.pinned),
+      },
+      {
+        kind: 'submenu',
+        label: t('projectMenu.moveToGroup'),
+        items: [
+          ...otherGroups.map((group): MenuEntry => ({
+            kind: 'action',
+            label: group,
+            run: () => workspace.setGroup(project.path, group),
+          })),
+          ...(otherGroups.length ? [{ kind: 'separator' } as const] : []),
+          {
+            kind: 'action',
+            label: t('projectMenu.newGroup'),
+            run: () => (editingGroupOf = project.path),
+          },
+          ...(project.group
+            ? [
+                {
+                  kind: 'action',
+                  label: t('projectMenu.removeFromGroup'),
+                  run: () => workspace.setGroup(project.path, null),
+                } as const,
+              ]
+            : []),
+        ],
+      },
+      { kind: 'separator' },
+      { kind: 'action', label: t('projectMenu.close'), run: () => workspace.remove(project.path) },
+    ]);
   }
 
   function commitGroup(project: Project, input: HTMLInputElement) {
@@ -113,7 +99,7 @@
             aria-current={project.path === workspace.activePath ? 'page' : undefined}
             title={project.path}
             onclick={() => void workspace.activate(project.path)}
-            oncontextmenu={(event) => void showMenu(event, project)}
+            oncontextmenu={(event) => showMenu(event, project)}
           >
             <span class="name">{project.name}</span>
             <kbd class="hint">{hint(project)}</kbd>

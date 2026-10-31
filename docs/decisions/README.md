@@ -22,3 +22,4 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0014](0014-quality-tooling.md)                        | Lint, format, test and git hook tooling                | Accepted |
 | [0015](0015-watch-only-visible-directories.md)         | Watch only visible directories                         | Accepted |
 | [0016](0016-commands-shortcuts-and-palette.md)         | Commands, shortcuts and the command palette            | Accepted |
+| [0017](0017-html-context-menus.md)                     | Context menus in HTML instead of native menus          | Accepted |

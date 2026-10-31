@@ -71,6 +71,7 @@ src/                  Svelte frontend
   lib/fs/             helpers for project-relative paths
   lib/i18n/           translation helper and tests
   lib/ipc/            generated bindings (bindings.ts) — do not edit; types.ts
+  lib/menu/           context menu state, keyboard navigation, placement
   lib/palette/        palette state, sources, fuzzy matching
   lib/project/        per-project sessions: file tree, editors, search
   lib/stores/         app-wide state: settings, workspace, notices
@@ -213,7 +214,8 @@ Example agent profile:
 - The frontend keeps a `ProjectSession` per open project
   (`src/lib/project/session.ts`) with the file tree, editors and search, so
   switching projects keeps all state.
-- Native context menu on projects: pin, move to group, close.
+- Context menu on projects: pin, move to group, close (HTML menu, see
+  [ADR 0017](decisions/0017-html-context-menus.md)).
   `Mod+1…9` and `Mod+Alt+Up/Down` switch projects; the window title shows
   the active project.
 
@@ -253,6 +255,9 @@ Example agent profile:
 - Central command registry with platform-aware shortcuts and a command
   palette for commands, projects and files (see
   [ADR 0016](decisions/0016-commands-shortcuts-and-palette.md)).
+- Context menus are one HTML overlay (`ContextMenu.svelte`) with full
+  keyboard support; callers pass translated entries to `contextMenu.show()`
+  (see [ADR 0017](decisions/0017-html-context-menus.md)).
 - In debug builds, frontend errors and the startup time are forwarded to
   the backend log.
 

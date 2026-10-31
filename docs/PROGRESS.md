@@ -15,6 +15,33 @@ is open, what comes next.
 
 ## Log
 
+### 2026-10-31 — M1 acceptance: HTML context menu
+
+**Done**
+
+- The maintainer's acceptance test of the projects feature failed TF05–TF08:
+  the native project context menu never appeared on Linux (WSLg, Wayland),
+  also after passing an explicit position (`4eec52c`).
+- Replaced native context menus with an HTML menu (ADR 0017):
+  `src/lib/menu/` (entries, keyboard navigation, placement, open state) and
+  `ContextMenu.svelte` (WAI-ARIA menu, submenus, typeahead, focus return).
+  `ProjectList.svelte` uses it for pin, groups and close.
+
+**Verified**
+
+- Unit tests for navigation, typeahead, placement and the open state.
+- A throwaway DOM test (happy-dom, not committed) mounted `ProjectList`
+  with the menu and ran TF05–TF08 by mouse and keyboard, Escape handling
+  and outside clicks: all passed.
+
+**Open**
+
+- Maintainer re-runs TF05–TF08 in the app (plus the new keyboard case).
+- No automated UI tests yet; a happy-dom setup for component tests would be
+  cheap (decision for the maintainer).
+- Pin and group are only reachable from the context menu, not as palette
+  commands (AGENTS.md asks for commands for every action).
+
 ### 2026-10-31 — M1 completed
 
 **Done** (branch `feat/m1-project-shell`, one commit per task)

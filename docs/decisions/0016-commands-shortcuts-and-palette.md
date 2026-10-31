@@ -1,6 +1,7 @@
 # 0016. Commands, shortcuts and the command palette
 
-- **Status:** Accepted
+- **Status:** Accepted; the context menu part is superseded by
+  [0017](0017-html-context-menus.md)
 - **Date:** 2026-10-31
 
 ## Context

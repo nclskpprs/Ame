@@ -2,11 +2,13 @@
   import { getCurrentWindow } from '@tauri-apps/api/window';
   import { registerAppCommands } from '$lib/commands/app-commands';
   import { handleShortcut } from '$lib/commands/registry';
+  import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import Palette from '$lib/components/Palette.svelte';
   import ProjectView from '$lib/components/ProjectView.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import { t } from '$lib/i18n';
+  import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { palette } from '$lib/palette/palette.svelte';
   import { listenToFileChanges, pruneSessions } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
@@ -72,6 +74,12 @@
 {#if palette.config}
   {#key palette.config}
     <Palette config={palette.config} />
+  {/key}
+{/if}
+
+{#if contextMenu.config}
+  {#key contextMenu.config}
+    <ContextMenu config={contextMenu.config} />
   {/key}
 {/if}
 

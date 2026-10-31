@@ -202,6 +202,12 @@ Module: `src-tauri/src/agents/`.
   with `resume` its resume arguments are appended (e.g. `claude --continue`).
 - Frontend: `lib/agents/` (store, ordering, palette picker `Mod+Shift+A`);
   the empty terminal panel offers the installed agents.
+- Resume after a restart: the open sessions of every shown project are kept
+  in its layout (`ProjectLayout.sessions`: profile and title; layouts are
+  flushed before the window closes). After a restart they appear as
+  previous sessions in the panel; "Continue conversation" starts the profile
+  with its resume arguments. After a mere reload of the web view the backend
+  still has the sessions, so nothing is offered.
 
 ## Agent status detection — planned (M3)
 

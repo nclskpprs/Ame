@@ -24,7 +24,9 @@ class FakeEditors {
 const sessions = new Map<string, { path: string; editors: FakeEditors }>();
 
 vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ destroy }) }));
-vi.mock('$lib/stores/workspace.svelte', () => ({ workspace: { remove } }));
+vi.mock('$lib/stores/workspace.svelte', () => ({
+  workspace: { remove, flushLayouts: async () => {} },
+}));
 const terminalList: { id: number; project: string; title: string; running: boolean }[] = [];
 
 vi.mock('$lib/terminal/sessions.svelte', () => ({

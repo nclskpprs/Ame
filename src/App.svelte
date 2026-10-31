@@ -14,7 +14,12 @@
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { palette } from '$lib/palette/palette.svelte';
   import { closeGuard } from '$lib/project/close-guard.svelte';
-  import { activeSession, listenToFileChanges, pruneSessions } from '$lib/project/session';
+  import {
+    activeSession,
+    listenToFileChanges,
+    persistTerminalSessions,
+    pruneSessions,
+  } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { currentTheme } from '$lib/theme/current.svelte';
@@ -49,8 +54,14 @@
   $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
 
   $effect(() => {
-    const unlisten = getCurrentWindow().onCloseRequested((event) => {
+    if (sessions.initial !== null) persistTerminalSessions();
+  });
+
+  $effect(() => {
+    const unlisten = getCurrentWindow().onCloseRequested(async (event) => {
       if (closeGuard.holdQuit()) event.preventDefault();
+      // Pending layout changes (e.g. the open sessions) must reach the disk.
+      else await workspace.flushLayouts();
     });
     return () => void unlisten.then((stop) => stop());
   });

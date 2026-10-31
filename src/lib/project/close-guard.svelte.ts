@@ -75,6 +75,7 @@ class CloseGuard {
       await workspace.remove(request.path);
     } else {
       this.#quitting = true;
+      await workspace.flushLayouts();
       await getCurrentWindow().destroy();
     }
   }

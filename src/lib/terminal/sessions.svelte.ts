@@ -4,6 +4,7 @@ import type { SessionInfo } from '$lib/ipc/types';
 /** All terminal sessions of the app. The Rust backend is the source of truth. */
 class SessionsStore {
   #list = $state.raw<SessionInfo[]>([]);
+  #initial = $state.raw<SessionInfo[] | null>(null);
 
   get list(): readonly SessionInfo[] {
     return this.#list;
@@ -11,6 +12,15 @@ class SessionsStore {
 
   async load(): Promise<void> {
     this.#list = await commands.listSessions();
+    this.#initial ??= this.#list;
+  }
+
+  /**
+   * Sessions the backend already had when the frontend started, `null` until
+   * loaded. Non-empty after a reload of the web view, empty after a restart.
+   */
+  get initial(): readonly SessionInfo[] | null {
+    return this.#initial;
   }
 
   /** Follows session changes from the backend; returns a stop function. */

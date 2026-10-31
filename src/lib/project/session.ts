@@ -30,7 +30,7 @@ export class ProjectSession {
       this.syncWatches();
     });
     this.search = new SearchState(path);
-    this.terminals = new TerminalGroup(path);
+    this.terminals = new TerminalGroup(path, layout?.sessions ?? []);
     void this.tree.init().then(() => this.syncWatches());
   }
 
@@ -64,6 +64,21 @@ export class ProjectSession {
 }
 
 const sessions = new Map<string, ProjectSession>();
+
+/**
+ * Remembers the open terminal sessions of every shown project in its layout,
+ * so they can be resumed after a restart. Call from an effect: it reads the
+ * reactive session lists.
+ */
+export function persistTerminalSessions(): void {
+  for (const session of sessions.values()) {
+    const saved = session.terminals.saved();
+    const layout = workspace.projects.find((p) => p.path === session.path)?.layout;
+    if (layout && JSON.stringify(layout.sessions) !== JSON.stringify(saved)) {
+      workspace.updateLayout(session.path, { sessions: saved });
+    }
+  }
+}
 
 /** The session of the active project, if any. */
 export function activeSession(): ProjectSession | null {

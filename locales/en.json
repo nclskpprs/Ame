@@ -176,7 +176,11 @@
     "stopAndClose": "Stop and close",
     "cancel": "Cancel",
     "empty": "Start an agent in this project",
-    "startFailed": "Could not start the terminal: {message}"
+    "startFailed": "Could not start the terminal: {message}",
+    "previousSession": "{title} was open when Ame was closed.",
+    "startAgain": "Start again",
+    "dismiss": "Dismiss {title}",
+    "dismissShort": "Dismiss"
   },
   "agents": {
     "pickerLabel": "Start an agent",

@@ -44,7 +44,7 @@ milestones and marked with 💡.
 - [x] Multiple sessions per project; sessions keep running in the background
 - [ ] 💡 Background daemon: PTY sessions live in a small Rust process and
       survive a UI crash or close (like tmux)
-- [ ] 💡 Session resume: a resume command per profile (e.g.
+- [x] 💡 Session resume: a resume command per profile (e.g.
       `claude --continue`), one click after a restart
 - [ ] 💡 "Send to agent": select code → `path:line-range` plus the selection
       is sent to the agent's terminal

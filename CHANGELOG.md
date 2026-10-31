@@ -59,3 +59,6 @@ and this project adheres to
   exited sessions can be restarted or continue their last conversation.
 - Quitting the app or closing a project with running terminal sessions
   asks inline first, since the sessions would be stopped.
+- Sessions that were open when Ame was closed come back as tabs after a
+  restart: continue the agent's last conversation with one click (e.g.
+  `claude --continue`), start it again or dismiss it.

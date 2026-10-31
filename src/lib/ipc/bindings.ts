@@ -233,6 +233,8 @@ export type ProjectLayout_Deserialize = {
 	/**  Whether the terminal panel below the editor is shown. */
 	terminalOpen?: boolean,
 	terminalHeight?: number,
+	/**  Terminal sessions that were open, offered to resume after a restart. */
+	sessions?: SavedSession[],
 };
 
 /**  The part of the UI state of a project that survives a restart. */
@@ -247,6 +249,8 @@ export type ProjectLayout_Serialize = {
 	/**  Whether the terminal panel below the editor is shown. */
 	terminalOpen: boolean,
 	terminalHeight: number,
+	/**  Terminal sessions that were open, offered to resume after a restart. */
+	sessions: SavedSession[],
 };
 
 /**  An open project folder. */
@@ -278,6 +282,13 @@ export type Project_Serialize = {
 };
 
 export type RainEffects = "on" | "subtle" | "off";
+
+/**  A terminal session remembered across restarts. */
+export type SavedSession = {
+	/**  Id of the agent profile. */
+	profile: string,
+	title: string,
+};
 
 export type SearchOptions = {
 	caseSensitive: boolean,

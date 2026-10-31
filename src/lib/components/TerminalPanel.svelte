@@ -18,6 +18,8 @@
   const active = $derived(group.active);
   const installed = $derived(orderedAgents(agents.list).filter(isInstalled));
   const activeAgent = $derived(active ? agents.find(active.profile) : undefined);
+  const restoring = $derived(group.selectedRestorable);
+  const restoringAgent = $derived(restoring ? agents.find(restoring.profile) : undefined);
 
   $effect(() => {
     void agents.load();
@@ -61,6 +63,30 @@
             aria-label={t('terminal.close', { title: session.title })}
             title={t('terminal.close', { title: session.title })}
             onclick={() => void group.close(session.id)}
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />
+            </svg>
+          </button>
+        </div>
+      {/each}
+      {#each group.restorable as entry (entry.key)}
+        <div class="tab previous" class:active={entry.key === restoring?.key}>
+          <button
+            class="label"
+            role="tab"
+            aria-selected={entry.key === restoring?.key}
+            title={t('terminal.previousSession', { title: entry.title })}
+            onclick={() => group.selectRestorable(entry.key)}
+          >
+            <span class="state previous" aria-hidden="true"></span>
+            {entry.title}
+          </button>
+          <button
+            class="icon close"
+            aria-label={t('terminal.dismiss', { title: entry.title })}
+            title={t('terminal.dismiss', { title: entry.title })}
+            onclick={() => group.dismissRestorable(entry.key)}
           >
             <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
               <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />
@@ -122,7 +148,27 @@
   {/if}
 
   <div class="body">
-    {#if active}
+    {#if restoring}
+      <div class="empty">
+        <p>{t('terminal.previousSession', { title: restoring.title })}</p>
+        <div class="agents">
+          {#if restoringAgent?.path && canResume(restoringAgent)}
+            <button class="primary" onclick={() => void group.restore(restoring.key, true)}>
+              {t('terminal.resume')}
+            </button>
+          {/if}
+          <button
+            class:primary={!restoringAgent?.path || !canResume(restoringAgent)}
+            onclick={() => void group.restore(restoring.key, false)}
+          >
+            {t('terminal.startAgain')}
+          </button>
+          <button onclick={() => group.dismissRestorable(restoring.key)}>
+            {t('terminal.dismissShort')}
+          </button>
+        </div>
+      </div>
+    {:else if active}
       {#key active.id}
         <Terminal session={active} {group} />
       {/key}
@@ -208,6 +254,15 @@
 
   .state.exited {
     background: var(--ame-text-muted);
+  }
+
+  .state.previous {
+    border: 1px solid var(--ame-text-muted);
+    background: transparent;
+  }
+
+  .tab.previous .label {
+    font-style: italic;
   }
 
   .icon {

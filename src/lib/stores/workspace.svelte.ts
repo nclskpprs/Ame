@@ -45,7 +45,7 @@ class WorkspaceStore {
   }
 
   async remove(path: string): Promise<void> {
-    this.#flushLayout(path);
+    void this.#flushLayout(path);
     this.#handle(await commands.removeProject(path));
   }
 
@@ -74,20 +74,24 @@ class WorkspaceStore {
     clearTimeout(this.#layoutTimers.get(path));
     this.#layoutTimers.set(
       path,
-      setTimeout(() => this.#flushLayout(path), LAYOUT_SAVE_DELAY_MS),
+      setTimeout(() => void this.#flushLayout(path), LAYOUT_SAVE_DELAY_MS),
     );
   }
 
-  #flushLayout(path: string): void {
+  /** Writes all pending layout changes now, e.g. before the app quits. */
+  async flushLayouts(): Promise<void> {
+    await Promise.all([...this.#layoutTimers.keys()].map((path) => this.#flushLayout(path)));
+  }
+
+  async #flushLayout(path: string): Promise<void> {
     const timer = this.#layoutTimers.get(path);
     if (timer === undefined) return;
     clearTimeout(timer);
     this.#layoutTimers.delete(path);
     const project = this.#projects.find((p) => p.path === path);
     if (!project) return;
-    void commands.setProjectLayout(path, project.layout).then((result) => {
-      if (result.status === 'error') notices.push(describeError(result.error));
-    });
+    const result = await commands.setProjectLayout(path, project.layout);
+    if (result.status === 'error') notices.push(describeError(result.error));
   }
 
   #handle(result: Result<WorkspaceState>): void {

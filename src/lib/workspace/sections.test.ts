@@ -16,6 +16,7 @@ function project(name: string, extra: Partial<Project> = {}): Project {
       sidePanelWidth: 260,
       terminalOpen: false,
       terminalHeight: 300,
+      sessions: [],
     },
     ...extra,
   };

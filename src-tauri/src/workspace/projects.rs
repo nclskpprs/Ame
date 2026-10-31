@@ -52,6 +52,17 @@ pub struct ProjectLayout {
     /// Whether the terminal panel below the editor is shown.
     pub terminal_open: bool,
     pub terminal_height: u32,
+    /// Terminal sessions that were open, offered to resume after a restart.
+    pub sessions: Vec<SavedSession>,
+}
+
+/// A terminal session remembered across restarts.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SavedSession {
+    /// Id of the agent profile.
+    pub profile: String,
+    pub title: String,
 }
 
 impl Default for ProjectLayout {
@@ -64,6 +75,7 @@ impl Default for ProjectLayout {
             side_panel_width: DEFAULT_SIDE_PANEL_WIDTH,
             terminal_open: false,
             terminal_height: DEFAULT_TERMINAL_HEIGHT,
+            sessions: Vec::new(),
         }
     }
 }

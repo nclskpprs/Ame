@@ -52,6 +52,7 @@ pub fn builder() -> Builder<Wry> {
             pty::attach_session,
             pty::detach_session,
             pty::write_session,
+            pty::paste_session,
             pty::resize_session,
             pty::stop_session,
             pty::close_session,

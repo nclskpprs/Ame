@@ -1,4 +1,5 @@
 import { openAgentPicker } from '$lib/agents/picker';
+import { sendSelectionToAgent } from '$lib/agents/send';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -146,6 +147,16 @@ export function registerAppCommands(): () => void {
       terminal: true,
       when: () => (activeSession()?.editors.dirtyFiles.length ?? 0) > 0,
       run: () => activeSession()?.editors.saveAll(),
+    },
+    {
+      id: 'agents.sendSelection',
+      title: 'commands.sendToAgent',
+      shortcut: 'Mod+Shift+Enter',
+      when: () => activeFile()?.status === 'ready',
+      run: () => {
+        const session = activeSession();
+        if (session) return sendSelectionToAgent(session);
+      },
     },
     {
       id: 'editor.close',

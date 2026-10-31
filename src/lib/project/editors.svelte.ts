@@ -70,6 +70,26 @@ export class EditorGroup {
     return this.files.find((f) => f.path === path);
   }
 
+  /**
+   * The selection of the shown editor: 1-based lines and the selected text
+   * (empty for a cursor without selection).
+   */
+  selection(): { path: string; fromLine: number; toLine: number; text: string } | null {
+    const view = this.#view;
+    const path = this.activePath;
+    if (!view || !path) return null;
+    const { from, to } = view.state.selection.main;
+    const doc = view.state.doc;
+    // A selection ending at the start of a line does not include that line.
+    const end = to > from && doc.lineAt(to).from === to ? to - 1 : to;
+    return {
+      path,
+      fromLine: doc.lineAt(from).number,
+      toLine: doc.lineAt(end).number,
+      text: view.state.sliceDoc(from, to),
+    };
+  }
+
   /** Called by the editor component that displays the active file. */
   attachView(view: EditorView | null): void {
     this.#view = view;

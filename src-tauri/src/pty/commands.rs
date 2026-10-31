@@ -106,6 +106,14 @@ pub async fn write_session(pty: State<'_, PtyManager>, id: SessionId, data: Stri
     blocking(move || session.write(data.as_bytes())).await
 }
 
+/// Sends text as a paste (e.g. code sent from the editor to an agent).
+#[tauri::command]
+#[specta::specta]
+pub async fn paste_session(pty: State<'_, PtyManager>, id: SessionId, text: String) -> Result<()> {
+    let session = pty.get(id)?;
+    blocking(move || session.paste(&text)).await
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn resize_session(

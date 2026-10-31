@@ -88,7 +88,8 @@
     "nextSession": "Next Terminal Session",
     "previousSession": "Previous Terminal Session",
     "closeSession": "Close Terminal Session",
-    "startAgent": "Start Agent…"
+    "startAgent": "Start Agent…",
+    "sendToAgent": "Send Selection to Agent"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -188,6 +189,7 @@
     "pickerEmpty": "No matching agent",
     "resume": "{name}: continue last conversation",
     "notInstalled": "Not found on the PATH",
-    "noneFound": "No agents found on the PATH. Install one, or add your own in the settings."
+    "noneFound": "No agents found on the PATH. Install one, or add your own in the settings.",
+    "noRunningSession": "No agent is running in this project. Start one with {shortcut}."
   }
 }

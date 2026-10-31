@@ -46,7 +46,7 @@ milestones and marked with 💡.
       survive a UI crash or close (like tmux)
 - [x] 💡 Session resume: a resume command per profile (e.g.
       `claude --continue`), one click after a restart
-- [ ] 💡 "Send to agent": select code → `path:line-range` plus the selection
+- [x] 💡 "Send to agent": select code → `path:line-range` plus the selection
       is sent to the agent's terminal
 
 ## M3 — Status and dashboard

@@ -175,8 +175,9 @@ Module: `src-tauri/src/pty/` (see
   to the attached view through a `Channel<String>`. Attaching replays the
   buffer first.
 - Commands: `start_session`, `list_sessions`, `attach_session`,
-  `detach_session`, `write_session`, `resize_session`, `stop_session`,
-  `close_session`; the `sessions-changed` event carries all sessions when
+  `detach_session`, `write_session`, `paste_session` (bracketed paste when
+  the program enabled it, used by "Send Selection to Agent"),
+  `resize_session`, `stop_session`, `close_session`; the `sessions-changed` event carries all sessions when
   one starts, exits or closes. Closing a project closes its sessions; quitting
   the app ends all of them.
 - Frontend: `TerminalGroup` (`lib/project/terminals.svelte.ts`) holds the

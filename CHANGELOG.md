@@ -62,3 +62,6 @@ and this project adheres to
 - Sessions that were open when Ame was closed come back as tabs after a
   restart: continue the agent's last conversation with one click (e.g.
   `claude --continue`), start it again or dismiss it.
+- Send code to an agent: select lines in the editor and press
+  Ctrl/Cmd+Shift+Enter. The agent receives `path:lines` and the code as a
+  paste (it is not submitted), ready for your prompt.

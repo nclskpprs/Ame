@@ -211,6 +211,13 @@ impl Session {
         Ok(())
     }
 
+    /// Sends text as if it was pasted: line breaks become carriage returns,
+    /// and the text is wrapped in paste brackets when the program asked for
+    /// them, so new lines do not submit a prompt.
+    pub fn paste(&self, text: &str) -> Result<()> {
+        self.write(paste_data(text, self.bracketed_paste()).as_bytes())
+    }
+
     pub fn resize(&self, cols: u16, rows: u16) -> Result<()> {
         if let Some(master) = lock(&self.master).as_ref() {
             master
@@ -251,6 +258,19 @@ impl Session {
     fn close_pty(&self) {
         lock(&self.writer).take();
         lock(&self.master).take();
+    }
+}
+
+const PASTE_START: &str = "\x1b[200~";
+const PASTE_END: &str = "\x1b[201~";
+
+fn paste_data(text: &str, bracketed: bool) -> String {
+    let text = text.replace("\r\n", "\r").replace('\n', "\r");
+    if bracketed {
+        // A paste end marker inside the text would end the paste early.
+        format!("{PASTE_START}{}{PASTE_END}", text.replace(PASTE_END, ""))
+    } else {
+        text
     }
 }
 
@@ -320,4 +340,23 @@ pub(super) fn lock<T: ?Sized>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn paste_data_uses_carriage_returns() {
+        assert_eq!(paste_data("a\nb\r\nc", false), "a\rb\rc");
+    }
+
+    #[test]
+    fn paste_data_adds_brackets_when_asked_for() {
+        assert_eq!(paste_data("x\ny", true), "\x1b[200~x\ry\x1b[201~");
+        assert_eq!(
+            paste_data("evil\x1b[201~rest", true),
+            "\x1b[200~evilrest\x1b[201~"
+        );
+    }
 }

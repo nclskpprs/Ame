@@ -64,6 +64,8 @@ export const commands = {
 	 *  one write at a time, so the order of keystrokes is kept.
 	 */
 	writeSession: (id: number, data: string) => typedError<null, AppError>(__TAURI_INVOKE("write_session", { id, data })),
+	/**  Sends text as a paste (e.g. code sent from the editor to an agent). */
+	pasteSession: (id: number, text: string) => typedError<null, AppError>(__TAURI_INVOKE("paste_session", { id, text })),
 	resizeSession: (id: number, cols: number, rows: number) => typedError<null, AppError>(__TAURI_INVOKE("resize_session", { id, cols, rows })),
 	/**  Ends the program; the session and its output stay until it is closed. */
 	stopSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("stop_session", { id })),

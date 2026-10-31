@@ -43,6 +43,13 @@
       "subtle": "Subtle",
       "off": "Off"
     },
+    "files": "Files",
+    "fileOpen": {
+      "label": "Open files in the file tree",
+      "description": "Enter always opens the selected file.",
+      "doubleClick": "Double click",
+      "singleClick": "Single click"
+    },
     "saveFailed": "Could not save settings: {message}"
   },
   "projectMenu": {

@@ -1,13 +1,17 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
   import type { FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
+  import { treeClick } from '$lib/project/tree-click';
 
   let {
     tree,
+    singleClick = false,
     onopen,
   }: {
     tree: FileTreeState;
-    /** Called when a file is activated (click or Enter). */
+    /** Open files with a single click instead of a double click. */
+    singleClick?: boolean;
+    /** Called when a file is activated (click or Enter, see `singleClick`). */
     onopen: (path: string) => void;
   } = $props();
 
@@ -19,6 +23,13 @@
     tree.selected = row.entry.path;
     if (row.entry.kind === 'dir') void tree.toggle(row.entry.path);
     else onopen(row.entry.path);
+  }
+
+  function onclick(event: MouseEvent, row: TreeRow) {
+    tree.selected = row.entry.path;
+    const action = treeClick(row.entry.kind, event.detail, singleClick);
+    if (action === 'toggle') void tree.toggle(row.entry.path);
+    else if (action === 'open') onopen(row.entry.path);
   }
 
   function select(index: number) {
@@ -101,7 +112,7 @@
       data-path={row.entry.path}
       style:padding-left="calc({row.depth} * var(--ame-tree-indent) + var(--ame-space-2))"
       title={row.entry.path}
-      onclick={() => activate(row)}
+      onclick={(event) => onclick(event, row)}
       onkeydown={() => {}}
     >
       {#if row.entry.kind === 'dir'}

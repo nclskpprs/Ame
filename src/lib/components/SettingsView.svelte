@@ -1,7 +1,12 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
-  import type { Density, RainEffects, ThemePreference } from '$lib/ipc/bindings';
-  import { densityOptions, rainOptions, themeOptions } from '$lib/settings/options';
+  import type { Density, FileOpen, RainEffects, ThemePreference } from '$lib/ipc/bindings';
+  import {
+    densityOptions,
+    fileOpenOptions,
+    rainOptions,
+    themeOptions,
+  } from '$lib/settings/options';
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
   import SegmentedControl from './SegmentedControl.svelte';
@@ -74,6 +79,23 @@
         />
       </div>
     </section>
+
+    <section class="group" aria-labelledby="settings-files">
+      <h2 id="settings-files">{t('settings.files')}</h2>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.fileOpen.label')}</span>
+          <span class="description">{t('settings.fileOpen.description')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-file-open"
+          label={t('settings.fileOpen.label')}
+          options={fileOpenOptions()}
+          value={settings.value.fileOpen}
+          onchange={(fileOpen: FileOpen) => void settings.update({ fileOpen })}
+        />
+      </div>
+    </section>
   </div>
 </section>
 
@@ -132,6 +154,10 @@
 
   .group {
     max-width: 720px;
+  }
+
+  .group + .group {
+    margin-top: var(--ame-space-6);
   }
 
   h2 {

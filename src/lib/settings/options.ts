@@ -1,5 +1,5 @@
 import { t, type MessageKey } from '$lib/i18n';
-import type { Density, RainEffects, ThemePreference } from '$lib/ipc/bindings';
+import type { Density, FileOpen, RainEffects, ThemePreference } from '$lib/ipc/bindings';
 
 export interface Option<T extends string> {
   value: T;
@@ -30,5 +30,12 @@ export function rainOptions(): Option<RainEffects>[] {
     ['on', 'settings.rain.on'],
     ['subtle', 'settings.rain.subtle'],
     ['off', 'settings.rain.off'],
+  ]);
+}
+
+export function fileOpenOptions(): Option<FileOpen>[] {
+  return translated([
+    ['doubleClick', 'settings.fileOpen.doubleClick'],
+    ['singleClick', 'settings.fileOpen.singleClick'],
   ]);
 }

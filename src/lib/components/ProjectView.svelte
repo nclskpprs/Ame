@@ -2,6 +2,7 @@
   import { t } from '$lib/i18n';
   import type { Project } from '$lib/ipc/types';
   import { sessionFor } from '$lib/project/session';
+  import { settings } from '$lib/stores/settings.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import EditorPane from './EditorPane.svelte';
   import FileTree from './FileTree.svelte';
@@ -35,7 +36,11 @@
       {#if project.layout.sidePanel === 'search'}
         <SearchPanel {session} />
       {:else}
-        <FileTree tree={session.tree} onopen={(path) => void session.editors.open(path)} />
+        <FileTree
+          tree={session.tree}
+          singleClick={settings.value.fileOpen === 'singleClick'}
+          onopen={(path) => void session.editors.open(path)}
+        />
       {/if}
     </div>
   </aside>

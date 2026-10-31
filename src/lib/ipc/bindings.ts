@@ -87,6 +87,12 @@ export type FileMatch = {
 	indices: number[],
 };
 
+export type FileOpen = 
+/**  A single click selects, a double click opens. */
+"doubleClick" | 
+/**  A single click opens. */
+"singleClick";
+
 export type FileResults = {
 	path: string,
 	lines: LineMatch[],
@@ -209,6 +215,8 @@ export type Settings_Deserialize = {
 	rainEffects?: RainEffects,
 	/**  Spacing of the UI. */
 	density?: Density,
+	/**  How a click in the file tree opens a file. */
+	fileOpen?: FileOpen,
 };
 
 /**
@@ -226,6 +234,8 @@ export type Settings_Serialize = {
 	rainEffects: RainEffects,
 	/**  Spacing of the UI. */
 	density: Density,
+	/**  How a click in the file tree opens a file. */
+	fileOpen: FileOpen,
 };
 
 export type SidePanel = "files" | "search";

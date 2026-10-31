@@ -35,3 +35,5 @@ and this project adheres to
   command palette (Ctrl/Cmd+K).
 - Settings view (Ctrl/Cmd+, or the gear in the sidebar) for theme,
   density and rain effects.
+- Files open from the file tree with a double click; a single click
+  selects. Single-click opening can be enabled in the settings.

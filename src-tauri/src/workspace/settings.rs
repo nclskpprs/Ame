@@ -34,6 +34,8 @@ pub struct Settings {
     pub rain_effects: RainEffects,
     /// Spacing of the UI.
     pub density: Density,
+    /// How a click in the file tree opens a file.
+    pub file_open: FileOpen,
 }
 
 impl Default for Settings {
@@ -44,6 +46,7 @@ impl Default for Settings {
             locale: "en".to_owned(),
             rain_effects: RainEffects::default(),
             density: Density::default(),
+            file_open: FileOpen::default(),
         }
     }
 }
@@ -73,6 +76,16 @@ pub enum Density {
     #[default]
     Comfortable,
     Compact,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum FileOpen {
+    /// A single click selects, a double click opens.
+    #[default]
+    DoubleClick,
+    /// A single click opens.
+    SingleClick,
 }
 
 /// Loads and saves [`Settings`]. Managed as Tauri state.
@@ -141,6 +154,7 @@ mod tests {
             theme: ThemePreference::Light,
             rain_effects: RainEffects::Subtle,
             density: Density::Compact,
+            file_open: FileOpen::SingleClick,
             ..Settings::default()
         };
         store.set(settings.clone()).unwrap();
@@ -177,6 +191,7 @@ mod tests {
         assert_eq!(settings.theme, ThemePreference::Dark);
         assert_eq!(settings.locale, "en");
         assert_eq!(settings.version, SETTINGS_VERSION);
+        assert_eq!(settings.file_open, FileOpen::DoubleClick);
     }
 
     #[test]

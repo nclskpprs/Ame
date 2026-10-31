@@ -62,7 +62,10 @@
 
   $effect(() => {
     const project = workspace.active;
-    const title = project ? t('app.windowTitle', { project: project.name }) : t('app.name');
+    const unsaved = (activeSession()?.editors.dirtyFiles.length ?? 0) > 0;
+    const title = project
+      ? t(unsaved ? 'app.windowTitleUnsaved' : 'app.windowTitle', { project: project.name })
+      : t('app.name');
     void getCurrentWindow().setTitle(title);
   });
 </script>

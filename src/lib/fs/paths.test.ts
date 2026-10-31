@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ancestors, basename, dirname, extension, isWithin } from './paths';
+import { ancestors, basename, dirname, extension, isWithin, withAncestors } from './paths';
 
 describe('paths', () => {
   it('splits paths', () => {
@@ -25,5 +25,16 @@ describe('paths', () => {
     expect(isWithin('src/a.ts', 'src')).toBe(true);
     expect(isWithin('srcx/a.ts', 'src')).toBe(false);
     expect(isWithin('anything', '')).toBe(true);
+  });
+
+  it('adds ancestor directories without the root', () => {
+    expect([...withAncestors(['src/lib/a.ts', 'src/b.ts', 'c.ts'])].sort()).toEqual([
+      'c.ts',
+      'src',
+      'src/b.ts',
+      'src/lib',
+      'src/lib/a.ts',
+    ]);
+    expect(withAncestors([]).size).toBe(0);
   });
 });

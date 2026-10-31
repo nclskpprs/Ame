@@ -37,3 +37,5 @@ and this project adheres to
   density and rain effects.
 - Files open from the file tree with a double click; a single click
   selects. Single-click opening can be enabled in the settings.
+- Unsaved files are marked in the file tree (also on collapsed folders
+  that contain them) and in the window title, in addition to the tab.

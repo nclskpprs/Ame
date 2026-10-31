@@ -26,3 +26,16 @@ export function ancestors(path: string): string[] {
 export function isWithin(path: string, dir: string): boolean {
   return dir === '' || path === dir || path.startsWith(`${dir}/`);
 }
+
+/**
+ * The given paths plus all their ancestor directories except the root, e.g.
+ * to mark collapsed folders that contain unsaved files.
+ */
+export function withAncestors(paths: Iterable<string>): Set<string> {
+  const result = new Set<string>();
+  for (const path of paths) {
+    result.add(path);
+    for (const dir of ancestors(path)) if (dir !== '') result.add(dir);
+  }
+  return result;
+}

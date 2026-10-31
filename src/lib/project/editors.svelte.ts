@@ -61,6 +61,11 @@ export class EditorGroup {
     return this.files.find((f) => f.path === this.activePath) ?? null;
   }
 
+  /** Tabs with unsaved changes. */
+  get dirtyFiles(): OpenFile[] {
+    return this.files.filter((f) => f.dirty);
+  }
+
   find(path: string): OpenFile | undefined {
     return this.files.find((f) => f.path === path);
   }

@@ -5,10 +5,13 @@
 
   let {
     tree,
+    unsaved = new Set(),
     singleClick = false,
     onopen,
   }: {
     tree: FileTreeState;
+    /** Files with unsaved changes and the folders that contain them. */
+    unsaved?: ReadonlySet<string>;
     /** Open files with a single click instead of a double click. */
     singleClick?: boolean;
     /** Called when a file is activated (click or Enter, see `singleClick`). */
@@ -123,6 +126,11 @@
         <span class="spacer"></span>
       {/if}
       <span class="name">{row.entry.name}</span>
+      {#if unsaved.has(row.entry.path) && !row.expanded}
+        <span class="unsaved" title={t('fileTree.unsaved')}>
+          <span class="visually-hidden">{t('fileTree.unsaved')}</span>
+        </span>
+      {/if}
     </div>
   {/each}
 </div>
@@ -185,5 +193,23 @@
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .unsaved {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--ame-text);
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 </style>

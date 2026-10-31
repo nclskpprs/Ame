@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { withAncestors } from '$lib/fs/paths';
   import { t } from '$lib/i18n';
   import type { Project } from '$lib/ipc/types';
   import { sessionFor } from '$lib/project/session';
@@ -13,6 +14,7 @@
   let { project }: { project: Project } = $props();
 
   const session = $derived(sessionFor(project.path));
+  const unsaved = $derived(withAncestors(session.editors.dirtyFiles.map((file) => file.path)));
   const panels: { id: SidePanel; label: 'sidePanel.files' | 'sidePanel.search' }[] = [
     { id: 'files', label: 'sidePanel.files' },
     { id: 'search', label: 'sidePanel.search' },
@@ -38,6 +40,7 @@
       {:else}
         <FileTree
           tree={session.tree}
+          {unsaved}
           singleClick={settings.value.fileOpen === 'singleClick'}
           onopen={(path) => void session.editors.open(path)}
         />

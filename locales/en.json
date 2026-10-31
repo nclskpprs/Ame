@@ -2,7 +2,8 @@
   "app": {
     "name": "Ame",
     "tagline": "Agent Manager Editor",
-    "windowTitle": "{project} — Ame"
+    "windowTitle": "{project} — Ame",
+    "windowTitleUnsaved": "● {project} — Ame"
   },
   "sidebar": {
     "label": "Projects",
@@ -91,7 +92,8 @@
   "fileTree": {
     "label": "Files",
     "empty": "This folder is empty",
-    "loadFailed": "Could not read folder: {message}"
+    "loadFailed": "Could not read folder: {message}",
+    "unsaved": "Unsaved changes"
   },
   "editor": {
     "tabs": "Open files",

@@ -5,22 +5,55 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M2 — Terminals and agents is done except the background
-  daemon (open decision, see below). Next: file icons (maintainer request),
-  then **M3 — Status and dashboard** and **M4 — Git** (the maintainer asked
-  for git highlighting in the file tree).
+- **Milestone:** M3 — Status and dashboard is half done (status detection,
+  dashboard, notifications); M4 — Git covers status, diff, staging and
+  follow mode. The background daemon (M2) still waits for a maintainer
+  decision.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. File icons from Material Icon Theme (MIT; maintainer asked about Atom
-     Material Icons, see the log entry).
-  2. Settings UI for custom agent profiles.
-  3. M3: status detection, dashboard, notifications.
-  4. M4: git status in the file tree, diff view.
+  1. M3: Claude Code hooks adapter with a helper CLI.
+  2. M3: rain status animations and the prompt drop, prompt queue,
+     resource monitor, performance benchmarks in CI.
+  3. M4: checkpoints before every prompt, review mode.
+  4. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-10-31 — File icons, agent settings, M3 status and M4 git
+
+**Done** (one commit per task; this entry was written in the next session,
+because the session that built the features ended before logging them)
+
+- File type icons from Material Icon Theme (MIT) in the tree and tabs,
+  loaded by the browser only when shown; setting `fileIcons`.
+- Agent profiles in the settings view: detected paths, edit or reset
+  built-in profiles, add custom ones.
+- M3: generic status detection (output activity, CPU of the process tree,
+  bells, OSC 9/777, exit code) plus `needsInputPatterns` per profile;
+  status dots in terminal tabs and the sidebar, the waiting count in the
+  window title; dashboard (`Mod+Shift+D`); OS notifications and the
+  dock/taskbar badge, mutable per project.
+- M4: git status in the file tree, changes panel (`Mod+Shift+G`), inline
+  diff with Keep/Revert per chunk, stage/unstage/commit, recently changed
+  files and follow mode (`Mod+Alt+F`).
+- Fix: the watcher watches the project root and ignores read events (this
+  caused a reload loop on Linux).
+
+**Verified**
+
+- On resume: `pnpm verify` green — 101 Rust tests, 393 frontend tests,
+  clippy, ESLint, Prettier and svelte-check clean.
+
+**Open**
+
+- No ADRs were written for status detection and the git integration; the
+  architecture document describes both (section _Agent status detection_
+  and _Git_).
+- Not tried by the maintainer yet (acceptance paused), not tested on macOS
+  and Windows (badge overlay icon, notifications).
 
 ### 2026-10-31 — Editor wishes and M2 (terminals and agents)
 

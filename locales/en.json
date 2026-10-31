@@ -51,11 +51,16 @@
     "rainSubtle": "Rain Effects: Subtle",
     "rainOff": "Rain Effects: Off",
     "saveFile": "Save File",
-    "closeEditor": "Close Editor"
+    "closeEditor": "Close Editor",
+    "goToFile": "Go to File…",
+    "searchInProject": "Search in Project",
+    "showFiles": "Show Files"
   },
   "sidePanel": {
     "label": "Side panel",
-    "resize": "Resize side panel"
+    "resize": "Resize side panel",
+    "files": "Files",
+    "search": "Search"
   },
   "fileTree": {
     "label": "Files",
@@ -82,5 +87,21 @@
     "hintPalette": "Command palette",
     "hintQuickOpen": "Open file",
     "hintSearch": "Search in project"
+  },
+  "search": {
+    "placeholder": "Search in project",
+    "caseSensitive": "Match case",
+    "wholeWord": "Match whole word",
+    "regex": "Use regular expression",
+    "searching": "Searching…",
+    "noResults": "No results",
+    "summary": "Results: {matches} · Files: {files}",
+    "truncated": "Showing the first {matches} results",
+    "invalid": "Invalid search: {message}"
+  },
+  "quickOpen": {
+    "label": "Go to file",
+    "placeholder": "Search files by name",
+    "empty": "No matching files"
   }
 }

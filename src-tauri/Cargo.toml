@@ -19,10 +19,14 @@ tauri-build = { version = "2.7.4", features = [] }
 
 [dependencies]
 dunce = "1"
+grep-matcher = "0.1"
+grep-regex = "0.1"
+grep-searcher = "0.1"
 ignore = "0.4"
 log = "0.4"
 notify = "8"
 notify-debouncer-mini = "0.7"
+nucleo-matcher = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 specta = { version = "=2.0.0-rc.26", features = ["derive"] }

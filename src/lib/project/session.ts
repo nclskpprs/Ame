@@ -4,6 +4,7 @@ import { notices } from '$lib/stores/notices.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
+import { SearchState } from './search.svelte';
 
 /**
  * Runtime state of an open project (file tree, editors, later terminals). Kept while the app runs, so switching projects is instant.
@@ -12,6 +13,7 @@ export class ProjectSession {
   readonly path: string;
   readonly tree: FileTreeState;
   readonly editors: EditorGroup;
+  readonly search: SearchState;
   #watched = '';
 
   constructor(path: string) {
@@ -25,12 +27,18 @@ export class ProjectSession {
       workspace.updateLayout(path, this.editors.layout());
       this.syncWatches();
     });
+    this.search = new SearchState(path);
     void this.tree.init().then(() => this.syncWatches());
   }
 
   /** Opens a file in the editor and reveals it in the tree. */
   async openFile(path: string): Promise<void> {
     await Promise.all([this.editors.open(path), this.tree.reveal(path)]);
+  }
+
+  /** Opens a file and selects a range on a line (columns in UTF-16 units). */
+  async openLocation(path: string, line: number, from: number, to: number): Promise<void> {
+    await this.editors.reveal(path, line, from, to);
   }
 
   /** Tells the backend which directories to watch, if the set changed. */

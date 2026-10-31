@@ -23,6 +23,8 @@ pub enum Error {
     UnknownProject(String),
     #[error("path is outside of the project: {0}")]
     PathOutsideProject(String),
+    #[error("invalid search: {0}")]
+    InvalidSearch(String),
 }
 
 impl From<std::io::Error> for Error {

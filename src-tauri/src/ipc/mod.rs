@@ -40,6 +40,9 @@ pub fn builder() -> Builder<Wry> {
             fs::read_file,
             fs::write_file,
             fs::watch_dirs,
+            fs::quick_open,
+            fs::search_text,
+            fs::cancel_search,
         ])
         .events(collect_events![FsChanged])
 }

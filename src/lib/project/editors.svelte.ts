@@ -83,6 +83,27 @@ export class EditorGroup {
     if (file.status === 'unloaded') await this.#load(file);
   }
 
+  /** Opens a file and selects a range on a 1-based line, centered. */
+  async reveal(path: string, line: number, from: number, to: number): Promise<void> {
+    await this.open(path);
+    const file = this.find(path);
+    const state = file?.editorState;
+    if (!file || !state) return;
+    const target = state.doc.line(Math.min(Math.max(line, 1), state.doc.lines));
+    const selection = {
+      anchor: Math.min(target.from + from, target.to),
+      head: Math.min(target.from + to, target.to),
+    };
+    const scroll = EditorView.scrollIntoView(selection.anchor, { y: 'center' });
+    if (this.#view && this.#view.state === state) {
+      this.#view.dispatch({ selection, effects: scroll });
+      this.#view.focus();
+    } else {
+      file.editorState = state.update({ selection }).state;
+      file.scroll = scroll;
+    }
+  }
+
   /** Closes a tab. Dirty tabs ask first unless `force` is set. */
   close(path: string, force = false): void {
     const index = this.files.findIndex((f) => f.path === path);

@@ -15,6 +15,8 @@ pub mod workspace;
 
 use tauri::{App, Manager, WebviewWindowBuilder};
 
+use fs::quick_open::QuickOpen;
+use fs::search::SearchControl;
 use fs::watcher::FsWatcher;
 use workspace::paths::AppPaths;
 use workspace::projects::WorkspaceStore;
@@ -54,6 +56,8 @@ pub fn run() {
             app.manage(SettingsStore::load(&paths.config_dir));
             app.manage(WorkspaceStore::load(&paths.config_dir));
             app.manage(FsWatcher::new(app.handle().clone())?);
+            app.manage(QuickOpen::default());
+            app.manage(SearchControl::default());
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())

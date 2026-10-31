@@ -1,3 +1,6 @@
+import { t } from '$lib/i18n';
+import { palette } from '$lib/palette/palette.svelte';
+import { fileSource } from '$lib/palette/sources';
 import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
@@ -56,6 +59,44 @@ export function registerAppCommands(): () => void {
       run: () => switchTo(-1),
     },
     ...projectSlots,
+    {
+      id: 'quickOpen.open',
+      title: 'commands.goToFile',
+      shortcut: 'Mod+P',
+      when: hasProject,
+      run: () => {
+        const session = activeSession();
+        if (!session) return;
+        palette.open({
+          label: t('quickOpen.label'),
+          placeholder: t('quickOpen.placeholder'),
+          empty: t('quickOpen.empty'),
+          source: fileSource(session),
+        });
+      },
+    },
+    {
+      id: 'search.open',
+      title: 'commands.searchInProject',
+      shortcut: 'Mod+Shift+F',
+      when: hasProject,
+      run: () => {
+        const session = activeSession();
+        if (!session) return;
+        workspace.updateLayout(session.path, { sidePanel: 'search' });
+        session.search.focusRequest++;
+      },
+    },
+    {
+      id: 'files.show',
+      title: 'commands.showFiles',
+      shortcut: 'Mod+Shift+E',
+      when: hasProject,
+      run: () => {
+        const path = workspace.activePath;
+        if (path) workspace.updateLayout(path, { sidePanel: 'files' });
+      },
+    },
     {
       id: 'editor.save',
       title: 'commands.saveFile',

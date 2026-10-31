@@ -2,11 +2,11 @@
 
 use std::path::Path;
 
-use ignore::WalkBuilder;
 use serde::Serialize;
 use specta::Type;
 
 use super::path::{relative, resolve};
+use super::walk::project_walker;
 use crate::error::{Error, Result};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
@@ -34,12 +34,7 @@ pub fn read_dir(root: &Path, rel: &str) -> Result<Vec<DirEntry>> {
         return Err(Error::NotADirectory(rel.to_owned()));
     }
 
-    let walker = WalkBuilder::new(&dir)
-        .max_depth(Some(1))
-        .hidden(false)
-        .require_git(false)
-        .filter_entry(|entry| entry.file_name() != ".git")
-        .build();
+    let walker = project_walker(&dir).max_depth(Some(1)).build();
 
     let mut entries: Vec<DirEntry> = walker
         .skip(1) // the directory itself

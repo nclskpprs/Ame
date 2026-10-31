@@ -110,6 +110,10 @@ const highlightStyle = HighlightStyle.define([
   { tag: tags.strikethrough, textDecoration: 'line-through' },
   { tag: [tags.meta, tags.processingInstruction], color: 'var(--ame-syntax-operator)' },
   { tag: tags.invalid, color: 'var(--ame-syntax-invalid)' },
+  // Diffs and patches.
+  { tag: tags.inserted, color: 'var(--ame-syntax-string)' },
+  { tag: tags.deleted, color: 'var(--ame-syntax-invalid)' },
+  { tag: tags.changed, color: 'var(--ame-syntax-number)' },
 ]);
 
 export const ameTheme: Extension = [editorTheme, syntaxHighlighting(highlightStyle)];

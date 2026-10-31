@@ -28,9 +28,11 @@ and this project adheres to
 - File tree that loads folders on demand, respects `.gitignore` and
   follows changes on disk.
 - Code editor (CodeMirror 6) with tabs, syntax highlighting for JS/TS,
-  JSON, CSS, HTML, Markdown and PHP, and JetBrains Mono. Files changed by
-  agents reload automatically; unsaved edits are never overwritten
-  silently.
+  JSON, CSS/SCSS/Sass, HTML, XML, Markdown, PHP, Python, Rust, Go, Java,
+  Kotlin, C#, C/C++, SQL, YAML, TOML, shell, PowerShell, Dockerfile, Ruby,
+  Lua, Swift, INI/properties and diffs (each loaded only when needed), and
+  JetBrains Mono. Files changed by agents reload automatically; unsaved
+  edits are never overwritten silently.
 - Quick open (Ctrl/Cmd+P), search in project (Ctrl/Cmd+Shift+F) and a
   command palette (Ctrl/Cmd+K).
 - Settings view (Ctrl/Cmd+, or the gear in the sidebar) for theme,

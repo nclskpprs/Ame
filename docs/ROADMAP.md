@@ -27,8 +27,9 @@ milestones and marked with 💡.
       M2, the changes panel in M4 (progressive disclosure).
 - [x] Lazy file tree with watcher
 - [x] CodeMirror editor: view, edit, save; syntax highlighting for common
-      languages (PHP, JS/TS, JSON, CSS, HTML, Markdown); theme derived from
-      the design tokens; bundled JetBrains Mono
+      languages (PHP, JS/TS, JSON, CSS, HTML, Markdown, and since then
+      Python, Rust, Go, Java, C/C++, SQL, YAML, TOML, shell and more);
+      theme derived from the design tokens; bundled JetBrains Mono
 - [x] Quick open (fuzzy) and text search
 - [x] 💡 Command palette (`Ctrl/Cmd+K`): projects, files and commands in one
       input (scripts follow in M5, agents in M2)

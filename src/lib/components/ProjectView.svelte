@@ -55,6 +55,7 @@
           tree={session.tree}
           {unsaved}
           git={session.git.marks}
+          recent={session.git.recentMarks}
           icons={settings.value.fileIcons}
           singleClick={settings.value.fileOpen === 'singleClick'}
           onopen={(path) => void session.editors.open(path)}
@@ -71,7 +72,11 @@
   />
   <section class="editor-area">
     <div class="editor">
-      <EditorPane group={session.editors} />
+      <EditorPane
+        group={session.editors}
+        following={session.following}
+        onstopfollowing={() => session.setFollowing(false)}
+      />
     </div>
     {#if project.layout.terminalOpen}
       <Resizer

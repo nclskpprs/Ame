@@ -33,7 +33,15 @@ pub async fn git_status(
                 ".",
             ],
         )?;
-        Ok(Some(status::parse(&output, &prefix)))
+        let mut status = status::parse(&output, &prefix);
+        for file in &mut status.files {
+            file.modified = std::fs::metadata(root.join(&file.path))
+                .and_then(|meta| meta.modified())
+                .ok()
+                .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|elapsed| elapsed.as_millis() as f64);
+        }
+        Ok(Some(status))
     })
     .await
     .or_else(|err| match err {

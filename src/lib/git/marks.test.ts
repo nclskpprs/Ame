@@ -3,7 +3,7 @@ import type { GitFile } from '$lib/ipc/types';
 import { fileMark, treeMarks } from './marks';
 
 function file(path: string, staged: GitFile['staged'], unstaged: GitFile['unstaged']): GitFile {
-  return { path, origPath: null, staged, unstaged };
+  return { path, origPath: null, staged, unstaged, modified: 1 };
 }
 
 describe('git marks', () => {

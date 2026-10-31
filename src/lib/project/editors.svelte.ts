@@ -53,6 +53,10 @@ export class EditorGroup {
   pendingClose = $state<string | null>(null);
   #view: EditorView | null = null;
   #onChange: () => void;
+  /** When each file was last saved by the editor (ms). */
+  #savedAt: Record<string, number> = {};
+  /** Whether the editor takes the focus when it shows the next file. */
+  #focusOnShow = true;
 
   /** `onChange` is called when tabs open, close or switch. */
   constructor(project: string, layout: ProjectLayout | undefined, onChange: () => void) {
@@ -104,9 +108,23 @@ export class EditorGroup {
     this.#view = view;
   }
 
-  async open(path: string): Promise<void> {
+  /** Opens a tab; with `focus: false` the focus stays where it is. */
+  async open(path: string, { focus = true }: { focus?: boolean } = {}): Promise<void> {
     if (!this.find(path)) this.files = [...this.files, new OpenFile(path)];
+    this.#focusOnShow = focus;
     await this.activate(path);
+  }
+
+  /** Called by the editor when it shows a file; resets to focusing. */
+  takeFocusOnShow(): boolean {
+    const focus = this.#focusOnShow;
+    this.#focusOnShow = true;
+    return focus;
+  }
+
+  /** Whether the editor itself wrote this file in the last few seconds. */
+  savedRecently(path: string, withinMs = 3000): boolean {
+    return Date.now() - (this.#savedAt[path] ?? 0) < withinMs;
   }
 
   async activate(path: string): Promise<void> {
@@ -168,6 +186,7 @@ export class EditorGroup {
     const file = this.find(path);
     if (!file?.editorState) return false;
     const doc = file.editorState.doc;
+    this.#savedAt[path] = Date.now();
     const result = await commands.writeFile(this.project, path, doc.toString());
     if (result.status === 'error') {
       notices.push(

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 
 /// Branch and changed files of a project.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct GitStatus {
     /// Current branch, `None` when detached.
@@ -15,7 +15,7 @@ pub struct GitStatus {
 }
 
 /// A changed file, with project-relative paths (`/` separators).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct GitFile {
     pub path: String,
@@ -25,6 +25,9 @@ pub struct GitFile {
     pub staged: Option<Change>,
     /// Change in the working tree (not staged), if any.
     pub unstaged: Option<Change>,
+    /// Last modification of the file on disk (ms since the Unix epoch), to
+    /// notice files an agent just changed. `None` for deleted files.
+    pub modified: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -111,6 +114,7 @@ pub fn parse(output: &[u8], prefix: &str) -> GitStatus {
                     orig_path: orig_path.and_then(|orig| relative(&orig)),
                     staged,
                     unstaged,
+                    modified: None,
                 }
             }
             Some(b'?') => {
@@ -122,6 +126,7 @@ pub fn parse(output: &[u8], prefix: &str) -> GitStatus {
                     orig_path: None,
                     staged: None,
                     unstaged: Some(Change::Untracked),
+                    modified: None,
                 }
             }
             _ => continue,

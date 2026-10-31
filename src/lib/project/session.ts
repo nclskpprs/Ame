@@ -6,6 +6,7 @@ import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
 import { GitState } from './git.svelte';
+import { newest } from '$lib/git/recent';
 import { SearchState } from './search.svelte';
 import { TerminalGroup } from './terminals.svelte';
 import { WatchSet } from './watch-set';
@@ -36,6 +37,8 @@ export class ProjectSession {
     this.search = new SearchState(path);
     this.terminals = new TerminalGroup(path, layout?.sessions ?? []);
     this.git = new GitState(path);
+    this.git.ignore = (file) => this.editors.savedRecently(file);
+    this.git.onChange = (paths) => this.#follow(paths);
     void this.git.refresh();
     void this.tree.init().then(() => this.syncWatches());
   }
@@ -43,6 +46,22 @@ export class ProjectSession {
   /** Opens a file in the editor and reveals it in the tree. */
   async openFile(path: string): Promise<void> {
     await Promise.all([this.editors.open(path), this.tree.reveal(path)]);
+  }
+
+  get following(): boolean {
+    return workspace.projects.find((p) => p.path === this.path)?.layout.follow ?? false;
+  }
+
+  setFollowing(follow: boolean): void {
+    workspace.updateLayout(this.path, { follow });
+  }
+
+  /** Follow mode: shows the newest changed file as a diff, keeping the focus. */
+  #follow(paths: string[]): void {
+    if (!this.following) return;
+    const path = newest(paths, this.git.status?.files ?? []);
+    if (!path) return;
+    void this.editors.open(path, { focus: false }).then(() => this.editors.setDiff(path, true));
   }
 
   /** Opens a file with its changes against `HEAD` shown inline. */

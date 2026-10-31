@@ -57,6 +57,8 @@ pub struct ProjectLayout {
     pub terminal_height: u32,
     /// Terminal sessions that were open, offered to resume after a restart.
     pub sessions: Vec<SavedSession>,
+    /// Follow mode: files an agent changes open in the editor as a diff.
+    pub follow: bool,
 }
 
 /// A terminal session remembered across restarts.
@@ -79,6 +81,7 @@ impl Default for ProjectLayout {
             terminal_open: false,
             terminal_height: DEFAULT_TERMINAL_HEIGHT,
             sessions: Vec::new(),
+            follow: false,
         }
     }
 }

@@ -92,6 +92,9 @@ and this project adheres to
   for any file).
 - Stage and unstage files (one by one or all) and commit from the changes
   panel; Ctrl/Cmd+Enter in the message commits. Git hooks run as usual.
+- Files an agent just changed are marked in the file tree for a minute.
+  Follow mode (Ctrl/Cmd+Alt+F) opens the file an agent changed last as an
+  inline diff, without taking the focus from the terminal.
 
 ### Fixed
 

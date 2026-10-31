@@ -142,6 +142,17 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'git.follow',
+      title: 'commands.toggleFollow',
+      shortcut: 'Mod+Alt+F',
+      terminal: true,
+      when: () => activeSession()?.git.status != null,
+      run: () => {
+        const session = activeSession();
+        if (session) session.setFollowing(!session.following);
+      },
+    },
+    {
       id: 'editor.toggleDiff',
       title: 'commands.toggleDiff',
       shortcut: 'Mod+Alt+D',

@@ -6,7 +6,16 @@
   import Editor from './Editor.svelte';
   import EditorTabs from './EditorTabs.svelte';
 
-  let { group }: { group: EditorGroup } = $props();
+  let {
+    group,
+    following = false,
+    onstopfollowing,
+  }: {
+    group: EditorGroup;
+    /** Follow mode is on: show it, with a way to turn it off. */
+    following?: boolean;
+    onstopfollowing?: () => void;
+  } = $props();
 
   const file = $derived(group.active);
   const pending = $derived(group.pendingClose ? group.find(group.pendingClose) : undefined);
@@ -29,8 +38,16 @@
 </script>
 
 <div class="pane">
-  {#if group.files.length}
-    <EditorTabs {group} />
+  {#if group.files.length || following}
+    <div class="top">
+      <EditorTabs {group} />
+      {#if following}
+        <button class="following" title={t('editor.followingHint')} onclick={onstopfollowing}>
+          <span class="dot" aria-hidden="true"></span>
+          {t('editor.following')}
+        </button>
+      {/if}
+    </div>
   {/if}
 
   {#if pending}
@@ -90,6 +107,41 @@
     height: 100%;
     min-width: 0;
     min-height: 0;
+  }
+
+  .top {
+    display: flex;
+    min-width: 0;
+    background: var(--ame-surface);
+    border-bottom: 1px solid var(--ame-border);
+  }
+
+  .top > :global(:first-child) {
+    flex: 1;
+    min-width: 0;
+    border-bottom: 0;
+  }
+
+  .following {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ame-space-1);
+    margin: var(--ame-space-1) var(--ame-space-2);
+    padding: 0 var(--ame-space-2);
+    border: 1px solid var(--ame-accent);
+    border-radius: var(--ame-radius);
+    background: transparent;
+    color: var(--ame-text);
+    font: inherit;
+    font-size: var(--ame-font-size-small);
+  }
+
+  .following .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ame-accent);
   }
 
   .bar {

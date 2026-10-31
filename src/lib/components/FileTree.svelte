@@ -10,6 +10,7 @@
     tree,
     unsaved = new Set(),
     git = new Map(),
+    recent = new Set(),
     icons = true,
     singleClick = false,
     onopen,
@@ -19,6 +20,8 @@
     unsaved?: ReadonlySet<string>;
     /** Git marks of changed files and the folders that contain them. */
     git?: ReadonlyMap<string, GitMark>;
+    /** Files an agent just changed, and their folders. */
+    recent?: ReadonlySet<string>;
     /** Show file type icons. */
     icons?: boolean;
     /** Open files with a single click instead of a double click. */
@@ -115,6 +118,7 @@
     <div
       class="row {mark ? `git-${mark}` : ''}"
       class:selected={row.entry.path === tree.selected}
+      class:recent={recent.has(row.entry.path)}
       role="treeitem"
       aria-level={row.depth + 1}
       aria-expanded={row.entry.kind === 'dir' ? row.expanded : undefined}
@@ -183,6 +187,11 @@
 
   .row:hover {
     color: var(--ame-text);
+  }
+
+  /* Changed by an agent a moment ago. */
+  .row.recent {
+    box-shadow: inset 2px 0 0 var(--ame-accent);
   }
 
   .row.selected {

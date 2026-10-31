@@ -33,7 +33,7 @@
     shown = target;
     view.setState(target.editorState);
     if (target.scroll) view.dispatch({ effects: target.scroll });
-    view.focus();
+    if (group.takeFocusOnShow()) view.focus();
   });
 </script>
 

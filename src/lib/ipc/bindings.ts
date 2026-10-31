@@ -270,6 +270,11 @@ export type GitFile_Deserialize = {
 	staged?: Change | null,
 	/**  Change in the working tree (not staged), if any. */
 	unstaged?: Change | null,
+	/**
+	 *  Last modification of the file on disk (ms since the Unix epoch), to
+	 *  notice files an agent just changed. `None` for deleted files.
+	 */
+	modified?: number | null,
 };
 
 /**  A changed file, with project-relative paths (`/` separators). */
@@ -281,6 +286,11 @@ export type GitFile_Serialize = {
 	staged: Change | null,
 	/**  Change in the working tree (not staged), if any. */
 	unstaged: Change | null,
+	/**
+	 *  Last modification of the file on disk (ms since the Unix epoch), to
+	 *  notice files an agent just changed. `None` for deleted files.
+	 */
+	modified: number | null,
 };
 
 /**  Branch and changed files of a project. */
@@ -340,6 +350,8 @@ export type ProjectLayout_Deserialize = {
 	terminalHeight?: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions?: SavedSession[],
+	/**  Follow mode: files an agent changes open in the editor as a diff. */
+	follow?: boolean,
 };
 
 /**  The part of the UI state of a project that survives a restart. */
@@ -356,6 +368,8 @@ export type ProjectLayout_Serialize = {
 	terminalHeight: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions: SavedSession[],
+	/**  Follow mode: files an agent changes open in the editor as a diff. */
+	follow: boolean,
 };
 
 /**  An open project folder. */

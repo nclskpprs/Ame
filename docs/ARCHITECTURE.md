@@ -384,6 +384,12 @@ Module: `src-tauri/src/git/` (git CLI, ADR 0008).
   `EditorGroup.setDiff` reconfigures a per-tab compartment with
   `@codemirror/merge`'s `unifiedMergeView` against `git_original` (loaded on
   demand), with Keep/Revert buttons per chunk; the file stays editable.
+- Recently changed files: `git_status` returns the modification time of
+  every changed file; `GitState` compares it with the previous status
+  (`lib/git/recent.ts`) and marks files changed since then for a minute
+  (accent bar in the tree), except files the editor saved itself. Follow
+  mode (`ProjectLayout.follow`) opens the newest of them as an inline diff
+  without moving the focus (`EditorGroup.open(path, { focus: false })`).
 
 ## Projects and views — planned (M2–M5)
 

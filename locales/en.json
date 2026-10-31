@@ -126,7 +126,8 @@
     "sendToAgent": "Send Selection to Agent",
     "showDashboard": "Show Dashboard",
     "showChanges": "Show Changes",
-    "toggleDiff": "Toggle Inline Diff"
+    "toggleDiff": "Toggle Inline Diff",
+    "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -160,7 +161,9 @@
     "empty": "No file open",
     "hintPalette": "Command palette",
     "hintQuickOpen": "Open file",
-    "hintSearch": "Search in project"
+    "hintSearch": "Search in project",
+    "following": "Following",
+    "followingHint": "Follow mode: files that agents change open here as a diff. Click to stop."
   },
   "search": {
     "placeholder": "Search in project",

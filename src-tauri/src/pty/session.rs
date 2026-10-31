@@ -14,6 +14,7 @@ use super::modes::ModeTracker;
 use super::ring::RingBuffer;
 use super::utf8::Utf8Decoder;
 use crate::agents::adapters::{self, endpoint::HookMessage};
+use crate::agents::cpu::TreeUsage;
 use crate::agents::status::{AgentState, StatusConfig, StatusTracker};
 use crate::error::{Error, Result};
 
@@ -88,6 +89,8 @@ struct Output {
 pub struct Session {
     info: Mutex<SessionInfo>,
     status: Mutex<StatusTracker>,
+    /// CPU and memory of the process tree, measured by the status loop.
+    usage: Mutex<Option<TreeUsage>>,
     output: Mutex<Output>,
     writer: Mutex<Option<Box<dyn Write + Send>>>,
     master: Mutex<Option<Box<dyn MasterPty + Send>>>,
@@ -121,6 +124,7 @@ impl Session {
         let session = Arc::new(Self {
             info: Mutex::new(info),
             status: Mutex::new(StatusTracker::new(status, Instant::now())),
+            usage: Mutex::new(None),
             output: Mutex::new(Output {
                 ring: RingBuffer::new(SCROLLBACK_BYTES),
                 modes: ModeTracker::default(),
@@ -218,6 +222,20 @@ impl Session {
 
     pub fn set_cpu_busy(&self, busy: bool) {
         lock(&self.status).set_cpu_busy(busy);
+    }
+
+    pub fn set_usage(&self, usage: TreeUsage) {
+        *lock(&self.usage) = Some(usage);
+    }
+
+    /// The last measured usage; `None` before the first measurement or
+    /// after the program exited.
+    pub fn usage(&self) -> Option<TreeUsage> {
+        if self.is_running() {
+            *lock(&self.usage)
+        } else {
+            None
+        }
     }
 
     pub fn is_running(&self) -> bool {

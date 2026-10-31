@@ -4,6 +4,8 @@
   import { shortcutOf } from '$lib/commands/registry';
   import { formatDuration } from '$lib/agents/duration';
   import { showSession } from '$lib/agents/show';
+  import { describeUsage } from '$lib/agents/usage';
+  import { usage } from '$lib/agents/usage.svelte';
   import { combinedState, stateLabels } from '$lib/agents/state';
   import { basename } from '$lib/fs/paths';
   import { t } from '$lib/i18n';
@@ -122,6 +124,9 @@
               <span class="state">
                 {session.attention ?? t(stateLabels[session.state])}
                 · {formatDuration(now - (session.startedAt ?? now))}
+                {#if usage.forSession(session.id)}
+                  · {describeUsage(usage.forSession(session.id) ?? { cpu: 0, memory: 0 })}
+                {/if}
               </span>
               <span class="line">{previews.get(session.id) || ' '}</span>
             </button>

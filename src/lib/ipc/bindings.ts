@@ -80,6 +80,11 @@ export const commands = {
 	 */
 	sessionPreviews: () => __TAURI_INVOKE<SessionPreview[]>("session_previews"),
 	/**
+	 *  The resource usage of every running session, measured about every two
+	 *  seconds. Polled by the frontend while the window is visible.
+	 */
+	sessionUsage: () => __TAURI_INVOKE<SessionUsage[]>("session_usage"),
+	/**
 	 *  Connects a terminal view: the buffered output and then live output are
 	 *  sent through `on_output`. Returns a token for [`detach_session`].
 	 */
@@ -514,6 +519,15 @@ signal?: string | null };
 export type SessionStatus_Serialize = { state: "running" } | { state: "exited"; exitCode: number; 
 /**  Name of the signal that ended the process (Unix). */
 signal: string | null };
+
+/**  CPU and memory of a session's program and everything it started. */
+export type SessionUsage = {
+	id: number,
+	/**  Percent of one core (can exceed 100 on several cores). */
+	cpu: number | null,
+	/**  Resident memory in bytes. */
+	memory: number | null,
+};
 
 /**  All sessions, sent whenever one starts, exits or is closed. */
 export type SessionsChanged = SessionsChanged_Serialize | SessionsChanged_Deserialize;

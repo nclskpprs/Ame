@@ -29,6 +29,7 @@
   import { waitingCount } from '$lib/agents/state';
   import { countBadge, notifier } from '$lib/notify/notifier';
   import { showSession } from '$lib/agents/show';
+  import { usage } from '$lib/agents/usage.svelte';
   import { closeDecision } from '$lib/background/close';
   import { trayModel } from '$lib/background/tray';
   import { shortcutOf } from '$lib/commands/registry';
@@ -53,6 +54,8 @@
   let reducedMotion = $state(systemPrefersReducedMotion());
 
   $effect(() => registerAppCommands());
+
+  $effect(() => usage.start());
 
   $effect(() => {
     const unlisten = listenToFileChanges();

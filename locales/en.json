@@ -313,5 +313,12 @@
   "background": {
     "hintTitle": "Ame keeps running",
     "hintBody": "Your agents keep working in the background. Quit with {shortcut} or from the tray icon."
+  },
+  "usage": {
+    "mb": "{value} MB",
+    "gb": "{value} GB",
+    "cpu": "{value} %",
+    "summary": "CPU {cpu} · RAM {memory}",
+    "projectLabel": "{project}: {usage}"
   }
 }

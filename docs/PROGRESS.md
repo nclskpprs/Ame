@@ -14,12 +14,38 @@ is open, what comes next.
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M3: rain status animations and the prompt drop, prompt queue,
-     resource monitor, performance benchmarks in CI.
+  1. M3: prompt queue per agent, rain status animations and the prompt
+     drop, performance benchmarks in CI.
   2. M4: checkpoints before every prompt, review mode.
   3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M3: resource monitor
+
+**Done**
+
+- `session_usage` command: CPU and memory of every running session's
+  process tree (measured by the status loop every 2 s).
+- Frontend: `lib/agents/usage.svelte.ts` polls only while the window is
+  visible and a session runs; the sidebar shows the memory per project
+  (CPU and memory in the tooltip), the dashboard cards show both.
+
+**Verified**
+
+- Unit tests for summing and formatting; seen in `pnpm tauri dev` on WSLg
+  (sidebar "6 MB" for a shell, dashboard "CPU 0 % · RAM 6 MB").
+- `pnpm verify` green.
+
+**Open / resume here**
+
+- Next is the prompt queue (M3). Session ended at the maintainer's request
+  (shutdown); everything is committed on `feat/m1-project-shell`.
+- Manual GUI tests on WSLg: start with `GDK_BACKEND=x11` and
+  `AME_CONFIG_DIR=<temp dir>`; a ctypes XTest script (find the window by
+  `_NET_WM_NAME`, send keys, `WM_DELETE_WINDOW`, `XGetImage` screenshots)
+  works because WSLg has no xdotool. It lived in the session scratchpad and
+  must be rewritten if needed.
 
 ### 2026-11-01 — M2: keep running in the background
 

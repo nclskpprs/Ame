@@ -64,7 +64,7 @@ milestones and marked with 💡.
 - [ ] Performance benchmarks (RAM, startup time) in CI
 - [ ] 💡 Prompt queue per agent: queue follow-up prompts that are sent
       automatically as soon as the agent is idle
-- [ ] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the
+- [x] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the
       sidebar
 
 ## M4 — Git and changes

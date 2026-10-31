@@ -87,6 +87,9 @@ and this project adheres to
   Ame again brings the window back. Ctrl/Cmd+Q quits and ends all agents,
   including programs they started in the background (a dev server, a
   watcher). Can be changed in the settings ("Closing the window").
+- Resource use: the sidebar shows the memory of each project's running
+  agents and programs (CPU and memory in the tooltip), the dashboard
+  shows both per session.
 - Precise status for Claude Code: Ame starts it with its own hooks (your
   hooks and project settings stay untouched), so "done" and "waits for
   you" are reported by Claude Code itself, with its permission message.

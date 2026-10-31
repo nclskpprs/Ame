@@ -10,6 +10,8 @@
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import StatusDot from './StatusDot.svelte';
+  import { describeUsage, formatMemory } from '$lib/agents/usage';
+  import { usage } from '$lib/agents/usage.svelte';
   import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
 
   const sections = $derived(projectSections(workspace.projects));
@@ -21,6 +23,10 @@
         return state ? [[project.path, state] as const] : [];
       }),
     ),
+  );
+  /** CPU and memory of each project's running sessions. */
+  const usages = $derived(
+    new Map(workspace.projects.map((project) => [project.path, usage.forProject(project.path)])),
   );
   /** Index of each project in sidebar order, for the Mod+1…9 hints. */
   const indexOf = $derived(
@@ -125,6 +131,17 @@
           >
             <span class="name">{project.name}</span>
             <kbd class="hint">{hint(project)}</kbd>
+            {#if usages.get(project.path)}
+              {@const projectUsage = usages.get(project.path) ?? { cpu: 0, memory: 0 }}
+              <span
+                class="usage"
+                title={describeUsage(projectUsage)}
+                aria-label={t('usage.projectLabel', {
+                  project: project.name,
+                  usage: describeUsage(projectUsage),
+                })}>{formatMemory(projectUsage.memory)}</span
+              >
+            {/if}
             {#if states.has(project.path)}
               <StatusDot
                 state={states.get(project.path) ?? 'idle'}
@@ -218,6 +235,13 @@
     font-size: var(--ame-font-size-small);
     opacity: 0;
     transition: opacity var(--ame-transition);
+  }
+
+  .usage {
+    color: var(--ame-text-muted);
+    font-size: var(--ame-font-size-small);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .project:hover .hint,

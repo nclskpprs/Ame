@@ -276,7 +276,10 @@ Implementation (`src-tauri/src/agents/`):
   an answered question does not match again. Automatic terminal replies
   (cursor reports, focus events, color queries) do not count as input.
 - `cpu.rs` sums CPU and memory of each session's process tree (`sysinfo`,
-  every 2 s); above 10 % of a core counts as busy.
+  every 2 s); above 10 % of a core counts as busy. The session keeps the
+  last measurement; `session_usage` returns it, polled every 2 s by
+  `lib/agents/usage.svelte.ts` only while the window is visible and a
+  session runs (sidebar: memory per project, dashboard: per session).
 - The `agent-status` thread re-evaluates every 250 ms and emits
   `sessions-changed` only when a state changed. `SessionInfo` carries
   `state` and `attention` (the notification text).

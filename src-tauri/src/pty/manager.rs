@@ -238,7 +238,9 @@ fn status_loop(inner: &Weak<Inner>) {
                 let pids: Vec<_> = running.iter().map(|(_, pid)| *pid).collect();
                 let usage = cpu.tree_usage(&pids);
                 for (session, pid) in running {
-                    session.set_cpu_busy(usage.get(&pid).is_some_and(|u| u.cpu > CPU_BUSY));
+                    let tree = usage.get(&pid).copied().unwrap_or_default();
+                    session.set_cpu_busy(tree.cpu > CPU_BUSY);
+                    session.set_usage(tree);
                 }
             }
         }

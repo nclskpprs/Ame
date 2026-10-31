@@ -103,6 +103,36 @@ pub fn session_previews(pty: State<'_, PtyManager>) -> Vec<SessionPreview> {
         .collect()
 }
 
+/// CPU and memory of a session's program and everything it started.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionUsage {
+    pub id: SessionId,
+    /// Percent of one core (can exceed 100 on several cores).
+    pub cpu: f32,
+    /// Resident memory in bytes.
+    pub memory: f64,
+}
+
+/// The resource usage of every running session, measured about every two
+/// seconds. Polled by the frontend while the window is visible.
+#[tauri::command]
+#[specta::specta]
+pub fn session_usage(pty: State<'_, PtyManager>) -> Vec<SessionUsage> {
+    pty.list()
+        .into_iter()
+        .filter_map(|info| {
+            let usage = pty.get(info.id).ok()?.usage()?;
+            Some(SessionUsage {
+                id: info.id,
+                cpu: usage.cpu,
+                // Bytes fit into an f64 exactly up to 8 PiB.
+                memory: usage.memory as f64,
+            })
+        })
+        .collect()
+}
+
 #[tauri::command]
 #[specta::specta]
 pub fn list_sessions(pty: State<'_, PtyManager>) -> Vec<SessionInfo> {

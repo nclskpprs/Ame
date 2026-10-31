@@ -97,12 +97,24 @@ export const commands = {
 	stopSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("stop_session", { id })),
 	/**  Ends the program if needed and removes the session. */
 	closeSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("close_session", { id })),
+	/**  Hides the main window; the app keeps running with its sessions. */
+	hideWindow: () => typedError<null, AppError>(__TAURI_INVOKE("hide_window")),
+	/**  Shows and focuses the main window. */
+	showWindow: () => __TAURI_INVOKE<void>("show_window"),
+	/**
+	 *  Ends the app and every session. The frontend asks about unsaved files
+	 *  and running agents first.
+	 */
+	quitApp: () => __TAURI_INVOKE<void>("quit_app"),
+	/**  Creates or updates the tray icon and its menu. */
+	setTray: (model: TrayModel_Deserialize) => typedError<null, AppError>(__TAURI_INVOKE("set_tray", { model })),
 };
 
 /** Events */
 export const events = {
 	fsChanged: makeEvent<FsChanged, FsChanged>("fs-changed"),
 	sessionsChanged: makeEvent<SessionsChanged_Serialize, SessionsChanged_Deserialize>("sessions-changed"),
+	trayAction: makeEvent<TrayAction, TrayAction>("tray-action"),
 };
 
 /* Types */
@@ -228,6 +240,12 @@ export type AppInfo = {
 };
 
 export type Change = "added" | "modified" | "deleted" | "renamed" | "copied" | "typeChanged" | "untracked" | "conflicted";
+
+export type CloseAction = 
+/**  Hide the window while agents run; quitting ends them. */
+"background" | 
+/**  Quit the app (after asking about running agents). */
+"quit";
 
 export type Density = "comfortable" | "compact";
 
@@ -537,6 +555,10 @@ export type Settings_Deserialize = {
 	fileIcons?: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */
 	notifications?: boolean,
+	/**  What closing the window does while agents run. */
+	closeAction?: CloseAction,
+	/**  The hint that Ame keeps running in the background was shown. */
+	backgroundHintShown?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents?: AgentProfile_Deserialize[],
 };
@@ -562,6 +584,10 @@ export type Settings_Serialize = {
 	fileIcons: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */
 	notifications: boolean,
+	/**  What closing the window does while agents run. */
+	closeAction: CloseAction,
+	/**  The hint that Ame keeps running in the background was shown. */
+	backgroundHintShown: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents: AgentProfile_Serialize[],
 };
@@ -573,6 +599,58 @@ export type SidePanel = "files" | "search" |
 export type ThemePreference = 
 /**  Follow the operating system. */
 "system" | "dark" | "light";
+
+/**  Something chosen in the tray menu that the frontend handles. */
+export type TrayAction = 
+/**  Quit, with the usual checks for unsaved files and running agents. */
+{ action: "quit" } | 
+/**  Show this session. */
+{ action: "session"; id: number };
+
+export type TrayEntry = {
+	id: number,
+	label: string,
+};
+
+export type TrayImage = {
+	rgba: number[],
+	width: number,
+	height: number,
+};
+
+/**
+ *  What the tray shows. Built by the frontend, which has the translations
+ *  and the theme colors.
+ */
+export type TrayModel = TrayModel_Serialize | TrayModel_Deserialize;
+
+/**
+ *  What the tray shows. Built by the frontend, which has the translations
+ *  and the theme colors.
+ */
+export type TrayModel_Deserialize = {
+	tooltip: string,
+	showLabel: string,
+	quitLabel: string,
+	/**  One entry per agent session, e.g. "Claude Code · project — waiting". */
+	sessions: TrayEntry[],
+	/**  A status icon (RGBA); `None` shows the app icon. */
+	icon?: TrayImage | null,
+};
+
+/**
+ *  What the tray shows. Built by the frontend, which has the translations
+ *  and the theme colors.
+ */
+export type TrayModel_Serialize = {
+	tooltip: string,
+	showLabel: string,
+	quitLabel: string,
+	/**  One entry per agent session, e.g. "Claude Code · project — waiting". */
+	sessions: TrayEntry[],
+	/**  A status icon (RGBA); `None` shows the app icon. */
+	icon: TrayImage | null,
+};
 
 /**  Snapshot of the open projects sent to the frontend. */
 export type WorkspaceState = WorkspaceState_Serialize | WorkspaceState_Deserialize;

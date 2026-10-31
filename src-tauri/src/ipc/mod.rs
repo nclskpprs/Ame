@@ -9,6 +9,8 @@ use tauri::Wry;
 use tauri_specta::{Builder, collect_commands, collect_events};
 
 use crate::agents::commands as agents;
+use crate::background::TrayAction;
+use crate::background::commands as background;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::git::commands as git;
@@ -64,8 +66,12 @@ pub fn builder() -> Builder<Wry> {
             pty::resize_session,
             pty::stop_session,
             pty::close_session,
+            background::hide_window,
+            background::show_window,
+            background::quit_app,
+            background::set_tray,
         ])
-        .events(collect_events![FsChanged, SessionsChanged])
+        .events(collect_events![FsChanged, SessionsChanged, TrayAction])
 }
 
 /// Writes the TypeScript bindings to [`BINDINGS_PATH`].

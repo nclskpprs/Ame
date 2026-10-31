@@ -4,6 +4,8 @@ use std::collections::HashMap;
 
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System};
 
+use crate::pty::tree;
+
 /// Usage of one process tree.
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub struct TreeUsage {
@@ -12,9 +14,6 @@ pub struct TreeUsage {
     /// Resident memory in bytes.
     pub memory: u64,
 }
-
-/// Upper bound of processes visited per tree, against cycles from reused pids.
-const MAX_TREE_SIZE: usize = 10_000;
 
 pub struct CpuMonitor {
     system: System,
@@ -38,29 +37,15 @@ impl CpuMonitor {
             ProcessRefreshKind::nothing().with_cpu().with_memory(),
         );
         let processes = self.system.processes();
-        let mut children: HashMap<Pid, Vec<Pid>> = HashMap::new();
-        for (pid, process) in processes {
-            if let Some(parent) = process.parent() {
-                children.entry(parent).or_default().push(*pid);
-            }
-        }
+        let children = tree::children(&self.system);
         roots
             .iter()
             .map(|&root| {
                 let mut usage = TreeUsage::default();
-                let mut stack = vec![Pid::from_u32(root)];
-                let mut visited = 0;
-                while let Some(pid) = stack.pop() {
-                    visited += 1;
-                    if visited > MAX_TREE_SIZE {
-                        break;
-                    }
+                for pid in tree::tree(&children, Pid::from_u32(root)) {
                     if let Some(process) = processes.get(&pid) {
                         usage.cpu += process.cpu_usage();
                         usage.memory += process.memory();
-                    }
-                    if let Some(kids) = children.get(&pid) {
-                        stack.extend(kids.iter().copied());
                     }
                 }
                 (root, usage)

@@ -82,6 +82,11 @@ and this project adheres to
   finishes a longer task or fails (can be turned off in the settings or
   muted per project in its context menu), and the number of waiting agents
   on the dock/taskbar icon.
+- Closing the window while agents run keeps Ame running in the
+  background: a tray icon lists the agents and their state, and starting
+  Ame again brings the window back. Ctrl/Cmd+Q quits and ends all agents,
+  including programs they started in the background (a dev server, a
+  watcher). Can be changed in the settings ("Closing the window").
 - Precise status for Claude Code: Ame starts it with its own hooks (your
   hooks and project settings stay untouched), so "done" and "waits for
   you" are reported by Claude Code itself, with its permission message.

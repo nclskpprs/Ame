@@ -65,6 +65,13 @@ class Notifier {
     });
   }
 
+  /** A one-off notice, e.g. that Ame keeps running in the background. */
+  hint(title: string, body: string): void {
+    void this.#allowed().then((allowed) => {
+      if (allowed) sendNotification({ title, body });
+    });
+  }
+
   #allowed(): Promise<boolean> {
     this.#permission ??= (async () =>
       (await isPermissionGranted()) || (await requestPermission()) === 'granted')().catch(
@@ -89,21 +96,28 @@ class Notifier {
 
 /** A small amber badge with the count, for the Windows taskbar. */
 async function overlayIcon(count: number, theme: ThemeName): Promise<Image> {
+  return Image.new(countBadge(count, theme, BADGE_SIZE), BADGE_SIZE, BADGE_SIZE);
+}
+
+/**
+ * An amber disc with the number of waiting agents as RGBA pixels, used for
+ * the Windows taskbar overlay and the tray icon.
+ */
+export function countBadge(count: number, theme: ThemeName, size: number): Uint8Array {
   const palette = palettes[theme];
-  const canvas = new OffscreenCanvas(BADGE_SIZE, BADGE_SIZE);
+  const canvas = new OffscreenCanvas(size, size);
   const context = canvas.getContext('2d');
   if (!context) throw new Error('no 2d context');
   context.fillStyle = palette.needsInput;
   context.beginPath();
-  context.arc(BADGE_SIZE / 2, BADGE_SIZE / 2, BADGE_SIZE / 2, 0, Math.PI * 2);
+  context.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
   context.fill();
   context.fillStyle = palettes.dark.bg;
-  context.font = 'bold 11px system-ui, sans-serif';
+  context.font = `bold ${Math.round(size * 0.7)}px system-ui, sans-serif`;
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(count > 9 ? '9+' : String(count), BADGE_SIZE / 2, BADGE_SIZE / 2 + 1);
-  const pixels = context.getImageData(0, 0, BADGE_SIZE, BADGE_SIZE).data;
-  return Image.new(new Uint8Array(pixels.buffer), BADGE_SIZE, BADGE_SIZE);
+  context.fillText(count > 9 ? '9+' : String(count), size / 2, size / 2 + size / 16);
+  return new Uint8Array(context.getImageData(0, 0, size, size).data.buffer);
 }
 
 export const notifier = new Notifier();

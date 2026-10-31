@@ -44,8 +44,10 @@ milestones and marked with 💡.
 - [x] Agent profiles (Claude Code, Codex, Gemini, OpenCode, Aider, generic
       shell) plus custom profiles; detect installed agents on the `PATH`
 - [x] Multiple sessions per project; sessions keep running in the background
-- [ ] 💡 Background daemon: PTY sessions live in a small Rust process and
-      survive a UI crash or close (like tmux)
+- [x] Keep running in the background (maintainer decision, ADR 0020):
+      closing the window hides it while agents run; tray icon with the
+      sessions, single instance, Mod+Q quits and ends all sessions and
+      everything they started
 - [x] 💡 Session resume: a resume command per profile (e.g.
       `claude --continue`), one click after a restart
 - [x] 💡 "Send to agent": select code → `path:line-range` plus the selection
@@ -112,6 +114,9 @@ milestones and marked with 💡.
 - [ ] Docs, screenshots, first publication
 
 ## Later
+
+- 💡 Background daemon: PTY sessions live in a small Rust process and
+  survive a crash of the app (like tmux); replaced for 0.1 by ADR 0020
 
 - File operations in the tree: new file/folder, rename, delete
 - Virtualized rendering for very large directories and search results

@@ -41,6 +41,10 @@ pub struct Settings {
     pub file_icons: bool,
     /// OS notifications when an agent needs input, is done or fails.
     pub notifications: bool,
+    /// What closing the window does while agents run.
+    pub close_action: CloseAction,
+    /// The hint that Ame keeps running in the background was shown.
+    pub background_hint_shown: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
     pub agents: Vec<AgentProfile>,
 }
@@ -56,6 +60,8 @@ impl Default for Settings {
             file_open: FileOpen::default(),
             file_icons: true,
             notifications: true,
+            close_action: CloseAction::default(),
+            background_hint_shown: false,
             agents: Vec::new(),
         }
     }
@@ -86,6 +92,16 @@ pub enum Density {
     #[default]
     Comfortable,
     Compact,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum CloseAction {
+    /// Hide the window while agents run; quitting ends them.
+    #[default]
+    Background,
+    /// Quit the app (after asking about running agents).
+    Quit,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]

@@ -9,6 +9,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 
 use super::session::{Session, SessionId, SessionInfo, SessionStatus, Spawned, lock};
+use super::tree;
 use crate::agents::adapters::endpoint::HookMessage;
 use crate::agents::cpu::CpuMonitor;
 use crate::agents::status::{AgentState, StatusConfig};
@@ -167,7 +168,7 @@ impl PtyManager {
 
     /// Asks the process to end; the session stays listed as exited.
     pub fn stop(&self, id: SessionId) -> Result<()> {
-        self.get(id)?.kill();
+        end_sessions(&[self.get(id)?]);
         Ok(())
     }
 
@@ -176,7 +177,7 @@ impl PtyManager {
         let session = lock(&self.inner.sessions)
             .remove(&id)
             .ok_or(Error::UnknownSession(id))?;
-        session.kill();
+        end_sessions(&[session]);
         self.inner.notify();
         Ok(())
     }
@@ -195,15 +196,28 @@ impl PtyManager {
         if removed.is_empty() {
             return;
         }
-        removed.iter().for_each(|session| session.kill());
+        end_sessions(&removed);
         self.inner.notify();
     }
 
     /// Ends every running process, e.g. when the app quits.
     pub fn shutdown(&self) {
         let sessions: Vec<_> = lock(&self.inner.sessions).values().cloned().collect();
-        sessions.iter().for_each(|session| session.kill());
+        end_sessions(&sessions);
     }
+}
+
+/// Ends the programs of the sessions and everything they started. The
+/// descendants go first: once a session's program ended, they belong to the
+/// init process and can no longer be found.
+fn end_sessions(sessions: &[Arc<Session>]) {
+    let roots: Vec<_> = sessions
+        .iter()
+        .filter(|session| session.is_running())
+        .filter_map(|session| session.pid())
+        .collect();
+    tree::end_descendants(&roots);
+    sessions.iter().for_each(|session| session.kill());
 }
 
 /// Re-evaluates the agent states and reports changes. Ends with the manager.
@@ -402,6 +416,34 @@ mod tests {
             manager.close(info.id),
             Err(Error::UnknownSession(_))
         ));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn closing_ends_what_the_program_started() {
+        let (manager, _exits) = manager();
+        let dir = tempfile::tempdir().unwrap();
+        let pid_file = dir.path().join("pid");
+        // `setsid` escapes the hangup of the terminal, like a daemonized server.
+        let script = format!(
+            "setsid sleep 300 & echo $! > '{}'; sleep 300",
+            pid_file.display()
+        );
+        let info = manager.spawn(spec("/bin/sh", &["-c", &script])).unwrap();
+        wait_until(|| std::fs::read_to_string(&pid_file).is_ok_and(|s| s.ends_with('\n')));
+        let pid: u32 = std::fs::read_to_string(&pid_file)
+            .unwrap()
+            .trim()
+            .parse()
+            .unwrap();
+        let alive = |pid: u32| {
+            std::path::Path::new(&format!("/proc/{pid}")).exists()
+                && !std::fs::read_to_string(format!("/proc/{pid}/stat"))
+                    .is_ok_and(|stat| stat.contains(") Z "))
+        };
+        assert!(alive(pid));
+        manager.close(info.id).unwrap();
+        wait_until(|| !alive(pid));
     }
 
     #[cfg(unix)]

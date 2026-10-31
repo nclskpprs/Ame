@@ -83,7 +83,13 @@
       "on": "On",
       "off": "Off"
     },
-    "saveFailed": "Could not save settings: {message}"
+    "saveFailed": "Could not save settings: {message}",
+    "closeAction": {
+      "label": "Closing the window",
+      "description": "While agents run, Ame can keep running in the background (open it again from the tray icon or by starting it). Quitting always ends the agents.",
+      "background": "Keep agents running",
+      "quit": "Quit"
+    }
   },
   "projectMenu": {
     "pin": "Pin",
@@ -127,7 +133,8 @@
     "showDashboard": "Show Dashboard",
     "showChanges": "Show Changes",
     "toggleDiff": "Toggle Inline Diff",
-    "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)"
+    "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)",
+    "quit": "Quit Ame"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -295,5 +302,16 @@
   "diff": {
     "keep": "Keep",
     "revert": "Revert"
+  },
+  "tray": {
+    "tooltipWaiting": "Ame — {count} waiting for you",
+    "tooltipWorking": "Ame — {count} working",
+    "session": "{agent} · {project} — {state}",
+    "show": "Show Ame",
+    "quit": "Quit Ame"
+  },
+  "background": {
+    "hintTitle": "Ame keeps running",
+    "hintBody": "Your agents keep working in the background. Quit with {shortcut} or from the tray icon."
   }
 }

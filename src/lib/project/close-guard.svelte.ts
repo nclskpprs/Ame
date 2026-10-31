@@ -1,4 +1,4 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { commands } from '$lib/ipc/bindings';
 import type { SessionInfo } from '$lib/ipc/types';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { isRunning, sessions as terminals } from '$lib/terminal/sessions.svelte';
@@ -51,6 +51,18 @@ class CloseGuard {
     await workspace.remove(path);
   }
 
+  /**
+   * Quits the app (Mod+Q, the tray, the macOS app menu), or asks first if
+   * files are unsaved or agents run. The window is shown for the question.
+   */
+  async quit(): Promise<void> {
+    if (this.holdQuit()) {
+      await commands.showWindow();
+      return;
+    }
+    await this.#exit();
+  }
+
   /** Called when the window is about to close; returns whether to keep it open. */
   holdQuit(): boolean {
     if (this.#quitting) return false;
@@ -74,10 +86,14 @@ class CloseGuard {
     if (request.kind === 'project') {
       await workspace.remove(request.path);
     } else {
-      this.#quitting = true;
-      await workspace.flushLayouts();
-      await getCurrentWindow().destroy();
+      await this.#exit();
     }
+  }
+
+  async #exit(): Promise<void> {
+    this.#quitting = true;
+    await workspace.flushLayouts();
+    await commands.quitApp();
   }
 
   cancel(): void {

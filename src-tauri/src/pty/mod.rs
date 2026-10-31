@@ -11,6 +11,7 @@ pub mod manager;
 pub mod modes;
 pub mod ring;
 pub mod session;
+pub mod tree;
 pub mod utf8;
 
 pub use manager::{PtyManager, SpawnSpec};

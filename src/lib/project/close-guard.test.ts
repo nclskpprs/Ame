@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const destroy = vi.fn(async () => {});
+const quitApp = vi.fn(async () => {});
+const showWindow = vi.fn(async () => {});
 const remove = vi.fn(async (_path: string) => {});
 
 interface FakeFile {
@@ -23,7 +24,7 @@ class FakeEditors {
 
 const sessions = new Map<string, { path: string; editors: FakeEditors }>();
 
-vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ destroy }) }));
+vi.mock('$lib/ipc/bindings', () => ({ commands: { quitApp, showWindow } }));
 vi.mock('$lib/stores/workspace.svelte', () => ({
   workspace: { remove, flushLayouts: async () => {} },
 }));
@@ -98,6 +99,15 @@ describe('closeGuard', () => {
     expect(closeGuard.request).toEqual({ kind: 'project', path: '/a' });
   });
 
+  it('quitting with unsaved files asks first and shows the window', async () => {
+    addSession('/a', ['a.ts']);
+    await closeGuard.quit();
+    expect(closeGuard.request).toEqual({ kind: 'app' });
+    expect(showWindow).toHaveBeenCalled();
+    expect(quitApp).not.toHaveBeenCalled();
+    closeGuard.cancel();
+  });
+
   it('lets the window close when nothing is unsaved', () => {
     addSession('/a');
     expect(closeGuard.holdQuit()).toBe(false);
@@ -111,8 +121,8 @@ describe('closeGuard', () => {
     expect(closeGuard.request).toEqual({ kind: 'app' });
 
     await closeGuard.discardAndClose();
-    expect(destroy).toHaveBeenCalled();
-    // The second close request (from destroy) is not held again.
+    expect(quitApp).toHaveBeenCalled();
+    // Once quitting, nothing is held back again.
     expect(closeGuard.holdQuit()).toBe(false);
   });
 
@@ -137,5 +147,13 @@ describe('closeGuard', () => {
     terminalList.push({ id: 1, project: '/a', title: 'Shell', running: false });
     await closeGuard.closeProject('/a');
     expect(remove).toHaveBeenCalledWith('/a');
+  });
+
+  it('quits right away when nothing is unsaved or running', async () => {
+    quitApp.mockClear();
+    addSession('/a');
+    await closeGuard.quit();
+    expect(closeGuard.request).toBeNull();
+    expect(quitApp).toHaveBeenCalled();
   });
 });

@@ -1,6 +1,12 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
-  import type { Density, FileOpen, RainEffects, ThemePreference } from '$lib/ipc/bindings';
+  import type {
+    CloseAction,
+    Density,
+    FileOpen,
+    RainEffects,
+    ThemePreference,
+  } from '$lib/ipc/bindings';
   import {
     densityOptions,
     fileOpenOptions,
@@ -127,6 +133,22 @@
           ]}
           value={settings.value.notifications ? 'on' : 'off'}
           onchange={(value) => void settings.update({ notifications: value === 'on' })}
+        />
+      </div>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.closeAction.label')}</span>
+          <span class="description">{t('settings.closeAction.description')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-close-action"
+          label={t('settings.closeAction.label')}
+          options={[
+            { value: 'background', label: t('settings.closeAction.background') },
+            { value: 'quit', label: t('settings.closeAction.quit') },
+          ]}
+          value={settings.value.closeAction}
+          onchange={(value) => void settings.update({ closeAction: value as CloseAction })}
         />
       </div>
       <p class="intro">{t('settings.agents.description')}</p>

@@ -3,12 +3,12 @@
   import { formatShortcut } from '$lib/commands/shortcuts';
   import { shortcutOf } from '$lib/commands/registry';
   import { formatDuration } from '$lib/agents/duration';
+  import { showSession } from '$lib/agents/show';
   import { combinedState, stateLabels } from '$lib/agents/state';
   import { basename } from '$lib/fs/paths';
   import { t } from '$lib/i18n';
   import { commands, type AgentState } from '$lib/ipc/bindings';
   import type { SessionInfo } from '$lib/ipc/types';
-  import { sessionFor } from '$lib/project/session';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import { sessions } from '$lib/terminal/sessions.svelte';
@@ -58,11 +58,7 @@
   }
 
   function open(session: SessionInfo) {
-    const terminals = sessionFor(session.project).terminals;
-    terminals.activate(session.id);
-    terminals.show();
-    view.close(false);
-    void workspace.activate(session.project);
+    showSession(session.project, session.id);
   }
 
   function onkeydown(event: KeyboardEvent) {

@@ -189,6 +189,26 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Running in the background — implemented (M2)
+
+Module: `src-tauri/src/background/` (see
+[ADR 0020](decisions/0020-keep-running-in-the-background-instead-of-a-daemon.md)).
+
+- Closing the window: `App.svelte` asks `closeDecision()`
+  (`lib/background/close.ts`): with running sessions and
+  `closeAction: background` it calls `hide_window`; otherwise the close
+  guard decides. The first hide sends a hint notification.
+- Quitting: `closeGuard.quit()` (`Mod+Q`, tray, macOS app menu via
+  `ExitRequested`) asks inline if needed, then `quit_app` (`app.exit(0)`);
+  `RunEvent::Exit` ends all sessions.
+- Tray: `set_tray(TrayModel)` creates or updates the icon, tooltip and
+  menu; the frontend builds the model (`lib/background/tray.ts`) whenever a
+  session state changes. Menu choices come back as the `tray-action`
+  event (quit, show a session). `tauri-plugin-single-instance` and macOS
+  `Reopen` call `show_main_window`.
+- `pty/tree.rs`: stopping, closing or quitting sessions first ends the
+  descendants of their programs (`sysinfo`), then the programs.
+
 ## Agent profiles — implemented (M2)
 
 Module: `src-tauri/src/agents/`.

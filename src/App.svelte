@@ -27,7 +27,15 @@
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { currentTheme } from '$lib/theme/current.svelte';
   import { waitingCount } from '$lib/agents/state';
-  import { notifier } from '$lib/notify/notifier';
+  import { countBadge, notifier } from '$lib/notify/notifier';
+  import { showSession } from '$lib/agents/show';
+  import { closeDecision } from '$lib/background/close';
+  import { trayModel } from '$lib/background/tray';
+  import { shortcutOf } from '$lib/commands/registry';
+  import { formatShortcut } from '$lib/commands/shortcuts';
+  import { basename } from '$lib/fs/paths';
+  import { commands, events } from '$lib/ipc/bindings';
+  import { isRunning } from '$lib/terminal/sessions.svelte';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
@@ -38,6 +46,8 @@
     systemPrefersReducedMotion,
     watchSystemPreferences,
   } from '$lib/theme/theme';
+
+  const TRAY_ICON_SIZE = 32;
 
   let prefersDark = $state(systemPrefersDark());
   let reducedMotion = $state(systemPrefersReducedMotion());
@@ -117,12 +127,74 @@
 
   $effect(() => {
     const unlisten = getCurrentWindow().onCloseRequested(async (event) => {
-      if (closeGuard.holdQuit()) event.preventDefault();
-      // Pending layout changes (e.g. the open sessions) must reach the disk.
-      else await workspace.flushLayouts();
+      const decision = closeDecision(
+        settings.value.closeAction,
+        sessions.list.some(isRunning),
+        () => closeGuard.holdQuit(),
+      );
+      if (decision === 'close') {
+        // Pending layout changes (e.g. the open sessions) must reach the disk.
+        await workspace.flushLayouts();
+        return;
+      }
+      event.preventDefault();
+      if (decision === 'hide') await hideToBackground();
     });
     return () => void unlisten.then((stop) => stop());
   });
+
+  async function hideToBackground() {
+    await workspace.flushLayouts();
+    await commands.hideWindow();
+    if (settings.value.backgroundHintShown) return;
+    const quit = shortcutOf('app.quit');
+    notifier.hint(
+      t('background.hintTitle'),
+      t('background.hintBody', { shortcut: quit ? formatShortcut(quit) : '' }),
+    );
+    await settings.update({ backgroundHintShown: true });
+  }
+
+  $effect(() => {
+    const unlisten = events.trayAction.listen(({ payload }) => {
+      if (payload.action === 'quit') void closeGuard.quit();
+      else {
+        const session = sessions.list.find((s) => s.id === payload.id);
+        if (session) showSession(session.project, session.id);
+      }
+    });
+    return () => void unlisten.then((stop) => stop());
+  });
+
+  // The tray lists every session; it only changes when a state, a title or
+  // a project name changes.
+  let lastTray = '';
+  $effect(() => {
+    const list = sessions.list;
+    const theme = currentTheme.name;
+    const names = new Map(workspace.projects.map((p) => [p.path, p.name]));
+    untrack(() => {
+      const waiting = waitingCount(list);
+      const model = trayModel(list, (path) => names.get(path) ?? basename(path), null);
+      const key = JSON.stringify([model, waiting, theme]);
+      if (key === lastTray) return;
+      lastTray = key;
+      if (waiting) model.icon = trayIcon(waiting, theme);
+      void commands.setTray(model);
+    });
+  });
+
+  function trayIcon(count: number, theme: typeof currentTheme.name) {
+    try {
+      return {
+        rgba: Array.from(countBadge(count, theme, TRAY_ICON_SIZE)),
+        width: TRAY_ICON_SIZE,
+        height: TRAY_ICON_SIZE,
+      };
+    } catch {
+      return null;
+    }
+  }
 
   // Switching projects or opening a file (e.g. from the palette) leaves the
   // settings and the dashboard, so the result is visible.

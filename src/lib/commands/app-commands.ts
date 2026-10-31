@@ -261,6 +261,14 @@ export function registerAppCommands(): () => void {
       run: () => view.toggle('dashboard'),
     },
     {
+      id: 'app.quit',
+      title: 'commands.quit',
+      shortcut: 'Mod+Q',
+      // Ctrl+Q (XON) means nothing to agents, so it quits from a terminal too.
+      terminal: true,
+      run: () => closeGuard.quit(),
+    },
+    {
       id: 'settings.open',
       title: 'commands.openSettings',
       shortcut: 'Mod+,',

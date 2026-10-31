@@ -5,10 +5,10 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M3 — Status and dashboard is half done (status detection,
-  dashboard, notifications); M4 — Git covers status, diff, staging and
-  follow mode. The background daemon (M2) still waits for a maintainer
-  decision.
+- **Milestone:** M2 is complete (the daemon was replaced by running in the
+  background, ADR 0020). M3 — Status and dashboard: hooks adapter done,
+  animations, prompt queue, resource monitor and benchmarks open. M4 —
+  Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
@@ -20,6 +20,41 @@ is open, what comes next.
   3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M2: keep running in the background
+
+**Done**
+
+- Maintainer decision: instead of a daemon, closing the window hides it
+  while agents run; quitting ends them (ADR 0020).
+- `background/`: `hide_window`, `show_window`, `quit_app`, `set_tray`
+  commands, tray icon with a session menu, single instance, macOS reopen
+  and Cmd+Q through the close guard. Setting `closeAction` (settings
+  view), one-time hint notification.
+- `Mod+Q` "Quit Ame" (also from a focused terminal); the close guard
+  quits through the backend.
+- `pty/tree.rs`: ending a session also ends everything its program
+  started (SIGTERM / terminate via `sysinfo`); the CPU monitor shares the
+  tree walk.
+
+**Verified**
+
+- Tests: close decision, tray model, quit flow of the close guard, process
+  tree walk, and a PTY test where a `setsid` child of a session ends when
+  the session is closed.
+- Manually in `pnpm tauri dev` on WSLg (X11, driven with XTest from a
+  ctypes script): X with a running shell hides the window and the shell
+  keeps running; a second start shows the window and exits; `Ctrl+Q` (also
+  with the terminal focused) shows the inline guard and quitting ends the
+  app and the shell; X without running sessions closes the app.
+- `pnpm verify` green (400 frontend tests, 123 Rust tests).
+
+**Open**
+
+- The tray icon itself could not be seen under WSLg (no tray host); the
+  appindicator was created without errors. Check in the final review.
+- macOS (dock reopen, Cmd+Q routing) and Windows (tray click, Alt+F4)
+  untested.
 
 ### 2026-10-31 — M3: Claude Code hooks adapter
 

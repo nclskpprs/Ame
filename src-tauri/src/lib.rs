@@ -4,6 +4,7 @@
 //! overview of the modules.
 
 pub mod agents;
+pub mod background;
 pub mod error;
 pub mod fs;
 pub mod git;
@@ -17,6 +18,7 @@ use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
 use tauri_specta::Event;
 
 use agents::adapters::Adapters;
+use background::Tray;
 use fs::quick_open::QuickOpen;
 use fs::search::SearchControl;
 use fs::watcher::FsWatcher;
@@ -27,7 +29,7 @@ use workspace::projects::WorkspaceStore;
 use workspace::settings::SettingsStore;
 
 /// Label of the main window as defined in `tauri.conf.json`.
-const MAIN_WINDOW: &str = "main";
+pub(crate) const MAIN_WINDOW: &str = "main";
 
 /// Runs a command-line helper if the arguments ask for one (e.g. the hook
 /// helper `ame hook claude`) and returns its exit code; `None` starts the
@@ -48,6 +50,10 @@ pub fn run() {
     pty::env::warm_up();
 
     let app = tauri::Builder::default()
+        // Must come first: a second start only shows the running app.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            background::show_main_window(app);
+        }))
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
@@ -73,6 +79,7 @@ pub fn run() {
             app.manage(WorkspaceStore::load(&paths.config_dir));
             app.manage(FsWatcher::new(app.handle().clone())?);
             app.manage(QuickOpen::default());
+            app.manage(Tray::default());
             app.manage(SearchControl::default());
             let handle = app.handle().clone();
             let pty = PtyManager::new(move |sessions| {
@@ -92,10 +99,26 @@ pub fn run() {
         .build(tauri::generate_context!());
 
     match app {
-        Ok(app) => app.run(|app, event| {
-            if let RunEvent::Exit = event {
-                app.state::<PtyManager>().shutdown();
+        Ok(app) => app.run(|app, event| match event {
+            RunEvent::Exit => app.state::<PtyManager>().shutdown(),
+            // Quitting from the OS (the macOS app menu, Cmd+Q) while the
+            // window still exists goes through the frontend's checks for
+            // unsaved files and running agents, which then call `quit_app`
+            // (that exit has a code). Closing the last window has no window
+            // left and exits right away.
+            RunEvent::ExitRequested {
+                code: None, api, ..
+            } if app.get_webview_window(MAIN_WINDOW).is_some() => {
+                api.prevent_exit();
+                background::show_main_window(app);
+                if let Err(err) = background::TrayAction::Quit.emit(app) {
+                    log::warn!("could not ask the window to quit: {err}");
+                }
             }
+            // A click on the dock icon brings a hidden window back.
+            #[cfg(target_os = "macos")]
+            RunEvent::Reopen { .. } => background::show_main_window(app),
+            _ => {}
         }),
         Err(err) => {
             eprintln!("error while running Ame: {err}");

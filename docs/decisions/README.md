@@ -25,3 +25,4 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0017](0017-html-context-menus.md)                                     | Context menus in HTML instead of native menus          | Accepted |
 | [0018](0018-pty-sessions-and-output-replay.md)                         | PTY sessions: raw output replay and throttled channels | Accepted |
 | [0019](0019-agent-hooks-via-the-app-binary-and-a-loopback-endpoint.md) | Agent hooks via the app binary and a loopback endpoint | Accepted |
+| [0020](0020-keep-running-in-the-background-instead-of-a-daemon.md)     | Keep running in the background instead of a daemon     | Accepted |

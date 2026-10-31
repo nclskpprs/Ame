@@ -82,6 +82,10 @@ and this project adheres to
   finishes a longer task or fails (can be turned off in the settings or
   muted per project in its context menu), and the number of waiting agents
   on the dock/taskbar icon.
+- Precise status for Claude Code: Ame starts it with its own hooks (your
+  hooks and project settings stay untouched), so "done" and "waits for
+  you" are reported by Claude Code itself, with its permission message.
+  Other agents keep the generic detection.
 - Git: changed, new, deleted and conflicted files are colored in the file
   tree with a status letter, and folders show the changes inside them. The
   status follows saves, file changes, window focus and working agents.

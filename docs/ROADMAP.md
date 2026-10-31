@@ -57,7 +57,7 @@ milestones and marked with 💡.
 - [x] Profile patterns for `needs_input`
 - [x] Dashboard view, status dots in the sidebar
 - [x] OS notifications + dock/taskbar badge (configurable per project)
-- [ ] Claude Code hooks adapter with helper CLI
+- [x] Claude Code hooks adapter with helper CLI
 - [ ] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
 - [ ] Performance benchmarks (RAM, startup time) in CI
 - [ ] 💡 Prompt queue per agent: queue follow-up prompts that are sent

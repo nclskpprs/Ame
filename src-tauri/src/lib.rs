@@ -16,6 +16,7 @@ pub mod workspace;
 use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
 use tauri_specta::Event;
 
+use agents::adapters::Adapters;
 use fs::quick_open::QuickOpen;
 use fs::search::SearchControl;
 use fs::watcher::FsWatcher;
@@ -27,6 +28,13 @@ use workspace::settings::SettingsStore;
 
 /// Label of the main window as defined in `tauri.conf.json`.
 const MAIN_WINDOW: &str = "main";
+
+/// Runs a command-line helper if the arguments ask for one (e.g. the hook
+/// helper `ame hook claude`) and returns its exit code; `None` starts the
+/// app. Must run before anything else, so helpers stay fast.
+pub fn run_cli() -> Option<i32> {
+    agents::adapters::cli::run(std::env::args_os().skip(1))
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -67,11 +75,16 @@ pub fn run() {
             app.manage(QuickOpen::default());
             app.manage(SearchControl::default());
             let handle = app.handle().clone();
-            app.manage(PtyManager::new(move |sessions| {
+            let pty = PtyManager::new(move |sessions| {
                 if let Err(err) = (SessionsChanged { sessions }).emit(&handle) {
                     log::warn!("could not emit session change: {err}");
                 }
+            });
+            let hooks = pty.clone();
+            app.manage(Adapters::start(&paths.config_dir, move |message| {
+                hooks.apply_hook(&message);
             }));
+            app.manage(pty);
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())

@@ -14,6 +14,7 @@ function agent(id: string, path: string | null, resumeArgs: string[] = []): Agen
       resumeArgs,
       needsInputPatterns: [],
       idleAfterMs: null,
+      adapter: null,
     },
     path,
     builtin: true,

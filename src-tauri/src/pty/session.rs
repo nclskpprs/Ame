@@ -13,6 +13,7 @@ use specta::Type;
 use super::modes::ModeTracker;
 use super::ring::RingBuffer;
 use super::utf8::Utf8Decoder;
+use crate::agents::adapters::{self, endpoint::HookMessage};
 use crate::agents::status::{AgentState, StatusConfig, StatusTracker};
 use crate::error::{Error, Result};
 
@@ -195,6 +196,19 @@ impl Session {
         info.state = state;
         info.attention = attention;
         changed
+    }
+
+    /// Applies a message of an adapter hook; returns whether the state
+    /// changed.
+    pub fn apply_hook(&self, message: &HookMessage, now: Instant) -> bool {
+        {
+            let mut status = lock(&self.status);
+            match adapters::signal(message, status.adapter_state()) {
+                Some(signal) => status.on_adapter(signal),
+                None => return false,
+            }
+        }
+        self.refresh_state(now)
     }
 
     /// The last line of output, see [`StatusTracker::last_line`].

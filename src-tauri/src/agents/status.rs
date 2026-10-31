@@ -1,7 +1,9 @@
-//! Generic agent status detection from terminal output, input and exit.
+//! Agent status detection from terminal output, input and exit, plus the
+//! signals of precise adapters.
 //!
-//! See *Agent status detection* in `docs/ARCHITECTURE.md`. Works for any
-//! program; agent profiles only add text patterns and the idle delay.
+//! See *Agent status detection* in `docs/ARCHITECTURE.md`. The heuristics
+//! work for any program; agent profiles only add text patterns and the idle
+//! delay. Adapter signals (e.g. Claude Code hooks) take precedence.
 
 use std::time::{Duration, Instant};
 
@@ -9,6 +11,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use super::adapters::{AdapterSignal, AdapterState};
 use super::signals::SignalParser;
 
 /// What an agent is doing, as shown in the sidebar, tabs and dashboard.
@@ -103,6 +106,9 @@ pub struct StatusTracker {
     message: Option<String>,
     cpu_busy: bool,
     exit: Option<bool>,
+    /// The last state an adapter reported, `None` without an adapter.
+    adapter: Option<AdapterState>,
+    adapter_message: Option<String>,
 }
 
 impl StatusTracker {
@@ -120,7 +126,23 @@ impl StatusTracker {
             message: None,
             cpu_busy: false,
             exit: None,
+            adapter: None,
+            adapter_message: None,
         }
+    }
+
+    /// A precise signal from an adapter, e.g. a Claude Code hook.
+    pub fn on_adapter(&mut self, signal: AdapterSignal) {
+        self.adapter = Some(signal.state());
+        self.adapter_message = match signal {
+            AdapterSignal::NeedsInput(message) => message,
+            AdapterSignal::Working | AdapterSignal::Idle => None,
+        };
+    }
+
+    /// The state the adapter reported last, if any.
+    pub fn adapter_state(&self) -> Option<AdapterState> {
+        self.adapter
     }
 
     pub fn on_output(&mut self, bytes: &[u8], now: Instant) {
@@ -152,6 +174,11 @@ impl StatusTracker {
         self.message = None;
         self.tail.clear();
         self.tail_checked = true;
+        // Answering the agent's question lets it carry on.
+        if self.adapter == Some(AdapterState::NeedsInput) {
+            self.adapter = Some(AdapterState::Working);
+            self.adapter_message = None;
+        }
     }
 
     pub fn on_exit(&mut self, success: bool) {
@@ -176,12 +203,33 @@ impl StatusTracker {
         line.chars().take(MAX_LINE_CHARS).collect()
     }
 
-    /// The text of the last terminal notification, if it was not answered yet.
+    /// The text of the last notification, if it was not answered yet.
     pub fn message(&self) -> Option<&str> {
-        self.message.as_deref()
+        match self.adapter {
+            Some(AdapterState::NeedsInput) => {
+                self.adapter_message.as_deref().or(self.message.as_deref())
+            }
+            Some(AdapterState::Idle) => None,
+            Some(AdapterState::Working) | None => self.message.as_deref(),
+        }
     }
 
+    /// The combined state: an adapter's word wins, except that the process
+    /// exit always counts and that an agent the adapter still thinks of as
+    /// working turns idle once the heuristics see it quiet (e.g. after an
+    /// interrupt, for which Claude Code sends no hook).
     pub fn state(&mut self, now: Instant) -> AgentState {
+        let heuristic = self.heuristic_state(now);
+        match (self.adapter, heuristic) {
+            (_, AgentState::Exited | AgentState::Error) | (None, _) => heuristic,
+            (Some(AdapterState::NeedsInput), _) => AgentState::NeedsInput,
+            (Some(AdapterState::Idle), _) => AgentState::Idle,
+            (Some(AdapterState::Working), AgentState::NeedsInput | AgentState::Idle) => heuristic,
+            (Some(AdapterState::Working), _) => AgentState::Working,
+        }
+    }
+
+    fn heuristic_state(&mut self, now: Instant) -> AgentState {
         if let Some(success) = self.exit {
             return if success {
                 AgentState::Exited
@@ -341,6 +389,55 @@ mod tests {
         assert_eq!(status.last_line(), "second line");
         status.on_input(t0 + ms(10));
         assert_eq!(status.last_line(), "second line");
+    }
+
+    #[test]
+    fn adapter_signals_win_over_the_heuristics() {
+        let (mut status, t0) = tracker(&[]);
+        status.on_adapter(AdapterSignal::Idle);
+        // Redraws of an idle agent are not work.
+        status.on_output(b"redraw", t0 + ms(100));
+        assert_eq!(status.state(t0 + ms(200)), AgentState::Idle);
+        // A bell after the agent finished is not a question.
+        status.on_output(b"\x07", t0 + ms(300));
+        assert_eq!(status.state(t0 + ms(1000)), AgentState::Idle);
+        assert_eq!(status.message(), None);
+
+        status.on_adapter(AdapterSignal::Working);
+        status.on_output(b"thinking", t0 + ms(1100));
+        assert_eq!(status.state(t0 + ms(1200)), AgentState::Working);
+
+        status.on_adapter(AdapterSignal::NeedsInput(Some("Allow Bash?".into())));
+        status.on_output(b"spinner", t0 + ms(1300));
+        assert_eq!(status.state(t0 + ms(1350)), AgentState::NeedsInput);
+        assert_eq!(status.message(), Some("Allow Bash?"));
+    }
+
+    #[test]
+    fn answering_an_adapter_question_means_working() {
+        let (mut status, t0) = tracker(&[]);
+        status.on_adapter(AdapterSignal::NeedsInput(None));
+        status.on_input(t0 + ms(100));
+        assert_eq!(status.adapter_state(), Some(AdapterState::Working));
+        status.on_output(b"running", t0 + ms(500));
+        assert_eq!(status.state(t0 + ms(600)), AgentState::Working);
+    }
+
+    #[test]
+    fn a_quiet_agent_is_idle_even_without_the_stop_signal() {
+        let (mut status, t0) = tracker(&[]);
+        status.on_adapter(AdapterSignal::Working);
+        status.on_output(b"Interrupted", t0);
+        assert_eq!(status.state(t0 + ms(500)), AgentState::Working);
+        assert_eq!(status.state(t0 + ms(1500)), AgentState::Idle);
+    }
+
+    #[test]
+    fn the_exit_wins_over_the_adapter() {
+        let (mut status, t0) = tracker(&[]);
+        status.on_adapter(AdapterSignal::NeedsInput(None));
+        status.on_exit(false);
+        assert_eq!(status.state(t0), AgentState::Error);
     }
 
     #[test]

@@ -66,6 +66,7 @@
       resumeArgs: splitArgs(draft.resumeArgs),
       needsInputPatterns: previous?.needsInputPatterns ?? [],
       idleAfterMs: previous?.idleAfterMs ?? null,
+      adapter: previous?.adapter ?? null,
     };
     draft = null;
     await settings.update({ agents: [...custom.filter((p) => p.id !== id), profile] });

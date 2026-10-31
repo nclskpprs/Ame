@@ -156,6 +156,11 @@ export type AgentProfile_Deserialize = {
 	needsInputPatterns?: string[],
 	/**  Milliseconds without output after which the agent counts as idle. */
 	idleAfterMs?: number | null,
+	/**
+	 *  Precise status adapter, e.g. `claude-hooks` (see
+	 *  `agents::adapters`). `None` uses the heuristics only.
+	 */
+	adapter?: string | null,
 };
 
 /**  How to start an agent (or a shell) in a terminal session. */
@@ -184,6 +189,11 @@ export type AgentProfile_Serialize = {
 	needsInputPatterns: string[],
 	/**  Milliseconds without output after which the agent counts as idle. */
 	idleAfterMs: number | null,
+	/**
+	 *  Precise status adapter, e.g. `claude-hooks` (see
+	 *  `agents::adapters`). `None` uses the heuristics only.
+	 */
+	adapter: string | null,
 };
 
 /**  What an agent is doing, as shown in the sidebar, tabs and dashboard. */

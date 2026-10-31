@@ -5,6 +5,8 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use super::adapters::CLAUDE_HOOKS;
+
 /// Id of the profile that starts the user's default shell.
 pub const SHELL_PROFILE: &str = "shell";
 
@@ -30,6 +32,9 @@ pub struct AgentProfile {
     pub needs_input_patterns: Vec<String>,
     /// Milliseconds without output after which the agent counts as idle.
     pub idle_after_ms: Option<u32>,
+    /// Precise status adapter, e.g. `claude-hooks` (see
+    /// `agents::adapters`). `None` uses the heuristics only.
+    pub adapter: Option<String>,
 }
 
 fn profile(
@@ -53,13 +58,16 @@ fn profile(
 /// The profiles Ame knows out of the box.
 pub fn builtin_profiles() -> Vec<AgentProfile> {
     vec![
-        profile(
-            "claude",
-            "Claude Code",
-            "claude",
-            &["--continue"],
-            &["Do you want to", r"❯ 1\. Yes", "Would you like to"],
-        ),
+        AgentProfile {
+            adapter: Some(CLAUDE_HOOKS.to_owned()),
+            ..profile(
+                "claude",
+                "Claude Code",
+                "claude",
+                &["--continue"],
+                &["Do you want to", r"❯ 1\. Yes", "Would you like to"],
+            )
+        },
         profile(
             "codex",
             "Codex CLI",
@@ -99,6 +107,7 @@ pub fn builtin_profiles() -> Vec<AgentProfile> {
 /// Built-in profiles with the custom ones from the settings applied: a custom
 /// profile replaces the built-in one with the same id, others are added
 /// before the shell. Custom profiles without an id or a command are ignored.
+/// A replacement without an `adapter` keeps the one of the built-in profile.
 pub fn merged_profiles(custom: &[AgentProfile]) -> Vec<AgentProfile> {
     let mut profiles = builtin_profiles();
     for profile in custom {
@@ -112,6 +121,11 @@ pub fn merged_profiles(custom: &[AgentProfile]) -> Vec<AgentProfile> {
             profile.name.clone_from(&profile.id);
         }
         if let Some(existing) = profiles.iter_mut().find(|p| p.id == profile.id) {
+            // Profiles saved before the adapter existed keep the built-in
+            // one; an empty string turns it off.
+            if profile.adapter.is_none() {
+                profile.adapter = existing.adapter.take();
+            }
             *existing = profile;
         } else {
             let shell = profiles
@@ -142,6 +156,7 @@ mod tests {
         ids.dedup();
         assert_eq!(ids.len(), profiles.len());
         assert!(can_resume(&profiles[0]));
+        assert_eq!(profiles[0].adapter.as_deref(), Some(CLAUDE_HOOKS));
         for profile in &profiles {
             for pattern in &profile.needs_input_patterns {
                 assert!(regex::Regex::new(pattern).is_ok(), "{pattern}");
@@ -172,6 +187,7 @@ mod tests {
         let profiles = merged_profiles(&custom);
         let claude = profiles.iter().find(|p| p.id == "claude").unwrap();
         assert_eq!(claude.name, "Claude (work)");
+        assert_eq!(claude.adapter.as_deref(), Some(CLAUDE_HOOKS));
         assert!(!can_resume(claude));
         let ids: Vec<_> = profiles.iter().map(|p| p.id.as_str()).collect();
         assert_eq!(ids[ids.len() - 2..], ["mine", SHELL_PROFILE]);

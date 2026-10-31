@@ -47,7 +47,8 @@ the architecture changes and record decisions as ADRs in
 ## Repository layout
 
 ```
-Cargo.toml            Cargo workspace (members: src-tauri, later the helper CLI)
+Cargo.toml            Cargo workspace (member: src-tauri; the hook helper is
+                      a subcommand of the app binary, `ame hook <agent>`)
 package.json          frontend + tooling (pnpm)
 src-tauri/            Rust backend
   src/
@@ -210,7 +211,7 @@ Module: `src-tauri/src/agents/`.
   with its resume arguments. After a mere reload of the web view the backend
   still has the sessions, so nothing is offered.
 
-## Agent status detection — implemented (M3, layers 1 and 2)
+## Agent status detection — implemented (M3)
 
 States: `starting` · `working` · `needs_input` · `idle` (done) · `exited` ·
 `error`.
@@ -229,14 +230,16 @@ Three layers combine into one result:
    matched against the last screen lines (e.g. confirmation prompts) →
    `needs_input`.
 3. **Precise adapters** (optional): agents with a hook or notify system report
-   their status directly. For Claude Code via its hooks (`UserPromptSubmit`,
-   `Notification`, `Stop`, `SessionStart`/`SessionEnd`). The app sets an
-   environment variable with the session ID per session and opens a small
-   local endpoint (Unix socket, named pipe on Windows) that a bundled helper
-   CLI calls. Other agents follow the same pattern where they support hooks
-   or notify commands.
+   their status directly. For Claude Code via its hooks (`SessionStart`,
+   `UserPromptSubmit`, `PreCompact`, `Notification`, `Stop`). Each session
+   gets its id in `AME_SESSION_ID`; the hooks run the Ame executable as a
+   helper (`ame hook claude`), which reports to a local endpoint (loopback
+   TCP with a token, see
+   [ADR 0019](decisions/0019-agent-hooks-via-the-app-binary-and-a-loopback-endpoint.md)).
+   Other agents can follow the same pattern where they support hooks or
+   notify commands.
 
-Adapter signals take precedence over heuristics. Changes to `needs_input` or
+Adapter signals take precedence over heuristics (details below). Changes to `needs_input` or
 `idle` trigger an OS notification and a badge (can be disabled per project).
 
 Implementation (`src-tauri/src/agents/`):
@@ -259,6 +262,18 @@ Implementation (`src-tauri/src/agents/`):
   `state` and `attention` (the notification text).
 - Profiles have `needsInputPatterns` and `idleAfterMs`; common yes/no
   prompts (`(y/n)`, `[y/N]`, …) are always detected.
+- Adapters (`agents/adapters/`): `Adapters::start` runs the `endpoint`
+  (one JSON line per connection: protocol version, token, session, agent,
+  event, detail, message) and writes `adapters/claude-settings.json` into
+  the config dir. Profiles with `adapter: "claude-hooks"` start with
+  `--settings <that file>` plus `AME_HOOK` and `AME_HOOK_TOKEN`. `cli.rs`
+  is the helper (`main.rs` runs it before Tauri starts; it prints nothing
+  and always exits with 0); `claude.rs` maps events to signals.
+  `PtyManager::apply_hook` passes them to the session's `StatusTracker`:
+  the adapter's last signal wins, except that the exit always counts and
+  that "working" turns idle once the heuristics see the agent quiet (an
+  interrupt sends no `Stop`). Input while the adapter says "needs input"
+  means working again.
 - Dashboard (`Dashboard.svelte`, an overlay of the main area like the
   settings): one card per session, most urgent first; the last output line
   comes from `session_previews`, polled every second only while the

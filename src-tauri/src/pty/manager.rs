@@ -9,6 +9,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 
 use super::session::{Session, SessionId, SessionInfo, SessionStatus, Spawned, lock};
+use crate::agents::adapters::endpoint::HookMessage;
 use crate::agents::cpu::CpuMonitor;
 use crate::agents::status::{AgentState, StatusConfig};
 use crate::error::{Error, Result};
@@ -151,6 +152,17 @@ impl PtyManager {
             .get(&id)
             .cloned()
             .ok_or(Error::UnknownSession(id))
+    }
+
+    /// Applies a message of an adapter hook to its session. Messages for
+    /// unknown or exited sessions are ignored.
+    pub fn apply_hook(&self, message: &HookMessage) {
+        let Ok(session) = self.get(message.session) else {
+            return;
+        };
+        if session.is_running() && session.apply_hook(message, Instant::now()) {
+            self.inner.notify();
+        }
     }
 
     /// Asks the process to end; the session stays listed as exited.

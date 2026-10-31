@@ -9,6 +9,7 @@ use tauri_specta::Event;
 use super::env;
 use super::manager::{PtyManager, SpawnSpec};
 use super::session::{OutputSink, SessionId, SessionInfo};
+use crate::agents::adapters::Adapters;
 use crate::agents::detect;
 use crate::agents::profiles::merged_profiles;
 use crate::agents::status::StatusConfig;
@@ -38,6 +39,7 @@ pub async fn start_session(
     store: State<'_, WorkspaceStore>,
     settings: State<'_, SettingsStore>,
     pty: State<'_, PtyManager>,
+    adapters: State<'_, Adapters>,
     project: String,
     profile: String,
     resume: bool,
@@ -50,13 +52,16 @@ pub async fn start_session(
         .find(|p| p.id == profile)
         .ok_or(Error::UnknownProfile(profile))?;
     let pty = pty.inner().clone();
+    let launch = adapters.launch(profile.adapter.as_deref());
     blocking(move || {
         let (program, mut args) = detect::program(&profile);
         if resume {
             args.extend(profile.resume_args.iter().cloned());
         }
+        args.extend(launch.args);
         let mut env = env::session_env();
         env.extend(profile.env.clone());
+        env.extend(launch.env);
         let status = StatusConfig::new(profile.idle_after_ms, &profile.needs_input_patterns);
         pty.spawn(SpawnSpec {
             project,

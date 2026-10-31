@@ -14,13 +14,47 @@ is open, what comes next.
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M3: Claude Code hooks adapter with a helper CLI.
-  2. M3: rain status animations and the prompt drop, prompt queue,
+  1. M3: rain status animations and the prompt drop, prompt queue,
      resource monitor, performance benchmarks in CI.
-  3. M4: checkpoints before every prompt, review mode.
-  4. M5: scripts; M5b: project groups for agents.
+  2. M4: checkpoints before every prompt, review mode.
+  3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-10-31 — M3: Claude Code hooks adapter
+
+**Done**
+
+- `agents/adapters/` (ADR 0019): a loopback TCP endpoint with a random
+  token; the hook helper as a subcommand of the app binary
+  (`ame hook claude`, run before Tauri starts, silent, always exit 0);
+  `claude-settings.json` in the config dir, passed with
+  `claude --settings`. Profile field `adapter` (`claude-hooks` for the
+  built-in Claude Code profile; edited profiles keep it).
+- `StatusTracker` combines adapter signals with the heuristics: the
+  adapter wins, the exit always counts, a quiet agent turns idle without a
+  `Stop` (interrupts), answering a question means working.
+
+**Verified**
+
+- Unit tests for the endpoint (token, version, garbage), the event mapping,
+  the settings file, the helper and the state combination; an integration
+  test (`src-tauri/tests/hooks.rs`) runs the real `ame hook claude` from a
+  PTY session that keeps printing and sees the session turn to "needs
+  input" with Claude's message.
+- The helper takes about 20 ms (debug build, Linux) and prints nothing.
+- `pnpm verify` green.
+
+**Open**
+
+- Not tried with a real Claude Code session (it would use the
+  maintainer's account): worth checking in the final review that
+  `claude --settings` loads the hooks (`/hooks` in Claude Code lists them)
+  and that the states follow.
+- Windows: hooks run with Git Bash; without it (PowerShell) the hook fails
+  silently and the heuristics remain. macOS and Windows untested.
+- Other agents (Codex `notify`, Gemini CLI hooks) could use the same
+  helper; not done yet.
 
 ### 2026-10-31 — File icons, agent settings, M3 status and M4 git
 

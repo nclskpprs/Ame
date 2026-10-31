@@ -13,6 +13,16 @@ export const commands = {
 	 */
 	setSettings: (settings: Settings_Deserialize) => typedError<null, AppError>(__TAURI_INVOKE("set_settings", { settings })),
 	getAppInfo: () => __TAURI_INVOKE<AppInfo>("get_app_info"),
+	getWorkspace: () => __TAURI_INVOKE<WorkspaceState_Serialize>("get_workspace"),
+	/**  Shows the native folder picker. Returns `None` when it was cancelled. */
+	pickFolder: () => __TAURI_INVOKE<string | null>("pick_folder"),
+	addProject: (path: string) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("add_project", { path })),
+	removeProject: (project: string) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("remove_project", { project })),
+	setActiveProject: (project: string) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_active_project", { project })),
+	setProjectPinned: (project: string, pinned: boolean) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_pinned", { project, pinned })),
+	/**  Sets the group of a project; `null` or a blank name removes it. */
+	setProjectGroup: (project: string, group: string | null) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_group", { project, group })),
+	setProjectLayout: (project: string, layout: ProjectLayout_Deserialize) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_layout", { project, layout })),
 };
 
 /* Types */
@@ -22,7 +32,7 @@ export const commands = {
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -33,6 +43,62 @@ export type AppInfo = {
 };
 
 export type Density = "comfortable" | "compact";
+
+/**  An open project folder. */
+export type Project = Project_Serialize | Project_Deserialize;
+
+/**  The part of the UI state of a project that survives a restart. */
+export type ProjectLayout = ProjectLayout_Serialize | ProjectLayout_Deserialize;
+
+/**  The part of the UI state of a project that survives a restart. */
+export type ProjectLayout_Deserialize = {
+	/**  Open editor tabs as project-relative paths with `/` separators. */
+	openFiles?: string[],
+	activeFile?: string | null,
+	/**  Expanded directories in the file tree (project-relative). */
+	expandedDirs?: string[],
+	sidePanel?: SidePanel,
+	sidePanelWidth?: number,
+};
+
+/**  The part of the UI state of a project that survives a restart. */
+export type ProjectLayout_Serialize = {
+	/**  Open editor tabs as project-relative paths with `/` separators. */
+	openFiles: string[],
+	activeFile: string | null,
+	/**  Expanded directories in the file tree (project-relative). */
+	expandedDirs: string[],
+	sidePanel: SidePanel,
+	sidePanelWidth: number,
+};
+
+/**  An open project folder. */
+export type Project_Deserialize = {
+	/**  Absolute path of the project folder. Also identifies the project. */
+	path: string,
+	/**  Display name, the folder name by default. */
+	name: string,
+	/**  Optional group, e.g. "Client A". */
+	group?: string | null,
+	/**  Pinned projects are listed first. */
+	pinned: boolean,
+	/**  UI layout restored when the project is shown again. */
+	layout?: ProjectLayout_Deserialize,
+};
+
+/**  An open project folder. */
+export type Project_Serialize = {
+	/**  Absolute path of the project folder. Also identifies the project. */
+	path: string,
+	/**  Display name, the folder name by default. */
+	name: string,
+	/**  Optional group, e.g. "Client A". */
+	group: string | null,
+	/**  Pinned projects are listed first. */
+	pinned: boolean,
+	/**  UI layout restored when the project is shown again. */
+	layout: ProjectLayout_Serialize,
+};
 
 export type RainEffects = "on" | "subtle" | "off";
 
@@ -76,9 +142,32 @@ export type Settings_Serialize = {
 	density: Density,
 };
 
+export type SidePanel = "files" | "search";
+
 export type ThemePreference = 
 /**  Follow the operating system. */
 "system" | "dark" | "light";
+
+/**  Snapshot of the open projects sent to the frontend. */
+export type WorkspaceState = WorkspaceState_Serialize | WorkspaceState_Deserialize;
+
+/**  Snapshot of the open projects sent to the frontend. */
+export type WorkspaceState_Deserialize = {
+	version?: number,
+	/**  Projects in the order they were opened. */
+	projects?: Project_Deserialize[],
+	/**  Path of the project shown in the main area. */
+	active?: string | null,
+};
+
+/**  Snapshot of the open projects sent to the frontend. */
+export type WorkspaceState_Serialize = {
+	version: number,
+	/**  Projects in the order they were opened. */
+	projects: Project_Serialize[],
+	/**  Path of the project shown in the main area. */
+	active: string | null,
+};
 
 /* Tauri Specta runtime */
 async function typedError<T, E>(result: Promise<T>): Promise<{ status: "ok"; data: T } | { status: "error"; error: E }> {

@@ -1,10 +1,14 @@
-//! Tauri commands for settings and app information.
+//! Tauri commands for projects, settings and app information.
+
+use std::path::PathBuf;
 
 use serde::Serialize;
 use specta::Type;
 use tauri::{AppHandle, State};
+use tauri_plugin_dialog::DialogExt;
 
 use super::paths::AppPaths;
+use super::projects::{ProjectLayout, WorkspaceState, WorkspaceStore};
 use super::settings::{Settings, SettingsStore};
 use crate::error::Result;
 
@@ -40,4 +44,80 @@ pub fn get_app_info(app: AppHandle, paths: State<'_, AppPaths>) -> AppInfo {
         portable: paths.is_portable(),
         config_dir: paths.config_dir.display().to_string(),
     }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_workspace(store: State<'_, WorkspaceStore>) -> WorkspaceState {
+    store.snapshot()
+}
+
+/// Shows the native folder picker. Returns `None` when it was cancelled.
+#[tauri::command]
+#[specta::specta]
+pub async fn pick_folder(app: AppHandle) -> Option<String> {
+    let folder =
+        tauri::async_runtime::spawn_blocking(move || app.dialog().file().blocking_pick_folder())
+            .await
+            .ok()
+            .flatten()?;
+    folder
+        .into_path()
+        .ok()
+        .map(|path| path.display().to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn add_project(store: State<'_, WorkspaceStore>, path: String) -> Result<WorkspaceState> {
+    store.add(&PathBuf::from(path))
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn remove_project(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+) -> Result<WorkspaceState> {
+    store.remove(&project)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn set_active_project(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+) -> Result<WorkspaceState> {
+    store.set_active(&project)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn set_project_pinned(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    pinned: bool,
+) -> Result<WorkspaceState> {
+    store.set_pinned(&project, pinned)
+}
+
+/// Sets the group of a project; `null` or a blank name removes it.
+#[tauri::command]
+#[specta::specta]
+pub async fn set_project_group(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    group: Option<String>,
+) -> Result<WorkspaceState> {
+    store.set_group(&project, group)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn set_project_layout(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    layout: ProjectLayout,
+) -> Result<WorkspaceState> {
+    store.set_layout(&project, layout)
 }

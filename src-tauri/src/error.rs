@@ -17,6 +17,12 @@ pub enum Error {
     Serialization(String),
     #[error("no config directory is available on this system")]
     NoConfigDir,
+    #[error("not a directory: {0}")]
+    NotADirectory(String),
+    #[error("project is not open: {0}")]
+    UnknownProject(String),
+    #[error("path is outside of the project: {0}")]
+    PathOutsideProject(String),
 }
 
 impl From<std::io::Error> for Error {

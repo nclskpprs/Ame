@@ -25,6 +25,14 @@ pub fn builder() -> Builder<Wry> {
         commands::get_settings,
         commands::set_settings,
         commands::get_app_info,
+        commands::get_workspace,
+        commands::pick_folder,
+        commands::add_project,
+        commands::remove_project,
+        commands::set_active_project,
+        commands::set_project_pinned,
+        commands::set_project_group,
+        commands::set_project_layout,
     ])
 }
 

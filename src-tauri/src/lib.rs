@@ -16,6 +16,7 @@ pub mod workspace;
 use tauri::{App, Manager, WebviewWindowBuilder};
 
 use workspace::paths::AppPaths;
+use workspace::projects::WorkspaceStore;
 use workspace::settings::SettingsStore;
 
 /// Label of the main window as defined in `tauri.conf.json`.
@@ -31,6 +32,7 @@ pub fn run() {
     }
 
     let result = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             if cfg!(debug_assertions) {
@@ -49,6 +51,7 @@ pub fn run() {
                 paths.source
             );
             app.manage(SettingsStore::load(&paths.config_dir));
+            app.manage(WorkspaceStore::load(&paths.config_dir));
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())

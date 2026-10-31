@@ -1,13 +1,12 @@
 //! Persistent user settings stored as `settings.json` in the config directory.
 
-use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use super::storage;
 use crate::error::Result;
 
 pub const SETTINGS_FILE: &str = "settings.json";
@@ -88,7 +87,7 @@ impl SettingsStore {
     /// defaults are used, so the app always starts.
     pub fn load(dir: &Path) -> Self {
         let path = dir.join(SETTINGS_FILE);
-        let current = read_settings(&path);
+        let current = storage::read_json(&path);
         Self {
             path,
             current: Mutex::new(current),
@@ -106,8 +105,7 @@ impl SettingsStore {
     /// Replaces the settings and writes them to disk atomically.
     pub fn set(&self, settings: Settings) -> Result<()> {
         let mut current = self.lock();
-        let json = serde_json::to_string_pretty(&settings)?;
-        write_atomic(&self.path, format!("{json}\n").as_bytes())?;
+        storage::write_json(&self.path, &settings)?;
         *current = settings;
         Ok(())
     }
@@ -121,51 +119,10 @@ impl SettingsStore {
     }
 }
 
-fn read_settings(path: &Path) -> Settings {
-    let text = match fs::read_to_string(path) {
-        Ok(text) => text,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Settings::default(),
-        Err(err) => {
-            log::warn!("could not read {}: {err}; using defaults", path.display());
-            return Settings::default();
-        }
-    };
-
-    match serde_json::from_str::<Settings>(&text) {
-        Ok(settings) => settings,
-        Err(err) => {
-            let backup = path.with_file_name(CORRUPT_SETTINGS_FILE);
-            log::warn!(
-                "could not parse {}: {err}; moving it to {} and using defaults",
-                path.display(),
-                backup.display()
-            );
-            if let Err(err) = fs::rename(path, &backup) {
-                log::warn!("could not move corrupt settings file: {err}");
-            }
-            Settings::default()
-        }
-    }
-}
-
-/// Writes `bytes` to a temporary file next to `path` and renames it over
-/// `path`, so a crash never leaves a half-written file behind.
-fn write_atomic(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
-    if let Some(dir) = path.parent() {
-        fs::create_dir_all(dir)?;
-    }
-    let tmp = path.with_extension("json.tmp");
-    {
-        let mut file = fs::File::create(&tmp)?;
-        file.write_all(bytes)?;
-        file.sync_all()?;
-    }
-    fs::rename(&tmp, path)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     use tempfile::TempDir;
 
     #[test]

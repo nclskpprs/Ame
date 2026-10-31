@@ -1,14 +1,5 @@
-import {
-  commands,
-  type AppError,
-  type AppInfo,
-  // The complete settings as sent by the backend (all fields present).
-  type Settings_Serialize as Settings,
-} from '$lib/ipc/bindings';
-
-function describe(error: AppError): string {
-  return 'message' in error ? error.message : error.kind;
-}
+import { commands, type AppInfo } from '$lib/ipc/bindings';
+import { describeError, type Settings } from '$lib/ipc/types';
 
 /** User settings, loaded from and saved to the Rust backend. */
 class SettingsState {
@@ -47,7 +38,7 @@ class SettingsState {
     const result = await commands.setSettings(next);
     if (result.status === 'error') {
       this.#value = previous;
-      this.#saveError = describe(result.error);
+      this.#saveError = describeError(result.error);
     }
   }
 }

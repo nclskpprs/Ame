@@ -1,16 +1,23 @@
 {
   "app": {
     "name": "Ame",
-    "tagline": "Agent Manager Editor"
+    "tagline": "Agent Manager Editor",
+    "windowTitle": "{project} — Ame"
   },
   "sidebar": {
     "label": "Projects",
     "empty": "No projects yet",
-    "portableMode": "Portable mode"
+    "portableMode": "Portable mode",
+    "openFolder": "Open folder",
+    "pinned": "Pinned",
+    "projects": "Projects",
+    "groupName": "Group name",
+    "dismiss": "Dismiss"
   },
   "emptyState": {
     "title": "Open a folder to get started",
-    "description": "Ame keeps your projects and coding agents side by side. Opening projects arrives in a later milestone."
+    "description": "Ame keeps your projects and coding agents side by side.",
+    "openFolder": "Open folder"
   },
   "settings": {
     "theme": {
@@ -20,5 +27,28 @@
       "light": "Light"
     },
     "saveFailed": "Could not save settings: {message}"
+  },
+  "projectMenu": {
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "moveToGroup": "Move to group",
+    "newGroup": "New group…",
+    "removeFromGroup": "Remove from group",
+    "close": "Close project"
+  },
+  "commands": {
+    "openFolder": "Open Folder…",
+    "closeProject": "Close Project",
+    "nextProject": "Next Project",
+    "previousProject": "Previous Project",
+    "switchProject": "Switch to Project {n}",
+    "themeSystem": "Theme: System",
+    "themeDark": "Theme: Dark",
+    "themeLight": "Theme: Light",
+    "densityComfortable": "Density: Comfortable",
+    "densityCompact": "Density: Compact",
+    "rainOn": "Rain Effects: On",
+    "rainSubtle": "Rain Effects: Subtle",
+    "rainOff": "Rain Effects: Off"
   }
 }

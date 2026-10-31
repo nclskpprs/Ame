@@ -1,3 +1,7 @@
 //! Workspace: projects, settings and portable mode.
 //!
-//! Settings are planned for M0, projects for M1.
+//! Project handling is planned for M1.
+
+pub mod commands;
+pub mod paths;
+pub mod settings;

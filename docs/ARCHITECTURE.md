@@ -91,9 +91,10 @@ Module: `src-tauri/src/workspace/`.
 - Settings are stored as pretty-printed JSON in `settings.json`.
 - **Config directory resolution** (first match wins):
   1. `AME_CONFIG_DIR` environment variable (development, tests, benchmarks).
-  2. **Portable mode:** a file named `portable` next to the executable →
-     `<exe dir>/data/`. Intended for the portable Windows `.exe`, but works on
-     every platform.
+  2. **Portable mode:** a file named `portable` (or `portable.txt`) next to
+     the executable → `<exe dir>/data/`. The web view data then lives in
+     `<exe dir>/data/webview/` as well. Intended for the portable Windows
+     `.exe`, but works wherever the executable directory is writable.
   3. The OS app config directory from Tauri (`app_config_dir()`), e.g.
      `%APPDATA%\io.github.nclskpprs.ame\` on Windows,
      `~/.config/io.github.nclskpprs.ame/` on Linux and
@@ -103,21 +104,40 @@ Module: `src-tauri/src/workspace/`.
   that cannot be parsed is moved aside to `settings.corrupt.json` and
   defaults are used.
 - Every file carries a `version` for future migrations.
-- Commands: `get_settings`, `set_settings`, `get_app_info` (version,
-  portable flag, config dir).
-- Frontend state: `src/lib/stores/settings.svelte.ts`.
+- Commands: `get_settings`, `set_settings` (async, so the file write does
+  not block the main thread), `get_app_info` (version, portable flag, config
+  dir).
+- The main window is created in Rust (`"create": false` in
+  `tauri.conf.json`) so that portable mode can set its data directory.
+- Frontend state: `src/lib/stores/settings.svelte.ts`. Updates are applied
+  optimistically and rolled back if saving fails.
 
 ## Theming — implemented (M0)
 
 - Tokens for _Ame Dark_ and _Ame Light_ live in `src/lib/theme/tokens.ts`
   (values in [DESIGN.md](DESIGN.md)).
-- `applyTheme()` resolves the `theme` setting (`system`, `dark`, `light`)
-  with `prefers-color-scheme` and writes the tokens as CSS custom properties
-  (`--ame-bg`, `--ame-text`, …) onto `<html>`, plus `data-theme`,
-  `data-density` and `data-rain` attributes.
-- Components only use `var(--ame-…)`. CodeMirror and xterm.js themes will be
-  derived from the same token objects.
-- A unit test checks the WCAG AA contrast of the text tokens.
+- `src/lib/theme/theme.ts` resolves the `theme` setting (`system`, `dark`,
+  `light`) with `prefers-color-scheme` and the rain setting with
+  `prefers-reduced-motion`. `applyAppearance()` writes the tokens as CSS
+  custom properties (`--ame-bg`, `--ame-text`, …) onto `<html>`, plus
+  `data-theme`, `data-density` and `data-rain` attributes. It runs once
+  before the first render and again whenever a setting or a system
+  preference changes.
+- Spacing, radii and fonts are CSS custom properties in `src/app.css` and
+  change with `data-density`.
+- Components only use `var(--ame-…)`; a test rejects literal colors in
+  `.svelte` and `.css` files. CodeMirror and xterm.js themes will be derived
+  from the same token objects.
+- A unit test checks WCAG AA contrast: 4.5:1 for text tokens and 3:1 for
+  indicator tokens, on `bg` and `surface`.
+
+## Base layout — implemented (M0)
+
+- `App.svelte`: a grid of the sidebar and the main area.
+- `Sidebar.svelte`: app name, project list placeholder, theme switcher and a
+  portable-mode badge.
+- `EmptyState.svelte` with `DropMark.svelte` (the drop that is also a text
+  cursor).
 
 ## i18n — implemented (M0)
 

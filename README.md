@@ -49,9 +49,10 @@ the WebView2 runtime, which is preinstalled on Windows 10 and 11.
 
 ### Portable mode (Windows)
 
-Place an empty file named `portable` next to `ame.exe`. Ame then stores its
-settings in a `data` folder next to the executable instead of your user
-profile, so you can run it from a USB stick without installing anything.
+Place an empty file named `portable` (or `portable.txt`) next to `ame.exe`.
+Ame then stores its settings and web view data in a `data` folder next to
+the executable instead of your user profile, so you can run it from a USB
+stick without installing anything.
 
 ## Building from source
 

@@ -6,23 +6,25 @@ milestones and marked with 💡.
 
 ## M0 — Foundation
 
-- [ ] Repository, licenses, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY,
+- [x] Repository, licenses, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY,
       issue and PR templates
-- [ ] Tauri 2 + Svelte 5 + TypeScript scaffold with pnpm
-- [ ] Lint, format and test setup (Rust + frontend), pre-commit hooks
-- [ ] GitHub Actions: CI matrix macOS / Linux / Windows
-- [ ] i18n skeleton with `locales/en.json`
-- [ ] Settings storage including portable mode (Windows: config next to the
+- [x] Tauri 2 + Svelte 5 + TypeScript scaffold with pnpm
+- [x] Lint, format and test setup (Rust + frontend), pre-commit hooks
+- [x] GitHub Actions: CI matrix macOS / Linux / Windows (first run happens
+      with the first push)
+- [x] i18n skeleton with `locales/en.json`
+- [x] Settings storage including portable mode (Windows: config next to the
       `.exe` when a file named `portable` lies next to it)
-- [ ] AGENTS.md, CLAUDE.md, `docs/` structure
-- [ ] ADRs for the stack choices
-- [ ] Design tokens and both themes (Ame Dark, Ame Light)
+- [x] AGENTS.md, CLAUDE.md, `docs/` structure
+- [x] ADRs for the stack choices
+- [x] Design tokens and both themes (Ame Dark, Ame Light)
 
 ## M1 — Project shell
 
 - [ ] Open multiple projects, sidebar, layout restoration
-- [ ] Base layout (sidebar · main area · panels) with comfortable / compact
-      density
+- [ ] Base layout: panels (file tree · editor · terminal · changes) next to
+      the sidebar from M0; density switch in the UI (the tokens already
+      support comfortable / compact)
 - [ ] Lazy file tree with watcher
 - [ ] CodeMirror editor: view, edit, save; syntax highlighting for common
       languages (PHP, JS/TS, JSON, CSS, HTML, Markdown); theme derived from

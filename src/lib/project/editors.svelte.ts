@@ -153,6 +153,12 @@ export class EditorGroup {
     return true;
   }
 
+  /** Saves every tab with unsaved changes; returns whether all succeeded. */
+  async saveAll(): Promise<boolean> {
+    const results = await Promise.all(this.dirtyFiles.map((file) => this.save(file.path)));
+    return results.every(Boolean);
+  }
+
   /** Re-reads open files that changed on disk. */
   async onFsChanged(paths: readonly string[]): Promise<void> {
     const changed = this.files.filter((f) => f.status === 'ready' && paths.includes(f.path));

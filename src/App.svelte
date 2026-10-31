@@ -3,6 +3,7 @@
   import { untrack } from 'svelte';
   import { registerAppCommands } from '$lib/commands/app-commands';
   import { handleShortcut } from '$lib/commands/registry';
+  import CloseGuardBar from '$lib/components/CloseGuardBar.svelte';
   import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import Palette from '$lib/components/Palette.svelte';
@@ -12,6 +13,7 @@
   import { t } from '$lib/i18n';
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { palette } from '$lib/palette/palette.svelte';
+  import { closeGuard } from '$lib/project/close-guard.svelte';
   import { activeSession, listenToFileChanges, pruneSessions } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
@@ -36,6 +38,13 @@
   });
 
   $effect(() => pruneSessions(workspace.projects.map((p) => p.path)));
+
+  $effect(() => {
+    const unlisten = getCurrentWindow().onCloseRequested((event) => {
+      if (closeGuard.holdQuit()) event.preventDefault();
+    });
+    return () => void unlisten.then((stop) => stop());
+  });
 
   // Switching projects or opening a file (e.g. from the palette) leaves the
   // settings, so the result is visible.
@@ -75,15 +84,20 @@
 <div class="shell">
   <Sidebar />
   <main class="main">
-    {#if view.settingsOpen}
-      <SettingsView />
-    {:else if workspace.active}
-      {#key workspace.active.path}
-        <ProjectView project={workspace.active} />
-      {/key}
-    {:else}
-      <EmptyState />
+    {#if closeGuard.request}
+      <CloseGuardBar request={closeGuard.request} />
     {/if}
+    <div class="view">
+      {#if view.settingsOpen}
+        <SettingsView />
+      {:else if workspace.active}
+        {#key workspace.active.path}
+          <ProjectView project={workspace.active} />
+        {/key}
+      {:else}
+        <EmptyState />
+      {/if}
+    </div>
   </main>
 </div>
 
@@ -107,10 +121,18 @@
   }
 
   .main {
-    display: grid;
-    place-items: stretch;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
     min-height: 0;
     background: var(--ame-bg);
+  }
+
+  .view {
+    display: grid;
+    flex: 1;
+    place-items: stretch;
+    min-width: 0;
+    min-height: 0;
   }
 </style>

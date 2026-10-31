@@ -39,3 +39,7 @@ and this project adheres to
   selects. Single-click opening can be enabled in the settings.
 - Unsaved files are marked in the file tree (also on collapsed folders
   that contain them) and in the window title, in addition to the tab.
+- Closing a project or the app with unsaved files asks inline (save all,
+  discard, cancel) instead of losing them. Files are only ever saved
+  manually; "Save All Files" (Ctrl/Cmd+Alt+S) saves every open file of the
+  project.

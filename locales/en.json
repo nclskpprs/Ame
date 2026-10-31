@@ -81,7 +81,8 @@
     "searchInProject": "Search in Project",
     "showFiles": "Show Files",
     "commandPalette": "Show Command Palette",
-    "openSettings": "Open Settings"
+    "openSettings": "Open Settings",
+    "saveAllFiles": "Save All Files"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -137,5 +138,15 @@
     "placeholder": "Type a command, project or file name",
     "empty": "Nothing found",
     "kindProject": "Project"
+  },
+  "closeGuard": {
+    "quitPrompt": "Unsaved changes in {files}. Save before quitting?",
+    "closeProjectPrompt": "Unsaved changes in {files} ({project}). Save before closing the project?",
+    "moreFiles": "{files} and {count} more",
+    "saveAndQuit": "Save all and quit",
+    "quitWithoutSaving": "Quit without saving",
+    "saveAndClose": "Save all and close",
+    "closeWithoutSaving": "Close without saving",
+    "cancel": "Cancel"
   }
 }

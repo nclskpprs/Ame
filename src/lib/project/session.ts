@@ -68,6 +68,15 @@ export function activeSession(): ProjectSession | null {
   return path ? sessionFor(path) : null;
 }
 
+/** The session of a project if it was created already (does not create one). */
+export function existingSession(path: string): ProjectSession | undefined {
+  return sessions.get(path);
+}
+
+export function allSessions(): ProjectSession[] {
+  return [...sessions.values()];
+}
+
 export function sessionFor(path: string): ProjectSession {
   let session = sessions.get(path);
   if (!session) {

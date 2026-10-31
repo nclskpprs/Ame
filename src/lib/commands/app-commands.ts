@@ -1,6 +1,7 @@
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
+import { closeGuard } from '$lib/project/close-guard.svelte';
 import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
 import { view } from '$lib/stores/view.svelte';
@@ -65,7 +66,7 @@ export function registerAppCommands(): () => void {
       id: 'workspace.closeProject',
       title: 'commands.closeProject',
       when: hasProject,
-      run: () => workspace.activePath && workspace.remove(workspace.activePath),
+      run: () => workspace.activePath && closeGuard.closeProject(workspace.activePath),
     },
     {
       id: 'workspace.nextProject',
@@ -129,6 +130,13 @@ export function registerAppCommands(): () => void {
         const file = activeFile();
         if (file) return activeSession()?.editors.save(file.path);
       },
+    },
+    {
+      id: 'editor.saveAll',
+      title: 'commands.saveAllFiles',
+      shortcut: 'Mod+Alt+S',
+      when: () => (activeSession()?.editors.dirtyFiles.length ?? 0) > 0,
+      run: () => activeSession()?.editors.saveAll(),
     },
     {
       id: 'editor.close',

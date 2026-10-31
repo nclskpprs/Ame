@@ -4,6 +4,7 @@
   import { t } from '$lib/i18n';
   import type { Project } from '$lib/ipc/types';
   import { contextMenu } from '$lib/menu/context-menu.svelte';
+  import { closeGuard } from '$lib/project/close-guard.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
   import { workspace } from '$lib/stores/workspace.svelte';
   import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
@@ -63,7 +64,11 @@
         ],
       },
       { kind: 'separator' },
-      { kind: 'action', label: t('projectMenu.close'), run: () => workspace.remove(project.path) },
+      {
+        kind: 'action',
+        label: t('projectMenu.close'),
+        run: () => closeGuard.closeProject(project.path),
+      },
     ]);
   }
 

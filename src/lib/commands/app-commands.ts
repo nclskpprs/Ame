@@ -19,6 +19,7 @@ function switchTo(offset: number): void {
 const hasProject = () => workspace.active !== null;
 const activeFile = () => activeSession()?.editors.active ?? null;
 const hasSeveralProjects = () => workspace.projects.length > 1;
+const hasSeveralSessions = () => (activeSession()?.terminals.sessions.length ?? 0) > 1;
 
 /** Commands that are always available. Returns a cleanup function. */
 export function registerAppCommands(): () => void {
@@ -27,6 +28,7 @@ export function registerAppCommands(): () => void {
     title: 'commands.switchProject',
     shortcut: `Mod+${i + 1}`,
     hidden: true,
+    terminal: true,
     run: () => {
       const project = orderedProjects(workspace.projects)[i];
       if (project) void workspace.activate(project.path);
@@ -54,6 +56,7 @@ export function registerAppCommands(): () => void {
       title: 'commands.commandPalette',
       shortcut: 'Mod+Shift+P',
       hidden: true,
+      terminal: true,
       run: openPalette,
     },
     {
@@ -72,6 +75,7 @@ export function registerAppCommands(): () => void {
       id: 'workspace.nextProject',
       title: 'commands.nextProject',
       shortcut: 'Mod+Alt+ArrowDown',
+      terminal: true,
       when: hasSeveralProjects,
       run: () => switchTo(1),
     },
@@ -79,6 +83,7 @@ export function registerAppCommands(): () => void {
       id: 'workspace.previousProject',
       title: 'commands.previousProject',
       shortcut: 'Mod+Alt+ArrowUp',
+      terminal: true,
       when: hasSeveralProjects,
       run: () => switchTo(-1),
     },
@@ -103,6 +108,7 @@ export function registerAppCommands(): () => void {
       id: 'search.open',
       title: 'commands.searchInProject',
       shortcut: 'Mod+Shift+F',
+      terminal: true,
       when: hasProject,
       run: () => {
         const session = activeSession();
@@ -115,6 +121,7 @@ export function registerAppCommands(): () => void {
       id: 'files.show',
       title: 'commands.showFiles',
       shortcut: 'Mod+Shift+E',
+      terminal: true,
       when: hasProject,
       run: () => {
         const path = workspace.activePath;
@@ -135,6 +142,7 @@ export function registerAppCommands(): () => void {
       id: 'editor.saveAll',
       title: 'commands.saveAllFiles',
       shortcut: 'Mod+Alt+S',
+      terminal: true,
       when: () => (activeSession()?.editors.dirtyFiles.length ?? 0) > 0,
       run: () => activeSession()?.editors.saveAll(),
     },
@@ -149,9 +157,52 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'terminal.toggle',
+      title: 'commands.toggleTerminal',
+      shortcut: 'Mod+J',
+      terminal: true,
+      when: hasProject,
+      run: () => activeSession()?.terminals.toggle(),
+    },
+    {
+      id: 'terminal.newShell',
+      title: 'commands.newShellSession',
+      shortcut: 'Mod+Shift+T',
+      terminal: true,
+      when: hasProject,
+      run: () => activeSession()?.terminals.startShell(),
+    },
+    {
+      id: 'terminal.next',
+      title: 'commands.nextSession',
+      shortcut: 'Mod+Alt+ArrowRight',
+      terminal: true,
+      when: hasSeveralSessions,
+      run: () => activeSession()?.terminals.cycle(1),
+    },
+    {
+      id: 'terminal.previous',
+      title: 'commands.previousSession',
+      shortcut: 'Mod+Alt+ArrowLeft',
+      terminal: true,
+      when: hasSeveralSessions,
+      run: () => activeSession()?.terminals.cycle(-1),
+    },
+    {
+      id: 'terminal.close',
+      title: 'commands.closeSession',
+      when: () => activeSession()?.terminals.active != null,
+      run: () => {
+        const terminals = activeSession()?.terminals;
+        const active = terminals?.active;
+        if (terminals && active) return terminals.close(active.id);
+      },
+    },
+    {
       id: 'settings.open',
       title: 'commands.openSettings',
       shortcut: 'Mod+,',
+      terminal: true,
       run: () => view.openSettings(),
     },
     {

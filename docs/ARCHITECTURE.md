@@ -74,7 +74,9 @@ src/                  Svelte frontend
   lib/menu/           context menu state, keyboard navigation, placement
   lib/palette/        palette state, sources, fuzzy matching
   lib/project/        per-project sessions: file tree, editors, search
-  lib/stores/         app-wide state: settings, workspace, notices
+  lib/settings/       option lists for the settings view
+  lib/stores/         app-wide state: settings, workspace, view, notices
+  lib/terminal/       xterm.js view, input queue, terminal theme, sessions
   lib/theme/          design tokens and theme logic
 locales/en.json       source of truth for UI strings
 docs/                 vision, architecture, design, roadmap, progress, ADRs
@@ -144,8 +146,11 @@ Module: `src-tauri/src/workspace/`.
 - `Sidebar.svelte`: app name, open-folder button, project list (pinned,
   groups, ungrouped), notices, theme switcher, portable-mode badge.
 - `ProjectView.svelte`: side panel (Files / Search tabs) | `Resizer` |
-  `EditorPane` (tabs, inline bars, editor). The side panel width and tab
-  are part of the project layout.
+  `EditorPane` (tabs, inline bars, editor) above the terminal panel. The
+  side panel width and tab and the terminal panel height and visibility are
+  part of the project layout.
+- `SettingsView.svelte` replaces the main area (`Mod+,`); it closes when a
+  project or file is opened.
 
 ## i18n — implemented (M0)
 
@@ -174,6 +179,13 @@ Module: `src-tauri/src/pty/` (see
   `close_session`; the `sessions-changed` event carries all sessions when
   one starts, exits or closes. Closing a project closes its sessions; quitting
   the app ends all of them.
+- Frontend: `TerminalGroup` (`lib/project/terminals.svelte.ts`) holds the
+  sessions of a project and the panel state; the panel (`TerminalPanel`)
+  shows one xterm.js instance (`lib/terminal/terminal-view.ts`, loaded on
+  demand) for the active session only. Input goes through an `InputQueue`
+  (one write in flight). On Linux and Windows, commands only run while a
+  terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
+  reach the program.
 
 ## Agent status detection — planned (M3)
 

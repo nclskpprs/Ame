@@ -156,6 +156,9 @@ export type ProjectLayout_Deserialize = {
 	expandedDirs?: string[],
 	sidePanel?: SidePanel,
 	sidePanelWidth?: number,
+	/**  Whether the terminal panel below the editor is shown. */
+	terminalOpen?: boolean,
+	terminalHeight?: number,
 };
 
 /**  The part of the UI state of a project that survives a restart. */
@@ -167,6 +170,9 @@ export type ProjectLayout_Serialize = {
 	expandedDirs: string[],
 	sidePanel: SidePanel,
 	sidePanelWidth: number,
+	/**  Whether the terminal panel below the editor is shown. */
+	terminalOpen: boolean,
+	terminalHeight: number,
 };
 
 /**  An open project folder. */

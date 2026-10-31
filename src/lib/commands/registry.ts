@@ -1,5 +1,5 @@
 import type { MessageKey } from '$lib/i18n';
-import { matchesShortcut, parseShortcut, type Shortcut } from './shortcuts';
+import { isMac, matchesShortcut, parseShortcut, type Shortcut } from './shortcuts';
 
 /** An action that can be triggered from the command palette or a shortcut. */
 export interface Command {
@@ -10,6 +10,12 @@ export interface Command {
   shortcut?: string;
   /** Hidden from the command palette (e.g. "switch to project 3"). */
   hidden?: boolean;
+  /**
+   * Also runs while a terminal has the focus. On Linux and Windows, Ctrl
+   * shortcuts belong to the program in the terminal (Ctrl+K, Ctrl+P, …)
+   * unless the command opts in. On macOS, Cmd never reaches the terminal.
+   */
+  terminal?: boolean;
   /** The command is only available when this returns true. */
   when?: () => boolean;
   run: () => unknown;
@@ -57,9 +63,11 @@ export function shortcutOf(id: string): Shortcut | null {
  * Global keydown handler. Runs the first available command whose shortcut
  * matches and stops the event. Returns whether a command ran.
  */
-export function handleShortcut(event: KeyboardEvent): boolean {
+export function handleShortcut(event: KeyboardEvent, mac = isMac): boolean {
+  const inTerminal = !mac && isInTerminal(event.target);
   for (const { command, shortcut } of registry.values()) {
-    if (shortcut && matchesShortcut(event, shortcut) && available(command)) {
+    if (inTerminal && !command.terminal) continue;
+    if (shortcut && matchesShortcut(event, shortcut, mac) && available(command)) {
       event.preventDefault();
       event.stopPropagation();
       void command.run();
@@ -67,4 +75,9 @@ export function handleShortcut(event: KeyboardEvent): boolean {
     }
   }
   return false;
+}
+
+function isInTerminal(target: EventTarget | null): boolean {
+  const element = target as Partial<Element> | null;
+  return typeof element?.closest === 'function' && element.closest('.xterm') !== null;
 }

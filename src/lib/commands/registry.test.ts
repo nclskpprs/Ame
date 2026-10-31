@@ -49,6 +49,31 @@ describe('command registry', () => {
     expect(handleShortcut(keydown({ key: 'a', code: 'KeyA' }))).toBe(false);
   });
 
+  it('leaves Ctrl shortcuts to a focused terminal unless the command opts in', () => {
+    const inEditor = vi.fn();
+    const everywhere = vi.fn();
+    cleanup = registerCommands([
+      { id: 'k', title: 'app.name', shortcut: 'Mod+K', run: inEditor },
+      { id: 'j', title: 'app.name', shortcut: 'Mod+J', terminal: true, run: everywhere },
+    ]);
+    const terminal = {
+      closest: (selector: string) => (selector === '.xterm' ? {} : null),
+    } as unknown as EventTarget;
+    const ctrl = (key: string) =>
+      keydown({ key, code: `Key${key.toUpperCase()}`, ctrlKey: true, target: terminal });
+    const cmd = (key: string) =>
+      keydown({ key, code: `Key${key.toUpperCase()}`, metaKey: true, target: terminal });
+
+    expect(handleShortcut(ctrl('k'), false)).toBe(false);
+    expect(handleShortcut(ctrl('j'), false)).toBe(true);
+    expect(everywhere).toHaveBeenCalledOnce();
+    // Cmd never reaches the program, so on macOS every command runs.
+    expect(handleShortcut(cmd('k'), true)).toBe(true);
+    expect(inEditor).toHaveBeenCalledOnce();
+    // Outside the terminal, Ctrl+K works as usual.
+    expect(handleShortcut(keydown({ key: 'k', code: 'KeyK', ctrlKey: true }), false)).toBe(true);
+  });
+
   it('unregisters commands', () => {
     registerCommands([{ id: 'gone', title: 'app.name', run: () => {} }])();
     expect(paletteCommands().map((c) => c.id)).not.toContain('gone');

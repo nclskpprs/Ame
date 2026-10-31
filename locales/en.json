@@ -82,7 +82,12 @@
     "showFiles": "Show Files",
     "commandPalette": "Show Command Palette",
     "openSettings": "Open Settings",
-    "saveAllFiles": "Save All Files"
+    "saveAllFiles": "Save All Files",
+    "newShellSession": "New Shell Session",
+    "toggleTerminal": "Toggle Terminal Panel",
+    "nextSession": "Next Terminal Session",
+    "previousSession": "Previous Terminal Session",
+    "closeSession": "Close Terminal Session"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -148,5 +153,23 @@
     "saveAndClose": "Save all and close",
     "closeWithoutSaving": "Close without saving",
     "cancel": "Cancel"
+  },
+  "terminal": {
+    "panel": "Terminal",
+    "sessions": "Terminal sessions",
+    "label": "Terminal: {title}",
+    "newShell": "New shell",
+    "hide": "Hide terminal panel",
+    "resize": "Resize terminal panel",
+    "close": "Close {title}",
+    "exited": "The process exited with code {code}.",
+    "endedBySignal": "The process was ended ({signal}).",
+    "restart": "Restart",
+    "closeExited": "Close",
+    "stopPrompt": "{title} is still running. Stop it and close the session?",
+    "stopAndClose": "Stop and close",
+    "cancel": "Cancel",
+    "empty": "No terminal sessions in this project yet",
+    "startFailed": "Could not start the terminal: {message}"
   }
 }

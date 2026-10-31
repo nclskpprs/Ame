@@ -16,6 +16,8 @@
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import { activeSession, listenToFileChanges, pruneSessions } from '$lib/project/session';
   import { settings } from '$lib/stores/settings.svelte';
+  import { sessions } from '$lib/terminal/sessions.svelte';
+  import { currentTheme } from '$lib/theme/current.svelte';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import {
@@ -34,6 +36,13 @@
 
   $effect(() => {
     const unlisten = listenToFileChanges();
+    return () => void unlisten.then((stop) => stop());
+  });
+
+  $effect(() => {
+    const unlisten = sessions.listen();
+    // Sessions survive a reload of the web view (e.g. in development).
+    void sessions.load();
     return () => void unlisten.then((stop) => stop());
   });
 
@@ -62,8 +71,10 @@
   );
 
   $effect(() => {
+    const theme = resolveTheme(settings.value.theme, prefersDark);
+    currentTheme.name = theme;
     applyAppearance(document.documentElement, {
-      theme: resolveTheme(settings.value.theme, prefersDark),
+      theme,
       density: settings.value.density,
       rainEffects: resolveRainEffects(settings.value.rainEffects, reducedMotion),
     });

@@ -14,6 +14,8 @@ function project(name: string, extra: Partial<Project> = {}): Project {
       expandedDirs: [],
       sidePanel: 'files',
       sidePanelWidth: 260,
+      terminalOpen: false,
+      terminalHeight: 300,
     },
     ...extra,
   };

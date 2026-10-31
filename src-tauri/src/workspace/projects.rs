@@ -18,6 +18,8 @@ pub const WORKSPACE_VERSION: u32 = 1;
 
 /// Default width of the side panel (file tree, search) in pixels.
 pub const DEFAULT_SIDE_PANEL_WIDTH: u32 = 260;
+/// Default height of the terminal panel in pixels.
+pub const DEFAULT_TERMINAL_HEIGHT: u32 = 300;
 
 /// An open project folder.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -47,6 +49,9 @@ pub struct ProjectLayout {
     pub expanded_dirs: Vec<String>,
     pub side_panel: SidePanel,
     pub side_panel_width: u32,
+    /// Whether the terminal panel below the editor is shown.
+    pub terminal_open: bool,
+    pub terminal_height: u32,
 }
 
 impl Default for ProjectLayout {
@@ -57,6 +62,8 @@ impl Default for ProjectLayout {
             expanded_dirs: Vec::new(),
             side_panel: SidePanel::default(),
             side_panel_width: DEFAULT_SIDE_PANEL_WIDTH,
+            terminal_open: false,
+            terminal_height: DEFAULT_TERMINAL_HEIGHT,
         }
     }
 }

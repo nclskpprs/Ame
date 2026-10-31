@@ -5,15 +5,17 @@ import { workspace } from '$lib/stores/workspace.svelte';
 import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
 import { SearchState } from './search.svelte';
+import { TerminalGroup } from './terminals.svelte';
 
 /**
- * Runtime state of an open project (file tree, editors, later terminals). Kept while the app runs, so switching projects is instant.
+ * Runtime state of an open project (file tree, editors, terminals). Kept while the app runs, so switching projects is instant.
  */
 export class ProjectSession {
   readonly path: string;
   readonly tree: FileTreeState;
   readonly editors: EditorGroup;
   readonly search: SearchState;
+  readonly terminals: TerminalGroup;
   #watched = '';
 
   constructor(path: string) {
@@ -28,6 +30,7 @@ export class ProjectSession {
       this.syncWatches();
     });
     this.search = new SearchState(path);
+    this.terminals = new TerminalGroup(path);
     void this.tree.init().then(() => this.syncWatches());
   }
 

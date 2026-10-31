@@ -45,3 +45,10 @@ and this project adheres to
   discard, cancel) instead of losing them. Files are only ever saved
   manually; "Save All Files" (Ctrl/Cmd+Alt+S) saves every open file of the
   project.
+- Terminal panel below the editor (Ctrl/Cmd+J) with several shell sessions
+  per project (Ctrl/Cmd+Shift+T, Ctrl/Cmd+Alt+Left/Right). Sessions keep
+  running in the background; their output is replayed when they are shown
+  again. GPU rendering where available, colors from the theme, links open
+  in the browser, copy and paste with Ctrl+Shift+C/V on Linux and Windows.
+  While a terminal has focus, Ctrl shortcuts such as Ctrl+K or Ctrl+P go to
+  the program in it.

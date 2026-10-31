@@ -9,6 +9,7 @@
   import FileTree from './FileTree.svelte';
   import Resizer from './Resizer.svelte';
   import SearchPanel from './SearchPanel.svelte';
+  import TerminalPanel from './TerminalPanel.svelte';
   import type { SidePanel } from '$lib/ipc/bindings';
 
   let { project }: { project: Project } = $props();
@@ -55,7 +56,23 @@
     onchange={(width) => workspace.updateLayout(project.path, { sidePanelWidth: width })}
   />
   <section class="editor-area">
-    <EditorPane group={session.editors} />
+    <div class="editor">
+      <EditorPane group={session.editors} />
+    </div>
+    {#if project.layout.terminalOpen}
+      <Resizer
+        orientation="horizontal"
+        invert
+        value={project.layout.terminalHeight}
+        min={96}
+        max={2000}
+        label={t('terminal.resize')}
+        onchange={(height) => workspace.updateLayout(project.path, { terminalHeight: height })}
+      />
+      <div class="terminal" style:--terminal-height="{project.layout.terminalHeight}px">
+        <TerminalPanel group={session.terminals} />
+      </div>
+    {/if}
   </section>
 </div>
 
@@ -109,7 +126,21 @@
   }
 
   .editor-area {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
+    min-height: 0;
+  }
+
+  .editor {
+    flex: 1;
+    min-height: 96px;
+  }
+
+  .terminal {
+    flex: none;
+    /* Leave room for the editor when the window gets small. */
+    height: min(var(--terminal-height), calc(100% - 96px));
     min-height: 0;
   }
 </style>

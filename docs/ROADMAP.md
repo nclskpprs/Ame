@@ -37,8 +37,8 @@ milestones and marked with 💡.
 
 ## M2 — Terminals and agents
 
-- [ ] PTY manager with ring buffer, xterm.js integration (WebGL with canvas
-      fallback)
+- [x] PTY manager with ring buffer, xterm.js integration (WebGL with DOM
+      renderer fallback; xterm.js 6 has no canvas renderer)
 - [ ] Agent profiles (Claude Code, Codex, Gemini, Aider, generic shell) plus
       custom profiles; detect installed agents on the `PATH`
 - [ ] Multiple sessions per project; sessions keep running in the background

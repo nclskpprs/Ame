@@ -13,6 +13,14 @@ const textTokens: TokenName[] = [
   ...tokenNames.filter((name) => name.startsWith('syntax')),
 ];
 const indicatorTokens: TokenName[] = ['accent', 'needsInput', 'done', 'error'];
+/**
+ * Terminal colors on the terminal background (`bg`). Dark "black" is meant to
+ * be close to the background, as in every terminal theme.
+ */
+const ansiTokens = (theme: ThemeName): TokenName[] =>
+  tokenNames.filter(
+    (name) => name.startsWith('ansi') && !(theme === 'dark' && name === 'ansiBlack'),
+  );
 
 describe('contrastRatio', () => {
   it('matches known values', () => {
@@ -31,6 +39,14 @@ for (const [theme, palette] of Object.entries(palettes) as [
         it(`${token} on ${background} meets ${TEXT_MIN}:1`, () => {
           expect(contrastRatio(palette[token], palette[background])).toBeGreaterThanOrEqual(
             TEXT_MIN,
+          );
+        });
+      }
+
+      for (const token of background === 'bg' ? ansiTokens(theme) : []) {
+        it(`${token} on ${background} meets ${INDICATOR_MIN}:1`, () => {
+          expect(contrastRatio(palette[token], palette[background])).toBeGreaterThanOrEqual(
+            INDICATOR_MIN,
           );
         });
       }

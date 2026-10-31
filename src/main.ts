@@ -1,4 +1,5 @@
 import { mount } from 'svelte';
+import '@fontsource-variable/jetbrains-mono';
 import './app.css';
 import App from './App.svelte';
 import { setLocale } from '$lib/i18n';

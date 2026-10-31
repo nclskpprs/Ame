@@ -49,7 +49,9 @@
     "densityCompact": "Density: Compact",
     "rainOn": "Rain Effects: On",
     "rainSubtle": "Rain Effects: Subtle",
-    "rainOff": "Rain Effects: Off"
+    "rainOff": "Rain Effects: Off",
+    "saveFile": "Save File",
+    "closeEditor": "Close Editor"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -59,5 +61,26 @@
     "label": "Files",
     "empty": "This folder is empty",
     "loadFailed": "Could not read folder: {message}"
+  },
+  "editor": {
+    "tabs": "Open files",
+    "close": "Close",
+    "closeUnsaved": "Close (unsaved changes)",
+    "closePrompt": "Save changes to {name} before closing?",
+    "save": "Save",
+    "dontSave": "Don't save",
+    "cancel": "Cancel",
+    "changedOnDisk": "This file changed on disk.",
+    "reload": "Reload from disk",
+    "keepMine": "Keep my version",
+    "deletedOnDisk": "This file was deleted on disk. Saving will recreate it.",
+    "binary": "This file is binary or not UTF-8 text and cannot be shown.",
+    "tooLarge": "This file is too large to open ({megabytes} MB).",
+    "loadFailed": "Could not open the file: {message}",
+    "saveFailed": "Could not save {name}: {message}",
+    "empty": "No file open",
+    "hintPalette": "Command palette",
+    "hintQuickOpen": "Open file",
+    "hintSearch": "Search in project"
   }
 }

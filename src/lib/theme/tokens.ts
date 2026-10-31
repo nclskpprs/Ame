@@ -16,6 +16,19 @@ export const tokenNames = [
   'needsInput',
   'done',
   'error',
+  // Syntax highlighting in the editor (blue and teal tones, see DESIGN.md).
+  'syntaxKeyword',
+  'syntaxString',
+  'syntaxNumber',
+  'syntaxComment',
+  'syntaxFunction',
+  'syntaxType',
+  'syntaxProperty',
+  'syntaxOperator',
+  'syntaxTag',
+  'syntaxAttribute',
+  'syntaxLink',
+  'syntaxInvalid',
 ] as const;
 
 export type TokenName = (typeof tokenNames)[number];
@@ -33,6 +46,18 @@ export const palettes: Readonly<Record<ThemeName, Palette>> = {
     needsInput: '#F2B84B',
     done: '#4FD1B5',
     error: '#F06A6A',
+    syntaxKeyword: '#78B4FF',
+    syntaxString: '#5ED3BA',
+    syntaxNumber: '#E6B673',
+    syntaxComment: '#7D90A6',
+    syntaxFunction: '#A5CDFF',
+    syntaxType: '#7FDBCA',
+    syntaxProperty: '#C3D1E0',
+    syntaxOperator: '#97AABF',
+    syntaxTag: '#78B4FF',
+    syntaxAttribute: '#A5CDFF',
+    syntaxLink: '#5AA9FF',
+    syntaxInvalid: '#F06A6A',
   },
   light: {
     bg: '#F5F8FB', // mist
@@ -44,6 +69,18 @@ export const palettes: Readonly<Record<ThemeName, Palette>> = {
     needsInput: '#B47A0E',
     done: '#1E9E82',
     error: '#D14343',
+    syntaxKeyword: '#1F5FB8',
+    syntaxString: '#0F7562',
+    syntaxNumber: '#8A5700',
+    syntaxComment: '#5D6D80',
+    syntaxFunction: '#2558A0',
+    syntaxType: '#0E6B5C',
+    syntaxProperty: '#34465C',
+    syntaxOperator: '#4E5E72',
+    syntaxTag: '#1F5FB8',
+    syntaxAttribute: '#2558A0',
+    syntaxLink: '#2A69BD',
+    syntaxInvalid: '#C23B3B',
   },
 };
 

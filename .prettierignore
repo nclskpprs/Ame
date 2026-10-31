@@ -10,3 +10,4 @@ src/lib/ipc/bindings.ts
 # Third-party text kept verbatim.
 CODE_OF_CONDUCT.md
 LICENSE-*
+licenses/

@@ -1,3 +1,4 @@
+import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { orderedProjects } from '$lib/workspace/sections';
@@ -11,6 +12,7 @@ function switchTo(offset: number): void {
 }
 
 const hasProject = () => workspace.active !== null;
+const activeFile = () => activeSession()?.editors.active ?? null;
 const hasSeveralProjects = () => workspace.projects.length > 1;
 
 /** Commands that are always available. Returns a cleanup function. */
@@ -54,6 +56,26 @@ export function registerAppCommands(): () => void {
       run: () => switchTo(-1),
     },
     ...projectSlots,
+    {
+      id: 'editor.save',
+      title: 'commands.saveFile',
+      shortcut: 'Mod+S',
+      when: () => activeFile()?.status === 'ready',
+      run: () => {
+        const file = activeFile();
+        if (file) return activeSession()?.editors.save(file.path);
+      },
+    },
+    {
+      id: 'editor.close',
+      title: 'commands.closeEditor',
+      shortcut: 'Mod+W',
+      when: () => activeFile() !== null,
+      run: () => {
+        const file = activeFile();
+        if (file) activeSession()?.editors.close(file.path);
+      },
+    },
     {
       id: 'theme.system',
       title: 'commands.themeSystem',

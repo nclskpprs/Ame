@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from './contrast';
-import { palettes, type ThemeName, type TokenName } from './tokens';
+import { palettes, tokenNames, type ThemeName, type TokenName } from './tokens';
 
 /** WCAG AA: 4.5:1 for normal text, 3:1 for UI components and indicators. */
 const TEXT_MIN = 4.5;
 const INDICATOR_MIN = 3;
 
 const backgrounds: TokenName[] = ['bg', 'surface'];
-const textTokens: TokenName[] = ['text', 'textMuted'];
+const textTokens: TokenName[] = [
+  'text',
+  'textMuted',
+  ...tokenNames.filter((name) => name.startsWith('syntax')),
+];
 const indicatorTokens: TokenName[] = ['accent', 'needsInput', 'done', 'error'];
 
 describe('contrastRatio', () => {

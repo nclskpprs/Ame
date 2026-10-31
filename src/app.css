@@ -5,10 +5,12 @@
   --ame-font-ui:
     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Cantarell, Ubuntu, 'Noto Sans',
     sans-serif;
-  --ame-font-code: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --ame-font-code:
+    'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   --ame-font-size: 13px;
   --ame-font-size-small: 12px;
+  --ame-font-size-code: 13px;
   --ame-font-size-title: 18px;
   --ame-space-1: 4px;
   --ame-space-2: 8px;

@@ -151,6 +151,22 @@
           onchange={(value) => void settings.update({ closeAction: value as CloseAction })}
         />
       </div>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.checkpoints.label')}</span>
+          <span class="description">{t('settings.checkpoints.description')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-checkpoints"
+          label={t('settings.checkpoints.label')}
+          options={[
+            { value: 'on', label: t('settings.checkpoints.on') },
+            { value: 'off', label: t('settings.checkpoints.off') },
+          ]}
+          value={settings.value.checkpoints ? 'on' : 'off'}
+          onchange={(value) => void settings.update({ checkpoints: value === 'on' })}
+        />
+      </div>
       <p class="intro">{t('settings.agents.description')}</p>
       <AgentSettings />
     </section>

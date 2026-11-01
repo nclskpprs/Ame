@@ -5,6 +5,7 @@ import { workspace } from '$lib/stores/workspace.svelte';
 import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
+import { CheckpointState } from './checkpoints.svelte';
 import { GitState } from './git.svelte';
 import { newest } from '$lib/git/recent';
 import { SearchState } from './search.svelte';
@@ -21,6 +22,7 @@ export class ProjectSession {
   readonly search: SearchState;
   readonly terminals: TerminalGroup;
   readonly git: GitState;
+  readonly checkpoints: CheckpointState;
   readonly #watched = new WatchSet();
 
   constructor(path: string) {
@@ -40,6 +42,11 @@ export class ProjectSession {
     this.git.ignore = (file) => this.editors.savedRecently(file);
     this.git.onChange = (paths) => this.#follow(paths);
     void this.git.refresh();
+    this.checkpoints = new CheckpointState(path);
+    this.checkpoints.onRestored = () => {
+      this.git.refreshSoon(0);
+      void this.editors.refreshDiffs();
+    };
     void this.tree.init().then(() => this.syncWatches());
   }
 
@@ -159,6 +166,13 @@ export function pollGit(): void {
 }
 
 /** Routes file change events from the backend to the sessions. */
+/** Refreshes the checkpoint list of a project when the backend took one. */
+export function listenToCheckpoints(): Promise<() => void> {
+  return events.checkpointsChanged.listen((event) => {
+    void sessions.get(event.payload.project)?.checkpoints.refresh();
+  });
+}
+
 export function listenToFileChanges(): Promise<() => void> {
   return events.fsChanged.listen((event) => {
     sessions.get(event.payload.project)?.onFsChanged(event.payload.paths);

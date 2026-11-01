@@ -2,6 +2,12 @@
 
 use tauri::State;
 
+use serde::{Deserialize, Serialize};
+use specta::Type;
+use tauri::AppHandle;
+use tauri_specta::Event;
+
+use super::checkpoints::{self, Checkpoint, CheckpointFile};
 use super::cli::{git, repo_prefix};
 use super::status::{self, GitStatus};
 use crate::error::{Error, Result};
@@ -135,6 +141,87 @@ pub async fn git_commit(
         return Err(Error::Git("empty commit message".into()));
     }
     blocking(move || git(&root, &["commit", "-m", &message]).map(drop)).await
+}
+
+/// A checkpoint was taken or restored in a project.
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckpointsChanged {
+    pub project: String,
+}
+
+/// Takes a checkpoint in the background and reports it (see
+/// `git::checkpoints`). Used before every prompt to an agent.
+pub fn checkpoint_in_background(app: AppHandle, project: String, label: String) {
+    let spawned = std::thread::Builder::new()
+        .name("checkpoint".into())
+        .spawn(
+            move || match checkpoints::create(std::path::Path::new(&project), &label) {
+                Ok(Some(_)) => {
+                    if let Err(err) = (CheckpointsChanged { project }).emit(&app) {
+                        log::warn!("could not report a checkpoint: {err}");
+                    }
+                }
+                Ok(None) | Err(Error::GitMissing) => {}
+                Err(err) => log::warn!("could not take a checkpoint: {err}"),
+            },
+        );
+    if let Err(err) = spawned {
+        log::warn!("could not start the checkpoint thread: {err}");
+    }
+}
+
+/// The project's checkpoints, newest first (empty outside git).
+#[tauri::command]
+#[specta::specta]
+pub async fn list_checkpoints(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+) -> Result<Vec<Checkpoint>> {
+    let root = store.root(&project)?;
+    blocking(move || checkpoints::list(&root))
+        .await
+        .or_else(|err| match err {
+            Error::GitMissing => Ok(Vec::new()),
+            err => Err(err),
+        })
+}
+
+/// Takes a checkpoint now; `None` if nothing changed since the last one.
+#[tauri::command]
+#[specta::specta]
+pub async fn create_checkpoint(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    label: String,
+) -> Result<Option<Checkpoint>> {
+    let root = store.root(&project)?;
+    blocking(move || checkpoints::create(&root, &label)).await
+}
+
+/// How the project's files differ now from a checkpoint.
+#[tauri::command]
+#[specta::specta]
+pub async fn checkpoint_changes(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    id: String,
+) -> Result<Vec<CheckpointFile>> {
+    let root = store.root(&project)?;
+    blocking(move || checkpoints::changes(&root, &id)).await
+}
+
+/// Brings the project's files back to a checkpoint. Returns the checkpoint
+/// that undoes it (`None` if nothing had changed).
+#[tauri::command]
+#[specta::specta]
+pub async fn restore_checkpoint(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    id: String,
+) -> Result<Option<Checkpoint>> {
+    let root = store.root(&project)?;
+    blocking(move || checkpoints::restore(&root, &id)).await
 }
 
 /// Project-relative paths, checked to stay inside the project.

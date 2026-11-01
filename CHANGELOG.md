@@ -116,6 +116,10 @@ and this project adheres to
   drop, and the dashboard header has a narrow sky where every prompt falls.
 - Origami: queued prompts carry a paper crane, and the command palette
   hides a small paper easter egg for fans of the hidden rain village.
+- Checkpoints: before every prompt to an agent, Ame saves the project's
+  files in a hidden git ref. The changes panel lists them with the files
+  changed since; restore with one click (and undo the restore). Can be
+  turned off in the settings.
 
 ### Fixed
 

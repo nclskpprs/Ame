@@ -20,6 +20,7 @@
   import {
     activeSession,
     existingSession,
+    listenToCheckpoints,
     listenToFileChanges,
     persistTerminalSessions,
     pollGit,
@@ -61,6 +62,11 @@
 
   $effect(() => {
     const unlisten = listenToFileChanges();
+    return () => void unlisten.then((stop) => stop());
+  });
+
+  $effect(() => {
+    const unlisten = listenToCheckpoints();
     return () => void unlisten.then((stop) => stop());
   });
 

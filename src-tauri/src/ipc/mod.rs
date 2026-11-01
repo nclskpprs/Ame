@@ -15,6 +15,7 @@ use crate::bench;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::git::commands as git;
+use crate::git::commands::CheckpointsChanged;
 use crate::pty::commands as pty;
 use crate::pty::commands::SessionsChanged;
 use crate::workspace::commands;
@@ -57,6 +58,10 @@ pub fn builder() -> Builder<Wry> {
             git::git_stage,
             git::git_unstage,
             git::git_commit,
+            git::list_checkpoints,
+            git::create_checkpoint,
+            git::checkpoint_changes,
+            git::restore_checkpoint,
             agents::list_agents,
             pty::start_session,
             pty::list_sessions,
@@ -78,7 +83,12 @@ pub fn builder() -> Builder<Wry> {
             background::quit_app,
             background::set_tray,
         ])
-        .events(collect_events![FsChanged, SessionsChanged, TrayAction])
+        .events(collect_events![
+            FsChanged,
+            SessionsChanged,
+            TrayAction,
+            CheckpointsChanged
+        ])
 }
 
 /// Writes the TypeScript bindings to [`BINDINGS_PATH`].

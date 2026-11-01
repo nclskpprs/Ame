@@ -69,6 +69,17 @@ export const commands = {
 	 *  error message when they fail.
 	 */
 	gitCommit: (project: string, message: string) => typedError<null, AppError>(__TAURI_INVOKE("git_commit", { project, message })),
+	/**  The project's checkpoints, newest first (empty outside git). */
+	listCheckpoints: (project: string) => typedError<Checkpoint[], AppError>(__TAURI_INVOKE("list_checkpoints", { project })),
+	/**  Takes a checkpoint now; `None` if nothing changed since the last one. */
+	createCheckpoint: (project: string, label: string) => typedError<Checkpoint | null, AppError>(__TAURI_INVOKE("create_checkpoint", { project, label })),
+	/**  How the project's files differ now from a checkpoint. */
+	checkpointChanges: (project: string, id: string) => typedError<CheckpointFile[], AppError>(__TAURI_INVOKE("checkpoint_changes", { project, id })),
+	/**
+	 *  Brings the project's files back to a checkpoint. Returns the checkpoint
+	 *  that undoes it (`None` if nothing had changed).
+	 */
+	restoreCheckpoint: (project: string, id: string) => typedError<Checkpoint | null, AppError>(__TAURI_INVOKE("restore_checkpoint", { project, id })),
 	/**
 	 *  All profiles with their detected programs. Looks at the `PATH` every
 	 *  time, so newly installed agents show up without a restart.
@@ -134,6 +145,7 @@ export const commands = {
 
 /** Events */
 export const events = {
+	checkpointsChanged: makeEvent<CheckpointsChanged, CheckpointsChanged>("checkpoints-changed"),
 	fsChanged: makeEvent<FsChanged, FsChanged>("fs-changed"),
 	sessionsChanged: makeEvent<SessionsChanged_Serialize, SessionsChanged_Deserialize>("sessions-changed"),
 	trayAction: makeEvent<TrayAction, TrayAction>("tray-action"),
@@ -262,6 +274,34 @@ export type AppInfo = {
 };
 
 export type Change = "added" | "modified" | "deleted" | "renamed" | "copied" | "typeChanged" | "untracked" | "conflicted";
+
+export type Checkpoint = {
+	/**  Stable id within the project. */
+	id: string,
+	/**  Milliseconds since the Unix epoch. */
+	createdAt: number | null,
+	label: string,
+};
+
+/**  How a file differs now from a checkpoint. */
+export type CheckpointChange = 
+/**  New since the checkpoint; restoring deletes it. */
+"added" | 
+/**  Changed since the checkpoint. */
+"modified" | 
+/**  Deleted since the checkpoint; restoring brings it back. */
+"deleted";
+
+export type CheckpointFile = {
+	/**  Project-relative, with `/` separators. */
+	path: string,
+	change: CheckpointChange,
+};
+
+/**  A checkpoint was taken or restored in a project. */
+export type CheckpointsChanged = {
+	project: string,
+};
 
 export type CloseAction = 
 /**  Hide the window while agents run; quitting ends them. */
@@ -607,6 +647,8 @@ export type Settings_Deserialize = {
 	notifications?: boolean,
 	/**  What closing the window does while agents run. */
 	closeAction?: CloseAction,
+	/**  Take a git checkpoint of the project before every prompt to an agent. */
+	checkpoints?: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
@@ -636,6 +678,8 @@ export type Settings_Serialize = {
 	notifications: boolean,
 	/**  What closing the window does while agents run. */
 	closeAction: CloseAction,
+	/**  Take a git checkpoint of the project before every prompt to an agent. */
+	checkpoints: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */

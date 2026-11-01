@@ -2,6 +2,8 @@
   import { iconName, iconUrl } from '$lib/fs/file-icons';
   import { basename, dirname } from '$lib/fs/paths';
   import { fileMark, markLetters } from '$lib/git/marks';
+  import { formatDuration } from '$lib/agents/duration';
+  import { summarize } from '$lib/project/checkpoints.svelte';
   import { t } from '$lib/i18n';
   import type { GitFile } from '$lib/ipc/types';
   import type { ProjectSession } from '$lib/project/session';
@@ -12,6 +14,14 @@
 
   let message = $state('');
   const git = $derived(session.git);
+  const checkpoints = $derived(session.checkpoints);
+  let now = $state(Date.now());
+
+  $effect(() => {
+    void session.checkpoints.refresh();
+    const timer = setInterval(() => (now = Date.now()), 30_000);
+    return () => clearInterval(timer);
+  });
 
   const status = $derived(session.git.status);
   const staged = $derived(status?.files.filter((file) => file.staged) ?? []);
@@ -155,12 +165,173 @@
     {/if}
     {@render list(t('changes.staged'), staged, true)}
     {@render list(t('changes.unstaged'), changes, false)}
+    {@render checkpointList()}
   {/if}
 </div>
+
+{#snippet checkpointList()}
+  {#if checkpoints.undo}
+    <div class="restored" role="status">
+      <span>{t('checkpoints.restored')}</span>
+      <button disabled={checkpoints.busy} onclick={() => void checkpoints.undoRestore()}>
+        {t('checkpoints.undo')}
+      </button>
+      <button onclick={() => (checkpoints.undo = null)}>{t('checkpoints.dismiss')}</button>
+    </div>
+  {/if}
+  {#if checkpoints.list.length}
+    <div class="section">
+      <h3>{t('checkpoints.title')} <span class="count">{checkpoints.list.length}</span></h3>
+    </div>
+    <ul>
+      {#each checkpoints.list as checkpoint (checkpoint.id)}
+        <li class="checkpoint">
+          <button
+            class="file"
+            aria-expanded={checkpoints.expanded === checkpoint.id}
+            title={new Date(checkpoint.createdAt ?? now).toLocaleString()}
+            onclick={() => void checkpoints.toggle(checkpoint.id)}
+          >
+            <span class="name">{checkpoint.label}</span>
+            <span class="dir"
+              >{t('checkpoints.ago', {
+                duration: formatDuration(now - (checkpoint.createdAt ?? now)),
+              })}</span
+            >
+          </button>
+          {#if checkpoints.expanded === checkpoint.id}
+            <div class="detail">
+              {#if checkpoints.files === null}
+                <p class="hint">{t('checkpoints.loading')}</p>
+              {:else if checkpoints.files.length === 0}
+                <p class="hint">{t('checkpoints.unchanged')}</p>
+              {:else}
+                {@const summary = summarize(checkpoints.files)}
+                <p class="hint">
+                  {t('checkpoints.summary', {
+                    changed: summary.changed,
+                    removed: summary.removed,
+                    back: summary.back,
+                  })}
+                </p>
+                <ul class="since">
+                  {#each checkpoints.files as file (file.path)}
+                    <li class="change-{file.change}">{file.path}</li>
+                  {/each}
+                </ul>
+                {#if checkpoints.confirming === checkpoint.id}
+                  <div class="confirm" role="alertdialog" aria-label={t('checkpoints.confirm')}>
+                    <span>{t('checkpoints.confirm')}</span>
+                    <button
+                      class="primary"
+                      disabled={checkpoints.busy}
+                      onclick={() => void checkpoints.restore(checkpoint.id)}
+                    >
+                      {t('checkpoints.restore')}
+                    </button>
+                    <button onclick={() => (checkpoints.confirming = null)}>
+                      {t('checkpoints.cancel')}
+                    </button>
+                  </div>
+                {:else}
+                  <button
+                    class="restore"
+                    disabled={checkpoints.busy}
+                    onclick={() => (checkpoints.confirming = checkpoint.id)}
+                  >
+                    {t('checkpoints.restore')}
+                  </button>
+                {/if}
+              {/if}
+            </div>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+  {/if}
+{/snippet}
 
 <style>
   .changes {
     padding: var(--ame-space-2) 0;
+  }
+
+  .checkpoint {
+    display: block;
+  }
+
+  .detail {
+    display: grid;
+    gap: var(--ame-space-1);
+    padding: 0 var(--ame-space-3) var(--ame-space-2) var(--ame-space-6);
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--ame-text-muted);
+    font-size: var(--ame-font-size-small);
+  }
+
+  .since {
+    max-height: 9em;
+    overflow-y: auto;
+    font-family: var(--ame-font-code);
+    font-size: var(--ame-font-size-small);
+  }
+
+  .since li::before {
+    display: inline-block;
+    width: 1.5em;
+    color: var(--ame-text-muted);
+  }
+
+  .change-added::before {
+    content: '−';
+  }
+
+  .change-modified::before {
+    content: '~';
+  }
+
+  .change-deleted::before {
+    content: '+';
+  }
+
+  .confirm,
+  .restored {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ame-space-2);
+  }
+
+  .restored {
+    margin: var(--ame-space-2) var(--ame-space-3);
+    padding: var(--ame-space-1) var(--ame-space-2);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+  }
+
+  .confirm span,
+  .restored span {
+    flex: 1;
+    color: var(--ame-text-muted);
+    font-size: var(--ame-font-size-small);
+  }
+
+  .detail button,
+  .restored button {
+    justify-self: start;
+    padding: 2px var(--ame-space-3);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+    background: var(--ame-bg);
+    color: var(--ame-text);
+    font: inherit;
+  }
+
+  .detail button.primary {
+    border-color: var(--ame-accent);
   }
 
   .branch {

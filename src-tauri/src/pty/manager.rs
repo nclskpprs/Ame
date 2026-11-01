@@ -1,6 +1,6 @@
 //! Owns all PTY sessions of the app.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, Weak};
@@ -40,12 +40,15 @@ const CPU_TICKS: u32 = 8;
 const CPU_BUSY: f32 = 10.0;
 
 type Listener = dyn Fn(Vec<SessionInfo>) + Send + Sync;
+type PromptListener = dyn Fn(&SessionInfo) + Send + Sync;
 
 struct Inner {
     sessions: Mutex<BTreeMap<SessionId, Arc<Session>>>,
     next_id: AtomicU32,
     /// Called with all sessions whenever one starts, exits or is closed.
     listener: Box<Listener>,
+    /// Called when a session submitted a prompt (seen by the status loop).
+    prompt_listener: Mutex<Option<Box<PromptListener>>>,
 }
 
 impl Inner {
@@ -73,6 +76,7 @@ impl PtyManager {
             sessions: Mutex::new(BTreeMap::new()),
             next_id: AtomicU32::new(1),
             listener: Box::new(listener),
+            prompt_listener: Mutex::new(None),
         });
         let weak = Arc::downgrade(&inner);
         let spawned = std::thread::Builder::new()
@@ -82,6 +86,12 @@ impl PtyManager {
             log::warn!("could not start the agent status thread: {err}");
         }
         Self { inner }
+    }
+
+    /// Calls `listener` whenever a session submitted a prompt, at most a
+    /// status tick (250 ms) later, e.g. to take a checkpoint.
+    pub fn on_prompt(&self, listener: impl Fn(&SessionInfo) + Send + Sync + 'static) {
+        *lock(&self.inner.prompt_listener) = Some(Box::new(listener));
     }
 
     pub fn spawn(&self, spec: SpawnSpec) -> Result<SessionInfo> {
@@ -247,6 +257,8 @@ fn end_sessions(sessions: &[Arc<Session>]) {
 fn status_loop(inner: &Weak<Inner>) {
     let mut cpu = CpuMonitor::default();
     let mut tick: u32 = 0;
+    // Prompts per session at the last tick.
+    let mut prompts: HashMap<SessionId, u32> = HashMap::new();
     loop {
         std::thread::sleep(STATUS_TICK);
         let Some(inner) = inner.upgrade() else { break };
@@ -280,8 +292,27 @@ fn status_loop(inner: &Weak<Inner>) {
         if changed {
             inner.notify();
         }
+        report_prompts(&inner, &sessions, &mut prompts);
         tick = tick.wrapping_add(1);
     }
+}
+
+/// Calls the prompt listener for every session whose prompt count grew.
+fn report_prompts(inner: &Inner, sessions: &[Arc<Session>], seen: &mut HashMap<SessionId, u32>) {
+    let listener = lock(&inner.prompt_listener);
+    let mut current = HashMap::with_capacity(sessions.len());
+    for session in sessions {
+        let info = session.info();
+        if seen
+            .get(&info.id)
+            .is_some_and(|&before| info.prompts > before)
+            && let Some(listener) = listener.as_ref()
+        {
+            listener(&info);
+        }
+        current.insert(info.id, info.prompts);
+    }
+    *seen = current;
 }
 
 /// Sends a queued prompt without blocking the status loop.
@@ -544,6 +575,29 @@ mod tests {
         assert_eq!(queue.len(), 1);
         assert_eq!(queue[0].text, "second");
         assert!(manager.queue_prompt(info.id, " ").is_err());
+        manager.close(info.id).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn reports_submitted_prompts() {
+        let (manager, _exits) = manager();
+        let (tx, rx) = mpsc::channel();
+        let tx = Mutex::new(tx);
+        manager.on_prompt(move |session| {
+            let _ = lock(&tx).send((session.id, session.prompts));
+        });
+        let info = manager
+            .spawn(spec("/bin/sh", &["-c", "read a; sleep 30"]))
+            .unwrap();
+        // Let the status loop see the session once before the prompt.
+        std::thread::sleep(Duration::from_millis(400));
+        manager
+            .get(info.id)
+            .unwrap()
+            .write(b"fix the tests\r")
+            .unwrap();
+        assert_eq!(rx.recv_timeout(TIMEOUT).unwrap(), (info.id, 1));
         manager.close(info.id).unwrap();
     }
 

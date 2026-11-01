@@ -43,6 +43,8 @@ pub struct Settings {
     pub notifications: bool,
     /// What closing the window does while agents run.
     pub close_action: CloseAction,
+    /// Take a git checkpoint of the project before every prompt to an agent.
+    pub checkpoints: bool,
     /// The hint that Ame keeps running in the background was shown.
     pub background_hint_shown: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
@@ -61,6 +63,7 @@ impl Default for Settings {
             file_icons: true,
             notifications: true,
             close_action: CloseAction::default(),
+            checkpoints: true,
             background_hint_shown: false,
             agents: Vec::new(),
         }

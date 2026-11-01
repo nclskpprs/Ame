@@ -157,6 +157,12 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'git.createCheckpoint',
+      title: 'commands.createCheckpoint',
+      when: () => activeSession()?.git.status != null,
+      run: () => activeSession()?.checkpoints.create(t('checkpoints.manualLabel')),
+    },
+    {
       id: 'editor.toggleDiff',
       title: 'commands.toggleDiff',
       shortcut: 'Mod+Alt+D',

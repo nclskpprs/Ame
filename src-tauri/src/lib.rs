@@ -93,6 +93,18 @@ pub fn run() {
                     log::warn!("could not emit session change: {err}");
                 }
             });
+            let checkpoint_app = app.handle().clone();
+            pty.on_prompt(move |session| {
+                // Checkpoints are for agents; a shell submits every command.
+                let enabled = checkpoint_app.state::<SettingsStore>().get().checkpoints;
+                if enabled && session.profile != agents::profiles::SHELL_PROFILE {
+                    git::commands::checkpoint_in_background(
+                        checkpoint_app.clone(),
+                        session.project.clone(),
+                        format!("Before a prompt to {}", session.title),
+                    );
+                }
+            });
             let hooks = pty.clone();
             app.manage(Adapters::start(&paths.config_dir, move |message| {
                 hooks.apply_hook(&message);

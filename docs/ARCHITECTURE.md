@@ -189,6 +189,19 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Checkpoints — implemented (M4)
+
+- `git/checkpoints.rs` (ADR 0023): snapshots on hidden refs
+  `refs/ame/checkpoints/<key>/<ms>` via a temporary index; `create`,
+  `list`, `changes` (diff to a fresh snapshot), `restore` (with an undo
+  checkpoint). One global lock serializes them.
+- `PtyManager::on_prompt` reports submitted prompts from the status loop;
+  `lib.rs` takes a checkpoint for agent sessions (not the shell) when the
+  setting `checkpoints` is on and emits `checkpoints-changed`.
+- Frontend: `project/checkpoints.svelte.ts` per project, listed in the
+  changes panel with the files changed since, inline confirmation and
+  Undo; command "Create Checkpoint".
+
 ## Benchmarks — implemented (M3)
 
 - `bench.rs` (ADR 0022): `mark_start` in `main`, the frontend calls

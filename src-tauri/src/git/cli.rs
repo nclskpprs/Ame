@@ -13,7 +13,13 @@ pub type Stdout = Vec<u8>;
 /// so agents running git at the same time are never blocked
 /// (`GIT_OPTIONAL_LOCKS=0`).
 pub fn git(cwd: &Path, args: &[&str]) -> Result<Stdout> {
+    git_with_env(cwd, args, &[])
+}
+
+/// Like [`git`], with extra environment variables (e.g. `GIT_INDEX_FILE`).
+pub fn git_with_env(cwd: &Path, args: &[&str], vars: &[(&str, &str)]) -> Result<Stdout> {
     let mut command = Command::new("git");
+    command.envs(vars.iter().copied());
     command
         .args(args)
         .current_dir(cwd)

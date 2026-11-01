@@ -7,6 +7,7 @@ is open, what comes next.
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
   background, ADR 0020). M3 — Status and dashboard is complete. M4 —
+  checkpoints done; review mode open. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
@@ -15,6 +16,36 @@ is open, what comes next.
 - **Next steps:** 2. M4: checkpoints before every prompt, review mode. 3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M4: checkpoints before every prompt
+
+**Done**
+
+- `git/checkpoints.rs` (ADR 0023): hidden refs via a temporary index;
+  dedupe, 50 per project, skip above 2000 untracked files; restore with an
+  undo checkpoint; only the project folder inside a larger repository.
+- `PtyManager::on_prompt` → checkpoint per prompt of agent sessions (not
+  the shell), setting `checkpoints` (default on), event
+  `checkpoints-changed`.
+- Changes panel: list with age, files changed since, inline confirmation,
+  "Files restored · Undo"; command "Create Checkpoint".
+
+**Verified**
+
+- Rust tests in temporary repositories: HEAD, index, status and files
+  untouched by a checkpoint; dedupe; restore of changed, added and deleted
+  files with ignored files left alone; undo; before the first commit;
+  bound of 50; unknown ids rejected. A PTY test for the prompt listener.
+- `pnpm verify` green.
+- Not tried in the GUI (maintainer asked to keep moving; checkpoints were
+  almost done when they were deprioritized). Check in the final review:
+  run an agent, let it change files, restore and undo from the changes
+  panel.
+
+**Open**
+
+- Review mode (M4) is next only if wanted; the maintainer prefers getting
+  everything running first.
 
 ### 2026-11-01 — M3: memory budget per platform
 

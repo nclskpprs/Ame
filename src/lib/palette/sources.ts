@@ -89,16 +89,39 @@ function projectItems(query: string): Scored[] {
     });
 }
 
+/** Scripts of the active project, e.g. "Run script: build". */
+function scriptItems(session: ProjectSession | null, query: string): Scored[] {
+  if (!session) return [];
+  return session.scripts.list.flatMap((script) => {
+    const label = t('scripts.paletteRun', { name: script.name });
+    const match = fuzzyMatch(query, label);
+    if (!match) return [];
+    return [
+      {
+        score: match.score,
+        item: {
+          id: `script:${script.id}`,
+          label: segments(label, match.indices),
+          hint: script.runner,
+          run: () => session.terminals.runScript(script.id),
+        },
+      },
+    ];
+  });
+}
+
 /**
- * The command palette: commands, projects and (with a query and an active
- * project) files, in that order.
+ * The command palette: commands, the active project's scripts, projects
+ * and (with a query and an active project) files, in that order.
  */
 export function everythingSource(session: ProjectSession | null): PaletteSource {
   const files = session ? fileSource(session) : null;
   return async (query) => {
-    const local = [...commandItems(query).sort(byScore), ...projectItems(query).sort(byScore)].map(
-      (scored) => scored.item,
-    );
+    const local = [
+      ...commandItems(query).sort(byScore),
+      ...scriptItems(session, query).sort(byScore),
+      ...projectItems(query).sort(byScore),
+    ].map((scored) => scored.item);
     if (!files || !query.trim()) return local;
     const fileItems = (await files(query)).slice(0, PALETTE_FILE_LIMIT);
     return [...local, ...fileItems];

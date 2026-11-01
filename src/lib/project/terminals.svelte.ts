@@ -7,6 +7,13 @@ import { notices } from '$lib/stores/notices.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { isRunning, sessions } from '$lib/terminal/sessions.svelte';
 
+/** Profile ids of script sessions (see `scripts/mod.rs`). */
+export const SCRIPT_PREFIX = 'script:';
+
+export function isScript(profile: string): boolean {
+  return profile.startsWith(SCRIPT_PREFIX);
+}
+
 /** Size for sessions started before a terminal view has measured itself. */
 const DEFAULT_SIZE = { cols: 120, rows: 30 };
 
@@ -66,11 +73,16 @@ export class TerminalGroup {
     return list.find((s) => s.id === this.#activeId) ?? list.at(-1) ?? null;
   }
 
-  /** What to remember for the next start: previous and current sessions. */
+  /**
+   * What to remember for the next start: previous and current sessions.
+   * Scripts are not restored; they are started again from the scripts panel.
+   */
   saved(): SavedSession[] {
     return [
       ...this.restorable.map(({ profile, title }) => ({ profile, title })),
-      ...this.sessions.map(({ profile, title }) => ({ profile, title })),
+      ...this.sessions
+        .filter((session) => !isScript(session.profile))
+        .map(({ profile, title }) => ({ profile, title })),
     ];
   }
 
@@ -123,10 +135,15 @@ export class TerminalGroup {
     else this.show();
   }
 
-  /** Starts an agent profile; `resume` continues its last conversation. */
+  /**
+   * Starts an agent profile (`resume` continues its last conversation) or,
+   * for a `script:` profile, runs that script.
+   */
   async start(profile: string, resume = false): Promise<void> {
     const { cols, rows } = this.size;
-    const result = await commands.startSession(this.project, profile, resume, cols, rows);
+    const result = isScript(profile)
+      ? await commands.runScript(this.project, profile.slice(SCRIPT_PREFIX.length), cols, rows)
+      : await commands.startSession(this.project, profile, resume, cols, rows);
     if (result.status === 'error') {
       notices.push(t('terminal.startFailed', { message: describeError(result.error) }));
       return;
@@ -158,6 +175,22 @@ export class TerminalGroup {
       if (next) this.activate(next.id);
       else this.#activeId = null;
     }
+  }
+
+  /** The running session of a script, if any. */
+  scriptSession(id: string): SessionInfo | undefined {
+    return this.sessions.find((s) => s.profile === SCRIPT_PREFIX + id && isRunning(s));
+  }
+
+  /** Runs a script, or shows it if it is running already. */
+  async runScript(id: string): Promise<void> {
+    const running = this.scriptSession(id);
+    if (running) {
+      this.activate(running.id);
+      this.show();
+      return;
+    }
+    await this.start(SCRIPT_PREFIX + id);
   }
 
   startShell(): Promise<void> {

@@ -97,7 +97,9 @@ pub fn run() {
             pty.on_prompt(move |session| {
                 // Checkpoints are for agents; a shell submits every command.
                 let enabled = checkpoint_app.state::<SettingsStore>().get().checkpoints;
-                if enabled && session.profile != agents::profiles::SHELL_PROFILE {
+                let agent = session.profile != agents::profiles::SHELL_PROFILE
+                    && !session.profile.starts_with(scripts::SCRIPT_PROFILE_PREFIX);
+                if enabled && agent {
                     git::commands::checkpoint_in_background(
                         checkpoint_app.clone(),
                         session.project.clone(),

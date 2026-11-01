@@ -189,6 +189,22 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Scripts — implemented (M5)
+
+- `scripts/detect.rs` reads `package.json` and `composer.json` at the
+  project root only (no indexing), in file order (`serde_json` with
+  `preserve_order`). The package manager comes from the lock file, then
+  the `packageManager` field, then npm; composer `pre-…`/`post-…` event
+  hooks are left out.
+- `run_script` starts a PTY session with the profile `script:<id>` (e.g.
+  `script:pnpm:build`) and the script name as title, so status dots, exit
+  codes, notifications and restart work as for agents. Script sessions
+  are not offered for restoring after a restart and take no checkpoints.
+- Frontend: `project/scripts.svelte.ts` (refreshed when a manifest or lock
+  file at the root changes), the scripts side panel (only when there are
+  scripts) with run/stop and the last result, "Run script: …" entries in
+  the command palette, command "Show Scripts".
+
 ## Checkpoints — implemented (M4)
 
 - `git/checkpoints.rs` (ADR 0023): snapshots on hidden refs
@@ -479,8 +495,5 @@ Module: `src-tauri/src/git/` (git CLI, ADR 0008).
 - **Changes panel:** live `git status` plus diff (CodeMirror merge view);
   files the agent just changed are highlighted. Optional _follow_ mode opens
   the most recently changed file automatically.
-- **Scripts panel:** detects `package.json` scripts (npm/pnpm/yarn/bun based
-  on the lock file) and `composer.json` scripts; each script runs in its own
-  task terminal with a status.
 - **Git worktrees (later):** several agents in parallel in the same repo, each
   in its own worktree and branch, created and merged with one click.

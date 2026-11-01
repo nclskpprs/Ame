@@ -27,8 +27,15 @@ const startSession = vi.fn(async (project: string, profile: string, _resume: boo
   return { status: 'ok' as const, data: session };
 });
 
+const runScript = vi.fn(async (project: string, id: string) => {
+  const session = info(nextId++, project, `script:${id}`);
+  backend = [...backend, session];
+  return { status: 'ok' as const, data: session };
+});
+
 vi.mock('$lib/ipc/bindings', () => ({
   commands: {
+    runScript: (project: string, id: string) => runScript(project, id),
     listSessions: async () => backend,
     startSession: (project: string, profile: string, resume: boolean) =>
       startSession(project, profile, resume),
@@ -81,5 +88,20 @@ describe('TerminalGroup restoring', () => {
     const key = group.restorable[1]?.key ?? 0;
     group.dismissRestorable(key);
     expect(group.restorable.map((r) => r.profile)).toEqual(['claude']);
+  });
+});
+
+describe('TerminalGroup scripts', () => {
+  it('runs a script once, shows it while it runs and does not restore it', async () => {
+    backend = [];
+    await sessions.load();
+    const group = new TerminalGroup('/s');
+    await group.runScript('pnpm:dev');
+    expect(runScript).toHaveBeenCalledWith('/s', 'pnpm:dev');
+    expect(group.active?.profile).toBe('script:pnpm:dev');
+    await group.runScript('pnpm:dev');
+    expect(runScript).toHaveBeenCalledTimes(1);
+    expect(group.scriptSession('pnpm:dev')).toBeDefined();
+    expect(group.saved()).toEqual([]);
   });
 });

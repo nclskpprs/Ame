@@ -9,6 +9,7 @@
   import EditorPane from './EditorPane.svelte';
   import FileTree from './FileTree.svelte';
   import Resizer from './Resizer.svelte';
+  import ScriptsPanel from './ScriptsPanel.svelte';
   import SearchPanel from './SearchPanel.svelte';
   import TerminalPanel from './TerminalPanel.svelte';
   import type { SidePanel } from '$lib/ipc/bindings';
@@ -17,13 +18,20 @@
 
   const session = $derived(sessionFor(project.path));
   const unsaved = $derived(withAncestors(session.editors.dirtyFiles.map((file) => file.path)));
-  type PanelLabel = 'sidePanel.files' | 'sidePanel.search' | 'sidePanel.changes';
-  /** The changes panel appears only in git repositories (progressive disclosure). */
+  type PanelLabel =
+    'sidePanel.files' | 'sidePanel.search' | 'sidePanel.changes' | 'sidePanel.scripts';
+  /**
+   * The changes panel appears only in git repositories, the scripts panel
+   * only when there are scripts (progressive disclosure).
+   */
   const panels = $derived<{ id: SidePanel; label: PanelLabel }[]>([
     { id: 'files', label: 'sidePanel.files' },
     { id: 'search', label: 'sidePanel.search' },
     ...(session.git.status
       ? [{ id: 'changes' as const, label: 'sidePanel.changes' as const }]
+      : []),
+    ...(session.scripts.list.length
+      ? [{ id: 'scripts' as const, label: 'sidePanel.scripts' as const }]
       : []),
   ]);
   const changeCount = $derived(session.git.status?.files.length ?? 0);
@@ -50,6 +58,8 @@
         <SearchPanel {session} />
       {:else if project.layout.sidePanel === 'changes' && session.git.status}
         <ChangesPanel {session} />
+      {:else if project.layout.sidePanel === 'scripts' && session.scripts.list.length}
+        <ScriptsPanel {session} />
       {:else}
         <FileTree
           tree={session.tree}

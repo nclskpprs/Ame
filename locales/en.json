@@ -143,14 +143,16 @@
     "quit": "Quit Ame",
     "queuePrompt": "Queue Prompt for Agent",
     "paperDance": "Dance of the Paper",
-    "createCheckpoint": "Create Checkpoint"
+    "createCheckpoint": "Create Checkpoint",
+    "showScripts": "Show Scripts"
   },
   "sidePanel": {
     "label": "Side panel",
     "resize": "Resize side panel",
     "files": "Files",
     "search": "Search",
-    "changes": "Changes"
+    "changes": "Changes",
+    "scripts": "Scripts"
   },
   "fileTree": {
     "label": "Files",
@@ -362,5 +364,12 @@
     "undo": "Undo",
     "dismiss": "Dismiss",
     "manualLabel": "Created by hand"
+  },
+  "scripts": {
+    "run": "Run {name}",
+    "stop": "Stop {name}",
+    "succeeded": "Finished",
+    "failed": "Failed",
+    "paletteRun": "Run script: {name}"
   }
 }

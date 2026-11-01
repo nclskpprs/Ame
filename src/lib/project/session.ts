@@ -7,6 +7,7 @@ import { EditorGroup } from './editors.svelte';
 import { FileTreeState } from './file-tree.svelte';
 import { CheckpointState } from './checkpoints.svelte';
 import { GitState } from './git.svelte';
+import { ScriptState, touchesManifest } from './scripts.svelte';
 import { newest } from '$lib/git/recent';
 import { SearchState } from './search.svelte';
 import { TerminalGroup } from './terminals.svelte';
@@ -23,6 +24,7 @@ export class ProjectSession {
   readonly terminals: TerminalGroup;
   readonly git: GitState;
   readonly checkpoints: CheckpointState;
+  readonly scripts: ScriptState;
   readonly #watched = new WatchSet();
 
   constructor(path: string) {
@@ -42,6 +44,8 @@ export class ProjectSession {
     this.git.ignore = (file) => this.editors.savedRecently(file);
     this.git.onChange = (paths) => this.#follow(paths);
     void this.git.refresh();
+    this.scripts = new ScriptState(path);
+    void this.scripts.refresh();
     this.checkpoints = new CheckpointState(path);
     this.checkpoints.onRestored = () => {
       this.git.refreshSoon(0);
@@ -95,6 +99,7 @@ export class ProjectSession {
     void this.tree.refresh(paths);
     void this.editors.onFsChanged(paths);
     this.git.refreshSoon();
+    if (touchesManifest(paths)) void this.scripts.refresh();
   }
 }
 

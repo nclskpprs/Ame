@@ -82,9 +82,9 @@ milestones and marked with 💡.
 
 ## M5 — Scripts
 
-- [ ] Detect `package.json` (package manager from lock file) and
+- [x] Detect `package.json` (package manager from lock file) and
       `composer.json`
-- [ ] Script runner with status
+- [x] Script runner with status
 - [ ] 💡 Dev server detection: detect ports in script output, "Open in
       browser" link, warn about port conflicts
 - [ ] 💡 Project config `.ame.json`: default agents, start commands and

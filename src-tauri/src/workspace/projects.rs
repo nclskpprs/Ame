@@ -94,6 +94,8 @@ pub enum SidePanel {
     Search,
     /// Git changes; only offered in git repositories.
     Changes,
+    /// `package.json` / `composer.json` scripts; only offered when there are some.
+    Scripts,
 }
 
 /// Snapshot of the open projects sent to the frontend.

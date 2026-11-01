@@ -69,6 +69,10 @@ export const commands = {
 	 *  error message when they fail.
 	 */
 	gitCommit: (project: string, message: string) => typedError<null, AppError>(__TAURI_INVOKE("git_commit", { project, message })),
+	/**  The scripts of a project (`package.json`, `composer.json` at its root). */
+	listScripts: (project: string) => typedError<Script[], AppError>(__TAURI_INVOKE("list_scripts", { project })),
+	/**  Runs a script in a new terminal session of the project. */
+	runScript: (project: string, id: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("run_script", { project, id, cols, rows })),
 	/**  The project's checkpoints, newest first (empty outside git). */
 	listCheckpoints: (project: string) => typedError<Checkpoint[], AppError>(__TAURI_INVOKE("list_checkpoints", { project })),
 	/**  Takes a checkpoint now; `None` if nothing changed since the last one. */
@@ -263,7 +267,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -503,11 +507,23 @@ export type QueuedPrompt = {
 
 export type RainEffects = "on" | "subtle" | "off";
 
+/**  The tool that runs a script. */
+export type Runner = "npm" | "pnpm" | "yarn" | "bun" | "composer";
+
 /**  A terminal session remembered across restarts. */
 export type SavedSession = {
 	/**  Id of the agent profile. */
 	profile: string,
 	title: string,
+};
+
+export type Script = {
+	/**  Unique within the project, e.g. `pnpm:build`. */
+	id: string,
+	name: string,
+	runner: Runner,
+	/**  What the script does, as written in the manifest (for tooltips). */
+	command: string,
 };
 
 export type SearchOptions = {
@@ -688,7 +704,9 @@ export type Settings_Serialize = {
 
 export type SidePanel = "files" | "search" | 
 /**  Git changes; only offered in git repositories. */
-"changes";
+"changes" | 
+/**  `package.json` / `composer.json` scripts; only offered when there are some. */
+"scripts";
 
 export type ThemePreference = 
 /**  Follow the operating system. */

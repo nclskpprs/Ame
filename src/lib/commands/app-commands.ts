@@ -157,6 +157,15 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'scripts.show',
+      title: 'commands.showScripts',
+      when: () => (activeSession()?.scripts.list.length ?? 0) > 0,
+      run: () => {
+        const path = workspace.activePath;
+        if (path) workspace.updateLayout(path, { sidePanel: 'scripts' });
+      },
+    },
+    {
       id: 'git.createCheckpoint',
       title: 'commands.createCheckpoint',
       when: () => activeSession()?.git.status != null,

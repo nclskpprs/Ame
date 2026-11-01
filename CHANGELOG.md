@@ -120,6 +120,9 @@ and this project adheres to
   files in a hidden git ref. The changes panel lists them with the files
   changed since; restore with one click (and undo the restore). Can be
   turned off in the settings.
+- Scripts: `package.json` (npm, pnpm, yarn or bun, from the lock file) and
+  `composer.json` scripts appear in a scripts panel and in the command
+  palette; each runs in its own terminal tab with a status.
 
 ### Fixed
 

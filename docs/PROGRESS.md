@@ -7,7 +7,8 @@ is open, what comes next.
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
   background, ADR 0020). M3 — Status and dashboard is complete. M4 —
-  checkpoints done; review mode open. M4 —
+  checkpoints done; review mode skipped for now (extra). M5 — scripts:
+  detection and runner done. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
@@ -16,6 +17,33 @@ is open, what comes next.
 - **Next steps:** 2. M4: checkpoints before every prompt, review mode. 3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M5: script detection and runner
+
+**Done**
+
+- Maintainer: extras (review mode) come after everything runs; review
+  mode is skipped for now. Checkpoints were almost done and got finished.
+- `scripts/` backend: detection of `package.json` / `composer.json`
+  scripts at the root, package manager from lock file / `packageManager`,
+  `list_scripts`, `run_script` (a PTY session with profile `script:<id>`).
+- Frontend: scripts side panel (progressive disclosure) with status of the
+  last run, run / stop; palette entries "Run script: …"; command
+  "Show Scripts"; script sessions are not restored after a restart.
+
+**Verified**
+
+- Unit tests (detection, lock files, composer hooks, broken manifests,
+  manifest changes, running a script once and showing it while it runs).
+- In `pnpm tauri dev` on WSLg: the Scripts tab appears with a
+  `package.json`; "Run script: hello" runs `npm run hello` (exit 0, gray),
+  `fail` ends with code 3 (red in the panel, tab, sidebar).
+- `pnpm verify` green.
+
+**Open**
+
+- Windows: npm/pnpm are `.cmd` files; starting them directly in ConPTY is
+  untested (the same applies to npm-installed agents).
 
 ### 2026-11-01 — M4: checkpoints before every prompt
 

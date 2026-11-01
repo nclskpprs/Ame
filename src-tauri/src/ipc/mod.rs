@@ -18,6 +18,7 @@ use crate::git::commands as git;
 use crate::git::commands::CheckpointsChanged;
 use crate::pty::commands as pty;
 use crate::pty::commands::SessionsChanged;
+use crate::scripts::commands as scripts;
 use crate::workspace::commands;
 
 /// Path of the generated TypeScript bindings.
@@ -58,6 +59,8 @@ pub fn builder() -> Builder<Wry> {
             git::git_stage,
             git::git_unstage,
             git::git_commit,
+            scripts::list_scripts,
+            scripts::run_script,
             git::list_checkpoints,
             git::create_checkpoint,
             git::checkpoint_changes,

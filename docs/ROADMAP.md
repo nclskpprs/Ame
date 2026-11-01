@@ -119,6 +119,8 @@ milestones and marked with 💡.
       portable `.exe` (Windows) — in the release workflow, not run yet
 - [x] Release workflow per tag (`tauri-action`), see `docs/RELEASING.md`;
       auto-update follows with the in-app updates
+- [x] Preview workflow: rolling pre-release "Ame Preview" built by hand
+      from a branch, no version bump (`docs/RELEASING.md`)
 - [ ] In-app updates (maintainer request): check on start and periodically
       (setting + "Check for Updates" command), inline notice and OS
       notification when an update exists, "Install and restart" with

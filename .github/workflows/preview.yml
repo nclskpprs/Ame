@@ -1,0 +1,89 @@
+name: Preview
+
+# Builds the installers for the selected branch (usually `main`) and puts
+# them on the rolling pre-release "Ame Preview" (tag `preview`). Every run
+# replaces the previous preview. No version bump or version tag needed.
+# See docs/RELEASING.md.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: preview
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  prepare:
+    name: Replace the preview release
+    runs-on: ubuntu-latest
+    outputs:
+      release-id: ${{ steps.release.outputs.id }}
+    steps:
+      - id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
+        run: |
+          gh release delete preview --cleanup-tag --yes || true
+          notes="Preview build of \`${REF}\` at ${GITHUB_SHA::7} ($(date -u '+%Y-%m-%d %H:%M UTC')).
+
+          Not a release: every preview run replaces this one, and it has no in-app updates.
+          macOS builds are only ad-hoc signed: if macOS blocks the app, allow it under System Settings → Privacy & Security → Open Anyway. Windows shows a SmartScreen warning (More info → Run anyway)."
+          gh release create preview --prerelease --latest=false \
+            --target "$GITHUB_SHA" --title "Ame Preview" --notes "$notes"
+          echo "id=$(gh api "repos/${GH_REPO}/releases/tags/preview" --jq .id)" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - name: Linux
+            os: ubuntu-22.04
+            args: ''
+            rust-targets: ''
+          - name: Windows
+            os: windows-latest
+            args: ''
+            rust-targets: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.os }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and attach to the preview release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ needs.prepare.outputs.release-id }}
+          args: ${{ matrix.args }}

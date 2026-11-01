@@ -29,8 +29,11 @@ detect, and the web view runs in separate processes.
   the release binary several times, reports the medians (job summary in
   GitHub Actions) and fails above the budget.
 - CI: a `bench` job on `ubuntu-24.04` builds the release binary and runs
-  the script under `xvfb-run`. It only reports (`--no-fail`) until the
-  memory budget is settled (see below).
+  the script under `xvfb-run`; it fails above the budget.
+- **Budgets per platform** (maintainer decision): startup < 1 s
+  everywhere; memory < 150 MB in general, < 450 MB PSS on Linux, where
+  WebKitGTK alone needs more. The first runs on hosted runners may adjust
+  the Linux value.
 
 ## Alternatives considered
 
@@ -50,9 +53,11 @@ detect, and the web view runs in separate processes.
   WebKit libraries), `WebKitWebProcess` 250 MB, `WebKitNetworkProcess`
   22 MB. Without accelerated compositing
   (`WEBKIT_DISABLE_COMPOSITING_MODE=1`) the web process drops to about
-  120 MB (total about 250 MB). The 150 MB target of `docs/VISION.md` is not
-  reachable with WebKitGTK as is; the maintainer decides between a
-  per-platform budget and further savings.
+  120 MB (total about 250 MB) — but then xterm's WebGL canvas shows new
+  output only on the next input event (tried with the WebKit setting
+  `HardwareAccelerationPolicy::Never` and with the environment variable;
+  both lag). Accelerated compositing therefore stays on. Possible later
+  work: the DOM renderer for xterm without compositing, measured again.
 - CI runners are slower than developer machines and use software
   rendering; a failing startup budget there may need a runner-specific
   budget. The first numbers decide.

@@ -21,7 +21,8 @@ replacement with indexing, but a **cockpit for agentic coding**.
 
 - **Performance first.** Target: < 150 MB RAM idle with three open projects,
   cold start < 1 s. Measure instead of guessing — benchmarks run in CI from
-  M3 on.
+  M3 on. On Linux, WebKitGTK alone needs more, so the budget there is
+  450 MB PSS (maintainer decision, ADR 0022).
 - **No indexing.** The file tree loads directories only when they are
   expanded, search runs on demand, `.gitignore` is respected.
 - **Agent-agnostic.** An agent is just a command in a PTY. Agent-specific

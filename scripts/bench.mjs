@@ -23,8 +23,14 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-/** Targets from docs/VISION.md. */
-const BUDGET = { memoryMb: 150, startupMs: 1000 };
+/**
+ * Budgets per platform (docs/VISION.md, ADR 0022). Linux measures PSS and
+ * carries WebKitGTK, which alone needs more than the general 150 MB.
+ */
+const BUDGETS = {
+  linux: { memoryMb: 450, startupMs: 1000 },
+  default: { memoryMb: 150, startupMs: 1000 },
+};
 const RUN_TIMEOUT_MS = 60_000;
 
 const { values } = parseArgs({
@@ -105,6 +111,8 @@ try {
   rmSync(root, { recursive: true, force: true });
 }
 
+const last = results.at(-1);
+const BUDGET = BUDGETS[last.os] ?? BUDGETS.default;
 const startup = median(results.map((r) => r.startupMs));
 const memory = median(results.map((r) => r.memoryMb));
 const over = [];
@@ -112,7 +120,6 @@ if (memory > BUDGET.memoryMb) over.push(`memory ${memory.toFixed(1)} MB > ${BUDG
 if (startup > BUDGET.startupMs)
   over.push(`startup ${startup.toFixed(0)} ms > ${BUDGET.startupMs} ms`);
 
-const last = results.at(-1);
 const lines = [
   `### Ame benchmark (${last.os}, ${runs} runs, median)`,
   '',

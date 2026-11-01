@@ -6,20 +6,34 @@ is open, what comes next.
 ## Current state
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
-  background, ADR 0020). M3 — Status and dashboard is complete; the
-  memory budget needs a maintainer decision (see the latest entry). M4 —
+  background, ADR 0020). M3 — Status and dashboard is complete. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
-- **Next steps:**
-  1. Maintainer decision on the memory budget (150 MB is not reachable
-     with WebKitGTK; ADR 0022), then make the CI benchmark enforce it.
-  2. M4: checkpoints before every prompt, review mode.
-  3. M5: scripts; M5b: project groups for agents.
+- **Next steps:** 2. M4: checkpoints before every prompt, review mode. 3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M3: memory budget per platform
+
+**Done**
+
+- Maintainer decision: budgets per platform plus turning off accelerated
+  compositing on Linux. The budget part is in: Linux 450 MB PSS, otherwise
+  150 MB, startup < 1 s; the CI job now fails above it.
+- Turning off compositing was built and measured (294 MB with the WebKit
+  setting, about 250 MB with the environment variable), then **reverted**:
+  without compositing, xterm's WebGL canvas showed new terminal output
+  only on the next input event (compared side by side with the same key
+  sequence on WSLg). Recorded in ADR 0022.
+
+**Open**
+
+- First CI run on a hosted runner (needs a push): check the Linux numbers
+  and adjust the 450 MB budget if needed.
+- Maybe later: xterm's DOM renderer without compositing, measured again.
 
 ### 2026-11-01 — M3: benchmarks for startup time and memory
 

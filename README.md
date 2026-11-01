@@ -2,6 +2,28 @@
 
 > **Ame** (雨) is Japanese for _rain_. Every drop is a signal.
 
+## The problem
+
+Coding agents like Claude Code, Codex CLI or Gemini CLI work on their own
+for minutes at a time. So you start several of them, in several projects —
+and then the juggling begins:
+
+- A dozen terminal windows, and no idea which agent is still working, which
+  one finished ten minutes ago and which one has been **waiting for your
+  permission** all along.
+- You switch between projects all day, but every switch means finding the
+  right window, editor and terminal again.
+- To see **what an agent changed**, you open a full IDE next to it — which
+  indexes everything and eats gigabytes of memory just to show a diff.
+- When an agent is done, its next task waits until you notice.
+
+**Ame turns this into one calm window:** all your projects in a sidebar,
+every agent's state visible at a glance (and a notification when one needs
+you), and the files and diffs of what it changed right next to its
+terminal — without the weight of an IDE.
+
+## What it is
+
 Ame is a lean, cross-platform desktop app for **agentic coding**. It keeps
 many projects open at once and runs any terminal coding agent per project —
 Claude Code, Codex CLI, Gemini CLI, Aider, OpenCode or a plain shell — and
@@ -17,7 +39,7 @@ a lightweight editor and a live diff of what your agents changed.
 
 ![Ame with a project, its changes, an inline diff and an agent](docs/screenshots/project-dark.png)
 
-## Why
+## What Ame does
 
 - **Low memory, fast start.** A Rust backend, no indexing, lazy loading
   everywhere. Startup under one second; memory is measured in CI on every

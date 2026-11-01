@@ -1,0 +1,108 @@
+name: Release
+
+# Builds the installers for a version tag (e.g. `v0.1.0`) and attaches them
+# to a draft GitHub release. See docs/RELEASING.md.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to build, e.g. v0.1.0
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  check:
+    name: Check version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - name: Tag matches Cargo.toml and package.json
+        run: node scripts/check-version.mjs "$TAG"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS universal
+            os: macos-latest
+            args: --target universal-apple-darwin
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+          # The oldest supported Ubuntu keeps the AppImage compatible with
+          # older glibc versions.
+          - name: Linux
+            os: ubuntu-22.04
+            args: ''
+            rust-targets: ''
+          - name: Windows
+            os: windows-latest
+            args: ''
+            rust-targets: ''
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.os }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and attach to the draft release
+        id: tauri
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ env.TAG }}
+          releaseName: Ame ${{ env.TAG }}
+          releaseBody: See CHANGELOG.md for the changes in this version.
+          releaseDraft: true
+          prerelease: ${{ startsWith(env.TAG, 'v0.') }}
+          args: ${{ matrix.args }}
+      - name: Attach the portable Windows build
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ID: ${{ steps.tauri.outputs.releaseId }}
+          VERSION: ${{ steps.tauri.outputs.appVersion }}
+        run: |
+          # The plain executable with a `portable` marker next to it keeps
+          # all data in a `data` folder beside it (ADR 0011).
+          mkdir portable
+          cp target/release/ame.exe portable/Ame.exe
+          echo "Ame keeps its settings next to this file while it exists." > portable/portable
+          name="Ame_${VERSION}_x64_portable.zip"
+          (cd portable && 7z a "../$name" Ame.exe portable)
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@${name}" \
+            "https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${name}"

@@ -20,6 +20,7 @@ Read these before you change anything substantial:
 | [docs/VISION.md](docs/VISION.md)             | Goals, principles, scope, risks              |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Current architecture and planned modules     |
 | [docs/DESIGN.md](docs/DESIGN.md)             | Rain concept, design tokens, UX              |
+| [docs/RELEASING.md](docs/RELEASING.md)       | How a version is built and published         |
 | [docs/decisions/](docs/decisions/)           | Architecture decision records (ADRs)         |
 
 ## Workflow

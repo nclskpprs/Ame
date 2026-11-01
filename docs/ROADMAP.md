@@ -106,9 +106,10 @@ milestones and marked with 💡.
 - [x] Icon and branding (a drop that is also a text cursor;
       source `branding/icon.svg`)
 - [ ] UX review with screenshots of every view in light and dark
-- [ ] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
-      portable `.exe` (Windows)
-- [ ] Release workflow per tag (`tauri-action`), auto-update
+- [x] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
+      portable `.exe` (Windows) — in the release workflow, not run yet
+- [x] Release workflow per tag (`tauri-action`), see `docs/RELEASING.md`;
+      auto-update follows with the in-app updates
 - [ ] In-app updates (maintainer request): check on start and periodically
       (setting + "Check for Updates" command), inline notice and OS
       notification when an update exists, "Install and restart" with

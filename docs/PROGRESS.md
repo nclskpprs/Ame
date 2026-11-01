@@ -19,6 +19,28 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — M6: release workflow
+
+**Done**
+
+- `.github/workflows/release.yml`: on a `v*` tag (or by hand), checks the
+  tag against `Cargo.toml` and `package.json`
+  (`scripts/check-version.mjs`), builds with `tauri-action` on macOS
+  (universal), Ubuntu 22.04 and Windows into a draft release, and attaches
+  a portable Windows ZIP (`Ame.exe` + `portable` marker).
+- `docs/RELEASING.md` (steps, artifacts, portable build, what is missing).
+
+**Verified**
+
+- `check-version.mjs` with matching, mismatching and invalid tags; both
+  workflow files parse as YAML. The workflow itself has not run (needs a
+  push of a tag).
+
+**Open — needs the maintainer**
+
+- Updater signing key (see `docs/RELEASING.md`), then in-app updates.
+- First push and a test tag (e.g. `v0.0.1`) to see the workflow run.
+
 ### 2026-11-01 — M6: app icon
 
 **Done**

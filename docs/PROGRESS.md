@@ -21,6 +21,9 @@ is open, what comes next.
   maintainer reviews everything at the end. The M1 checklists for file
   tree, editor, search and palette are still unreviewed (local `abnahme/`
   folder, not in git).
+- **Preview builds:** `gh workflow run preview.yml --ref main` replaces
+  the pre-release "Ame Preview" (tag `preview`) with fresh builds for
+  all three platforms; the maintainer tests from there.
 - **Signing:** ad-hoc on macOS is enough for now (maintainer decision);
   no Apple Developer ID, Windows stays unsigned.
 - **CI:** green on macOS, Linux and Windows. The benchmark runs under
@@ -59,6 +62,23 @@ is open, what comes next.
    the first publication.
 
 ## Log
+
+### 2026-11-01 — Preview workflow
+
+**Done**
+
+- `.github/workflows/preview.yml`: started by hand on a branch, it deletes
+  the previous "Ame Preview" pre-release and its `preview` tag, creates
+  a new one on the current commit (never marked latest) and lets
+  `tauri-action` upload the macOS universal, Linux and Windows builds to
+  it via `releaseId`. No version check, no portable ZIP. Documented in
+  `docs/RELEASING.md`.
+
+**Open**
+
+- `fs::watcher::tests::reports_writes_but_not_reads` is flaky on macOS CI
+  (FSEvents can report the write made just before `watch()` late); it
+  failed once on PR #5 and passed on the re-run.
 
 ### 2026-11-01 — macOS smoke test of a release build; editor styles fixed
 

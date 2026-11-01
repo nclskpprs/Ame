@@ -39,6 +39,22 @@ How a version of Ame gets built and published. The workflow is
 To rebuild an existing tag, run the workflow by hand
 (_Actions → Release → Run workflow_) with the tag name.
 
+## Preview builds
+
+To test the current state without a version, run the **Preview** workflow
+(`.github/workflows/preview.yml`) by hand, usually on `main`:
+
+```sh
+gh workflow run preview.yml --ref main
+```
+
+It replaces the pre-release **Ame Preview** (tag `preview`) with fresh
+builds for macOS (universal `.dmg`), Linux and Windows, built from the
+selected branch. The version inside stays whatever `main` has (`0.0.0`
+between releases). The preview is never marked as the latest release, so
+it does not interfere with real releases or, later, in-app updates. There
+is no portable Windows ZIP in the preview.
+
 ## Portable Windows build
 
 The portable ZIP contains `Ame.exe` and a file named `portable`. While that

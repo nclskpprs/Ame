@@ -649,12 +649,16 @@ mod tests {
         let info = manager
             .spawn(spec("cmd.exe", &["/c", "echo hello"]))
             .unwrap();
+        // No view while it runs: the session itself answers ConPTY's cursor
+        // position request, otherwise the program never starts.
+        wait_for_exit(&exits, info.id);
         let output = Collect::default();
         manager
             .get(info.id)
             .unwrap()
             .attach(Box::new(output.clone()));
-        wait_for_exit(&exits, info.id);
-        wait_until(|| output.text().contains("hello"));
+        let text = output.text();
+        assert!(text.contains("hello"), "{text:?}");
+        assert!(!text.contains("\x1b[6n"), "{text:?}");
     }
 }

@@ -27,3 +27,4 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0019](0019-agent-hooks-via-the-app-binary-and-a-loopback-endpoint.md) | Agent hooks via the app binary and a loopback endpoint | Accepted |
 | [0020](0020-keep-running-in-the-background-instead-of-a-daemon.md)     | Keep running in the background instead of a daemon     | Accepted |
 | [0021](0021-prompt-queue-in-the-backend.md)                            | Prompt queue in the backend                            | Accepted |
+| [0022](0022-self-measuring-benchmarks.md)                              | Self-measuring benchmarks                              | Accepted |

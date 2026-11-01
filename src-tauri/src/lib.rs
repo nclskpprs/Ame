@@ -5,6 +5,7 @@
 
 pub mod agents;
 pub mod background;
+pub mod bench;
 pub mod error;
 pub mod fs;
 pub mod git;
@@ -35,6 +36,7 @@ pub(crate) const MAIN_WINDOW: &str = "main";
 /// helper `ame hook claude`) and returns its exit code; `None` starts the
 /// app. Must run before anything else, so helpers stay fast.
 pub fn run_cli() -> Option<i32> {
+    bench::mark_start();
     agents::adapters::cli::run(std::env::args_os().skip(1))
 }
 
@@ -49,11 +51,15 @@ pub fn run() {
 
     pty::env::warm_up();
 
-    let app = tauri::Builder::default()
-        // Must come first: a second start only shows the running app.
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+    let mut app = tauri::Builder::default();
+    // Must come first: a second start only shows the running app. Benchmark
+    // runs are separate instances, so they work while Ame is open.
+    if std::env::var_os(bench::BENCH_ENV).is_none() {
+        app = app.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             background::show_main_window(app);
-        }))
+        }));
+    }
+    let app = app
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())

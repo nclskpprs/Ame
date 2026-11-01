@@ -6,19 +6,55 @@ is open, what comes next.
 ## Current state
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
-  background, ADR 0020). M3 — Status and dashboard: everything done
-  except the performance benchmarks in CI. M4 —
+  background, ADR 0020). M3 — Status and dashboard is complete; the
+  memory budget needs a maintainer decision (see the latest entry). M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M3: performance benchmarks (RAM, startup time) in CI.
+  1. Maintainer decision on the memory budget (150 MB is not reachable
+     with WebKitGTK; ADR 0022), then make the CI benchmark enforce it.
   2. M4: checkpoints before every prompt, review mode.
   3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M3: benchmarks for startup time and memory
+
+**Done**
+
+- `bench.rs` (ADR 0022): the app measures itself. The frontend reports its
+  first frame (`app_ready`, replaces the old frontend-only startup log);
+  the backend logs "ready after N ms" from the process start. With
+  `AME_BENCH=<file>` it measures its process tree after 5 s (PSS on
+  Linux), writes JSON and quits; single instance is off in that mode.
+- `scripts/bench.mjs`: three projects, several runs, medians, job summary,
+  budget check (`--no-fail` to only report).
+- CI job `bench` (ubuntu-24.04, release build, `xvfb-run`), report only.
+- Fix: `pty/tree.rs` counted threads as processes on Linux (sysinfo lists
+  them), so the resource monitor showed far too much memory and CPU for
+  multi-threaded agents, and the first benchmark said 33 GB.
+
+**Verified**
+
+- Unit tests: PSS parsing, JSON shape, own-tree measurement, threads not
+  in the tree. `pnpm verify` green.
+- Release build on WSLg: startup 822–833 ms (budget 1 s ✓), memory
+  382 MB PSS (budget 150 MB ✗): `ame` 108, `WebKitWebProcess` 248,
+  `WebKitNetworkProcess` 22. With `WEBKIT_DISABLE_COMPOSITING_MODE=1` the
+  web process needs about 120 MB (total about 250 MB).
+
+**Open — needs the maintainer**
+
+- The 150 MB target is not reachable with WebKitGTK as is. Options: a
+  per-platform budget (e.g. Linux 400 MB PSS, measured on real runners),
+  turning off accelerated compositing on Linux (saves about 130 MB under
+  software rendering; animations and xterm's WebGL need checking), or
+  both. Until then the CI job only reports.
+- The CI job has not run yet (no push); its first numbers on a hosted
+  runner will differ from WSLg.
 
 ### 2026-11-01 — M3: rain status animations, prompt drop and origami
 

@@ -189,6 +189,18 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Benchmarks — implemented (M3)
+
+- `bench.rs` (ADR 0022): `mark_start` in `main`, the frontend calls
+  `app_ready` after its first frame; the startup time is logged on every
+  start. With `AME_BENCH=<file>` the app measures the memory of its process
+  tree after 5 s (PSS on Linux, RSS elsewhere), writes JSON and quits; the
+  single-instance plugin is off in this mode.
+- `scripts/bench.mjs` runs the release binary with three projects and
+  reports medians; the CI job `bench` runs it under `xvfb-run`.
+- `pty/tree.rs` leaves threads out of process trees (sysinfo lists them as
+  processes on Linux), which the resource monitor relies on as well.
+
 ## Running in the background — implemented (M2)
 
 Module: `src-tauri/src/background/` (see

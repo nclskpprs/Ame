@@ -7,10 +7,15 @@ use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, Signal, System};
 /// Upper bound of processes visited per tree, against cycles from reused pids.
 const MAX_TREE_SIZE: usize = 10_000;
 
-/// Parent → children of every process of a refreshed [`System`].
+/// Parent → children of every process of a refreshed [`System`]. Threads
+/// are left out: sysinfo lists them as processes on Linux, and each one
+/// reports the memory of its whole process.
 pub fn children(system: &System) -> HashMap<Pid, Vec<Pid>> {
     let mut children: HashMap<Pid, Vec<Pid>> = HashMap::new();
     for (pid, process) in system.processes() {
+        if process.thread_kind().is_some() {
+            continue;
+        }
         if let Some(parent) = process.parent() {
             children.entry(parent).or_default().push(*pid);
         }
@@ -73,6 +78,26 @@ mod tests {
         assert_eq!(tree[0], pid(1));
         tree.sort();
         assert_eq!(tree, [pid(1), pid(2), pid(3), pid(4)]);
+    }
+
+    #[test]
+    fn threads_are_not_part_of_the_tree() {
+        // The test binary runs several threads.
+        let _worker = std::thread::spawn(|| std::thread::sleep(std::time::Duration::from_secs(2)));
+        let mut system = System::new();
+        system.refresh_processes_specifics(
+            ProcessesToUpdate::All,
+            true,
+            ProcessRefreshKind::nothing(),
+        );
+        let root = Pid::from_u32(std::process::id());
+        for pid in tree(&children(&system), root) {
+            let process = system.process(pid);
+            assert!(
+                process.is_none_or(|process| process.thread_kind().is_none()),
+                "{pid} is a thread"
+            );
+        }
     }
 
     #[test]

@@ -1,4 +1,4 @@
-import { error as logError, info as logInfo } from '@tauri-apps/plugin-log';
+import { error as logError } from '@tauri-apps/plugin-log';
 
 /**
  * Forwards uncaught frontend errors to the backend log, so they show up in
@@ -16,10 +16,4 @@ export function forwardErrorsToLog(): void {
       `unhandled rejection: ${reason instanceof Error ? (reason.stack ?? reason.message) : String(reason)}`,
     );
   });
-}
-
-/** Logs how long the frontend took from navigation start to the first mount. */
-export function logStartupTime(): void {
-  const ms = Math.round(performance.now());
-  void logInfo(`[frontend] mounted after ${ms} ms`).catch(() => {});
 }

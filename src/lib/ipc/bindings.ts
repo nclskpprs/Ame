@@ -7,6 +7,12 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 
 /** Commands */
 export const commands = {
+	/**
+	 *  The frontend painted its first frame. Logs the startup time and, in
+	 *  benchmark mode, measures and quits. Later calls (web view reloads) are
+	 *  ignored.
+	 */
+	appReady: () => __TAURI_INVOKE<void>("app_ready"),
 	getSettings: () => __TAURI_INVOKE<Settings_Serialize>("get_settings"),
 	/**
 	 *  Replaces all settings. Async so the file write does not block the main

@@ -11,6 +11,7 @@ use tauri_specta::{Builder, collect_commands, collect_events};
 use crate::agents::commands as agents;
 use crate::background::TrayAction;
 use crate::background::commands as background;
+use crate::bench;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::git::commands as git;
@@ -31,6 +32,7 @@ pub fn builder() -> Builder<Wry> {
     // backend sends, `Foo_Deserialize` what it accepts.
     Builder::<Wry>::new()
         .commands(collect_commands![
+            bench::app_ready,
             commands::get_settings,
             commands::set_settings,
             commands::get_app_info,

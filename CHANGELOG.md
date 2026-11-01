@@ -119,6 +119,9 @@ and this project adheres to
 
 ### Fixed
 
+- The resource monitor counted every thread of an agent as a process, so
+  memory and CPU of multi-threaded agents were shown far too high.
+
 - The file tree now notices new and changed files in the project folder
   itself when no subfolder is expanded, and the file watcher no longer
   reacts to its own reads (on Linux this caused a constant reload loop).

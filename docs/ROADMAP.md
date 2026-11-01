@@ -63,7 +63,8 @@ milestones and marked with 💡.
 - [x] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
 - [x] Origami motif (maintainer idea): paper crane for queued prompts and
       a hidden "Dance of the Paper" easter egg in the palette
-- [ ] Performance benchmarks (RAM, startup time) in CI
+- [x] Performance benchmarks (RAM, startup time) in CI — report only
+      until the memory budget is decided (ADR 0022)
 - [x] 💡 Prompt queue per agent: queue follow-up prompts that are sent
       automatically as soon as the agent is idle
 - [x] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the

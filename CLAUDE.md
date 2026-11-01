@@ -8,6 +8,6 @@
 - To continue the project, a prompt like this is enough:
   "Read AGENTS.md, docs/PROGRESS.md and docs/ROADMAP.md, then start the next
   open milestone."
-- The Claude Code status adapter planned for M3 uses Claude Code hooks
-  (`UserPromptSubmit`, `Notification`, `Stop`, `SessionStart`,
-  `SessionEnd`). See _Agent status detection_ in `docs/ARCHITECTURE.md`.
+- The Claude Code status adapter uses Claude Code hooks, passed with
+  `claude --settings` (ADR 0019). See _Agent status detection_ in
+  `docs/ARCHITECTURE.md`.

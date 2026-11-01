@@ -1,27 +1,94 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
+  import { notices } from '$lib/stores/notices.svelte';
   import { settings } from '$lib/stores/settings.svelte';
+  import { view } from '$lib/stores/view.svelte';
+  import { workspace } from '$lib/stores/workspace.svelte';
+  import { combinedRain, combinedState } from '$lib/agents/state';
+  import { sessions } from '$lib/terminal/sessions.svelte';
+  import ProjectList from './ProjectList.svelte';
+  import StatusDot from './StatusDot.svelte';
   import ThemeSwitcher from './ThemeSwitcher.svelte';
+
+  const overall = $derived(combinedState(sessions.list));
+  const rain = $derived(combinedRain(sessions.list));
 </script>
 
 <nav class="sidebar" aria-label={t('sidebar.label')}>
   <header class="brand">
-    <span class="name">{t('app.name')}</span>
-    <span class="tagline">{t('app.tagline')}</span>
+    <div class="title">
+      <span class="name">{t('app.name')}</span>
+      <span class="tagline">{t('app.tagline')}</span>
+    </div>
+    <button
+      class="icon-button"
+      title={t('sidebar.openFolder')}
+      aria-label={t('sidebar.openFolder')}
+      onclick={() => void workspace.openFolder()}
+    >
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path d="M8 3v10M3 8h10" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    </button>
   </header>
 
-  <section class="projects">
-    <h2 class="section-label">{t('sidebar.label')}</h2>
-    <p class="muted">{t('sidebar.empty')}</p>
-  </section>
+  <button
+    class="nav"
+    class:active={view.dashboardOpen}
+    aria-pressed={view.dashboardOpen}
+    onclick={() => view.toggle('dashboard')}
+  >
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path d="M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5h-4.5zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5h-4.5z" />
+    </svg>
+    <span class="label">{t('sidebar.dashboard')}</span>
+    {#if overall}<StatusDot state={overall} intensity={rain.intensity} />{/if}
+  </button>
+
+  <div class="projects">
+    <ProjectList />
+  </div>
 
   <footer class="footer">
     {#if settings.saveError}
-      <p class="error" role="alert">
+      <p class="notice error" role="alert">
         {t('settings.saveFailed', { message: settings.saveError })}
       </p>
     {/if}
-    <ThemeSwitcher />
+    {#each notices.list as notice (notice.id)}
+      <p class="notice" class:error={notice.kind === 'error'} role="alert">
+        <span>{notice.message}</span>
+        <button
+          class="dismiss"
+          aria-label={t('sidebar.dismiss')}
+          title={t('sidebar.dismiss')}
+          onclick={() => notices.dismiss(notice.id)}
+        >
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <path d="M4 4l8 8M12 4l-8 8" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+      </p>
+    {/each}
+    <div class="footer-row">
+      <div class="theme"><ThemeSwitcher /></div>
+      <button
+        class="icon-button"
+        class:active={view.settingsOpen}
+        title={t('sidebar.settings')}
+        aria-label={t('sidebar.settings')}
+        aria-pressed={view.settingsOpen}
+        onclick={() => view.toggleSettings()}
+      >
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM6.9 1.5h2.2l.4 1.8 1.2.7 1.8-.6 1.1 1.9-1.4 1.2v1.4l1.4 1.2-1.1 1.9-1.8-.6-1.2.7-.4 1.8H6.9l-.4-1.8-1.2-.7-1.8.6-1.1-1.9 1.4-1.2V7.1L2.4 5.9l1.1-1.9 1.8.6 1.2-.7z"
+            stroke-width="1.2"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
     {#if settings.appInfo?.portable}
       <span class="badge" title={settings.appInfo.configDir}>{t('sidebar.portableMode')}</span>
     {/if}
@@ -34,6 +101,7 @@
     flex-direction: column;
     gap: var(--ame-space-4);
     min-width: 0;
+    min-height: 0;
     padding: var(--ame-space-4) var(--ame-space-3);
     background: var(--ame-surface);
     border-right: 1px solid var(--ame-border);
@@ -41,8 +109,16 @@
 
   .brand {
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ame-space-2);
     padding: 0 var(--ame-space-1);
+  }
+
+  .title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .name {
@@ -51,27 +127,79 @@
     letter-spacing: 0.02em;
   }
 
-  .tagline,
-  .muted {
+  .tagline {
     color: var(--ame-text-muted);
+  }
+
+  .icon-button,
+  .dismiss {
+    display: grid;
+    place-items: center;
+    padding: var(--ame-space-1);
+    border: 0;
+    border-radius: var(--ame-radius);
+    background: transparent;
+    color: var(--ame-text-muted);
+  }
+
+  .icon-button:hover,
+  .icon-button.active,
+  .dismiss:hover {
+    background: var(--ame-bg);
+    color: var(--ame-text);
+  }
+
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-1);
+  }
+
+  .theme {
+    flex: 1;
+    min-width: 0;
+  }
+
+  svg path {
+    fill: none;
+    stroke: currentColor;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-2);
+    margin: calc(var(--ame-space-2) * -1) 0;
+    padding: var(--ame-space-1) var(--ame-space-2);
+    border: 0;
+    border-radius: var(--ame-radius);
+    background: transparent;
+    color: var(--ame-text-muted);
+    font: inherit;
+    text-align: left;
+  }
+
+  .nav:hover,
+  .nav.active {
+    background: var(--ame-bg);
+    color: var(--ame-text);
+  }
+
+  .nav .label {
+    flex: 1;
+  }
+
+  .nav path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linejoin: round;
   }
 
   .projects {
     flex: 1;
-    padding: 0 var(--ame-space-1);
-  }
-
-  .section-label {
-    margin: 0 0 var(--ame-space-2);
-    color: var(--ame-text-muted);
-    font-size: var(--ame-font-size-small);
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .muted {
-    margin: 0;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .footer {
@@ -80,13 +208,25 @@
     gap: var(--ame-space-2);
   }
 
-  .error {
+  .notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ame-space-2);
     margin: 0;
     padding: var(--ame-space-2);
-    border: 1px solid var(--ame-error);
+    border: 1px solid var(--ame-border);
     border-radius: var(--ame-radius);
     color: var(--ame-text);
     font-size: var(--ame-font-size-small);
+    overflow-wrap: anywhere;
+  }
+
+  .notice span {
+    flex: 1;
+  }
+
+  .notice.error {
+    border-color: var(--ame-error);
   }
 
   .badge {

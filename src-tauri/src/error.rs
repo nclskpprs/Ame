@@ -17,6 +17,32 @@ pub enum Error {
     Serialization(String),
     #[error("no config directory is available on this system")]
     NoConfigDir,
+    #[error("not a directory: {0}")]
+    NotADirectory(String),
+    #[error("project is not open: {0}")]
+    UnknownProject(String),
+    #[error("path is outside of the project: {0}")]
+    PathOutsideProject(String),
+    #[error("invalid search: {0}")]
+    InvalidSearch(String),
+    #[error("terminal error: {0}")]
+    Pty(String),
+    #[error("unknown session: {0}")]
+    UnknownSession(u32),
+    #[error("session has exited: {0}")]
+    SessionExited(u32),
+    #[error("prompt not queued: {0}")]
+    PromptRejected(String),
+    #[error("unknown script: {0}")]
+    UnknownScript(String),
+    #[error("{0} cannot be given other folders; set its folder option in the settings")]
+    NoFolderOption(String),
+    #[error("unknown agent profile: {0}")]
+    UnknownProfile(String),
+    #[error("git is not installed")]
+    GitMissing,
+    #[error("git: {0}")]
+    Git(String),
 }
 
 impl From<std::io::Error> for Error {

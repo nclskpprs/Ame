@@ -1,14 +1,26 @@
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from './contrast';
-import { palettes, type ThemeName, type TokenName } from './tokens';
+import { palettes, tokenNames, type ThemeName, type TokenName } from './tokens';
 
 /** WCAG AA: 4.5:1 for normal text, 3:1 for UI components and indicators. */
 const TEXT_MIN = 4.5;
 const INDICATOR_MIN = 3;
 
 const backgrounds: TokenName[] = ['bg', 'surface'];
-const textTokens: TokenName[] = ['text', 'textMuted'];
+const textTokens: TokenName[] = [
+  'text',
+  'textMuted',
+  ...tokenNames.filter((name) => name.startsWith('syntax') || name.startsWith('git')),
+];
 const indicatorTokens: TokenName[] = ['accent', 'needsInput', 'done', 'error'];
+/**
+ * Terminal colors on the terminal background (`bg`). Dark "black" is meant to
+ * be close to the background, as in every terminal theme.
+ */
+const ansiTokens = (theme: ThemeName): TokenName[] =>
+  tokenNames.filter(
+    (name) => name.startsWith('ansi') && !(theme === 'dark' && name === 'ansiBlack'),
+  );
 
 describe('contrastRatio', () => {
   it('matches known values', () => {
@@ -27,6 +39,14 @@ for (const [theme, palette] of Object.entries(palettes) as [
         it(`${token} on ${background} meets ${TEXT_MIN}:1`, () => {
           expect(contrastRatio(palette[token], palette[background])).toBeGreaterThanOrEqual(
             TEXT_MIN,
+          );
+        });
+      }
+
+      for (const token of background === 'bg' ? ansiTokens(theme) : []) {
+        it(`${token} on ${background} meets ${INDICATOR_MIN}:1`, () => {
+          expect(contrastRatio(palette[token], palette[background])).toBeGreaterThanOrEqual(
+            INDICATOR_MIN,
           );
         });
       }

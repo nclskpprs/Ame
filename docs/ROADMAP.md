@@ -21,86 +21,126 @@ milestones and marked with 💡.
 
 ## M1 — Project shell
 
-- [ ] Open multiple projects, sidebar, layout restoration
-- [ ] Base layout: panels (file tree · editor · terminal · changes) next to
-      the sidebar from M0; density switch in the UI (the tokens already
-      support comfortable / compact)
-- [ ] Lazy file tree with watcher
-- [ ] CodeMirror editor: view, edit, save; syntax highlighting for common
-      languages (PHP, JS/TS, JSON, CSS, HTML, Markdown); theme derived from
-      the design tokens; bundled JetBrains Mono
-- [ ] Quick open (fuzzy) and text search
-- [ ] 💡 Command palette (`Ctrl/Cmd+K`): projects, files, scripts, agents and
-      commands in one input
-- [ ] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
+- [x] Open multiple projects, sidebar, layout restoration
+- [x] Base layout: resizable side panel (files · search) and editor area;
+      density switch via the command palette. The terminal panel follows in
+      M2, the changes panel in M4 (progressive disclosure).
+- [x] Lazy file tree with watcher
+- [x] CodeMirror editor: view, edit, save; syntax highlighting for common
+      languages (PHP, JS/TS, JSON, CSS, HTML, Markdown, and since then
+      Python, Rust, Go, Java, C/C++, SQL, YAML, TOML, shell and more);
+      theme derived from the design tokens; bundled JetBrains Mono
+- [x] Quick open (fuzzy) and text search
+- [x] 💡 Command palette (`Ctrl/Cmd+K`): projects, files and commands in one
+      input (scripts follow in M5, agents in M2)
+- [x] 💡 Project groups (e.g. _Client A_, _Private_) and pinning
+- [x] File type icons in the tree and tabs (Material Icon Theme subset,
+      maintainer request)
 
 ## M2 — Terminals and agents
 
-- [ ] PTY manager with ring buffer, xterm.js integration (WebGL with canvas
-      fallback)
-- [ ] Agent profiles (Claude Code, Codex, Gemini, Aider, generic shell) plus
-      custom profiles; detect installed agents on the `PATH`
-- [ ] Multiple sessions per project; sessions keep running in the background
-- [ ] 💡 Background daemon: PTY sessions live in a small Rust process and
-      survive a UI crash or close (like tmux)
-- [ ] 💡 Session resume: a resume command per profile (e.g.
+- [x] PTY manager with ring buffer, xterm.js integration (WebGL with DOM
+      renderer fallback; xterm.js 6 has no canvas renderer)
+- [x] Agent profiles (Claude Code, Codex, Gemini, OpenCode, Aider, generic
+      shell) plus custom profiles; detect installed agents on the `PATH`
+- [x] Multiple sessions per project; sessions keep running in the background
+- [x] Keep running in the background (maintainer decision, ADR 0020):
+      closing the window hides it while agents run; tray icon with the
+      sessions, single instance, Mod+Q quits and ends all sessions and
+      everything they started
+- [x] Start the preferred agent automatically when a project is shown
+      (maintainer request; setting, off by default)
+- [x] 💡 Session resume: a resume command per profile (e.g.
       `claude --continue`), one click after a restart
-- [ ] 💡 "Send to agent": select code → `path:line-range` plus the selection
+- [x] 💡 "Send to agent": select code → `path:line-range` plus the selection
       is sent to the agent's terminal
 
 ## M3 — Status and dashboard
 
-- [ ] Generic status detection (activity, CPU, BEL/OSC, exit)
-- [ ] Profile patterns for `needs_input`
-- [ ] Dashboard view, status dots in the sidebar
-- [ ] OS notifications + dock/taskbar badge (configurable per project)
-- [ ] Claude Code hooks adapter with helper CLI
-- [ ] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
-- [ ] Performance benchmarks (RAM, startup time) in CI
-- [ ] 💡 Prompt queue per agent: queue follow-up prompts that are sent
+- [x] Generic status detection (activity, CPU, BEL/OSC, exit)
+- [x] Profile patterns for `needs_input`
+- [x] Dashboard view, status dots in the sidebar
+- [x] OS notifications + dock/taskbar badge (configurable per project)
+- [x] Claude Code hooks adapter with helper CLI
+- [x] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
+- [x] Origami motif (maintainer idea): paper crane for queued prompts and
+      a hidden "Dance of the Paper" easter egg in the palette
+- [x] Performance benchmarks (RAM, startup time) in CI; budgets per
+      platform (ADR 0022)
+- [x] 💡 Prompt queue per agent: queue follow-up prompts that are sent
       automatically as soon as the agent is idle
-- [ ] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the
+- [x] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the
       sidebar
 
 ## M4 — Git and changes
 
-- [ ] Git status, diff view, highlighting of changed files
-- [ ] Follow mode
-- [ ] Simple staging/commit (optional)
-- [ ] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden
-      ref; roll back agent changes with one click
+- [x] Git status, diff view, highlighting of changed files
+- [x] Follow mode
+- [x] Simple staging/commit (optional)
+- [x] Branches: list and switch (maintainer request); ready-made prompt
+      "clean up branches and return to the main branch" for one agent or a
+      project group
+- [x] Prompt library (maintainer request): own prompts with `{project}`,
+      `{branch}`, `{main}`, sent with "Send Prompt…" to the project's agent
+      or the project group
+- [x] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden
+      ref; roll back agent changes with one click (ADR 0023)
 - [ ] 💡 Review mode: when an agent is done, walk through the diff,
       accept/discard hunks, send a comment on the diff directly as a prompt
 
 ## M5 — Scripts
 
-- [ ] Detect `package.json` (package manager from lock file) and
+- [x] Detect `package.json` (package manager from lock file) and
       `composer.json`
-- [ ] Script runner with status
+- [x] Script runner with status
 - [ ] 💡 Dev server detection: detect ports in script output, "Open in
       browser" link, warn about port conflicts
 - [ ] 💡 Project config `.ame.json`: default agents, start commands and
       favorite scripts per project, shareable with the team
 
+## M5b — Project groups for agents (maintainer idea)
+
+- [x] Start an agent for a whole group: it runs in a chosen project and
+      gets the other folders of the group (e.g. Claude Code `--add-dir`,
+      Gemini CLI `--include-directories`), so it knows the projects belong
+      together and can work across them
+- [x] Broadcast prompt to a group: send the same task to the agents of all
+      projects in a group (moved up from "Later")
+- [x] Group view in the dashboard: status of all agents of a group at a
+      glance
+
 ## M6 — Release 0.1
 
-- [ ] Icon and branding (a drop that is also a text cursor)
-- [ ] UX review with screenshots of every view in light and dark
-- [ ] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
-      portable `.exe` (Windows)
-- [ ] Release workflow per tag (`tauri-action`), auto-update
-- [ ] Docs, screenshots, first publication
+- [x] Icon and branding (a drop that is also a text cursor;
+      source `branding/icon.svg`)
+- [x] UX review with screenshots of every view in light and dark (main
+      views; see PROGRESS)
+- [x] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
+      portable `.exe` (Windows) — in the release workflow, not run yet
+- [x] Release workflow per tag (`tauri-action`), see `docs/RELEASING.md`;
+      auto-update follows with the in-app updates
+- [ ] In-app updates (maintainer request): check on start and periodically
+      (setting + "Check for Updates" command), inline notice and OS
+      notification when an update exists, "Install and restart" with
+      `tauri-plugin-updater` and signed GitHub release artifacts; the
+      portable `.exe` gets a download link instead. The maintainer creates
+      the signing key and stores it as a GitHub secret.
+- [ ] Docs, screenshots, first publication — README and screenshots
+      updated; publication waits for the first release
 
 ## Later
 
+- 💡 Background daemon: PTY sessions live in a small Rust process and
+  survive a crash of the app (like tmux); replaced for 0.1 by ADR 0020
+
+- File operations in the tree: new file/folder, rename, delete
+- Virtualized rendering for very large directories and search results
 - Git worktrees for parallel agents in the same repo
 - More UI languages (German first)
 - Themes, keybinding configuration
 - Optional LSP support (opt-in per project only)
 - More adapters for agents with hook systems
-- 💡 Broadcast prompt: send the same task to several projects (e.g. update
-  dependencies)
-- 💡 Prompt library: recurring prompts as snippets per project or global
+- 💡 Prompt library per project (`.ame.json`); the global library is done
 - 💡 Focus mode: bundle notifications, report only `needs_input` immediately
 - 💡 Push to phone: report status changes e.g. via ntfy or Pushover
 - 💡 Token/cost display for agents that print their usage

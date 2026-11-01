@@ -78,3 +78,31 @@ jobs:
             echo "::error::src/lib/ipc/bindings.ts is stale. Run 'cargo test --workspace' and commit the result."
             exit 1
           fi
+
+  bench:
+    name: Benchmark (startup, memory)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev librsvg2-dev xvfb
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build release binary
+        run: pnpm tauri build --no-bundle
+      - name: Measure startup time and idle memory
+        # The web view needs a display; xvfb provides a virtual one. The
+        # runner's own session bus stalls portal requests until the D-Bus
+        # timeout (~30 s of startup), so the run gets a private session bus.
+        run: dbus-run-session -- xvfb-run --auto-servernum node scripts/bench.mjs --runs 5

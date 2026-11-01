@@ -1,24 +1,437 @@
 {
   "app": {
     "name": "Ame",
-    "tagline": "Agent Manager Editor"
+    "tagline": "Agent Manager Editor",
+    "windowTitle": "{project} — Ame",
+    "windowTitleUnsaved": "● {project} — Ame",
+    "windowTitleWaiting": "({count}) {title}"
   },
   "sidebar": {
     "label": "Projects",
     "empty": "No projects yet",
-    "portableMode": "Portable mode"
+    "portableMode": "Portable mode",
+    "openFolder": "Open folder",
+    "pinned": "Pinned",
+    "projects": "Projects",
+    "groupName": "Group name",
+    "dismiss": "Dismiss",
+    "settings": "Settings",
+    "dashboard": "Dashboard"
   },
   "emptyState": {
     "title": "Open a folder to get started",
-    "description": "Ame keeps your projects and coding agents side by side. Opening projects arrives in a later milestone."
+    "description": "Ame keeps your projects and coding agents side by side.",
+    "openFolder": "Open folder"
   },
   "settings": {
+    "title": "Settings",
+    "close": "Close settings",
+    "closeHint": "Close settings (Esc)",
+    "appearance": "Appearance",
     "theme": {
       "label": "Theme",
       "system": "System",
       "dark": "Dark",
       "light": "Light"
     },
-    "saveFailed": "Could not save settings: {message}"
+    "density": {
+      "label": "Density",
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "rain": {
+      "label": "Rain effects",
+      "description": "Status animations in the sidebar and dashboard. Never in the editor or terminal.",
+      "on": "On",
+      "subtle": "Subtle",
+      "off": "Off"
+    },
+    "files": "Files",
+    "fileOpen": {
+      "label": "Open files in the file tree",
+      "description": "Enter always opens the selected file.",
+      "doubleClick": "Double click",
+      "singleClick": "Single click"
+    },
+    "fileIcons": {
+      "label": "File icons",
+      "on": "Show",
+      "off": "Hide"
+    },
+    "agents": {
+      "title": "Agents",
+      "description": "Agents are found on the PATH. Change the command line of a built-in agent or add your own.",
+      "add": "Add agent",
+      "edit": "Edit",
+      "customize": "Customize",
+      "reset": "Reset",
+      "remove": "Remove",
+      "custom": "Custom",
+      "changed": "Changed",
+      "name": "Name",
+      "command": "Command",
+      "commandHint": "Program on the PATH or a full path",
+      "shellCommand": "Your default shell",
+      "args": "Arguments",
+      "resumeArgs": "Resume arguments",
+      "resumeHint": "Continue the last conversation, e.g. --continue",
+      "addDirArg": "Folder option",
+      "addDirHint": "Gives the agent another folder for project groups, e.g. --add-dir",
+      "save": "Save",
+      "cancel": "Cancel",
+      "invalid": "A name and a command are required.",
+      "notifications": "Notifications",
+      "notificationsDescription": "When an agent you are not looking at needs your input, finishes a longer task or fails. Projects can be muted in their context menu.",
+      "on": "On",
+      "off": "Off"
+    },
+    "saveFailed": "Could not save settings: {message}",
+    "closeAction": {
+      "label": "Closing the window",
+      "description": "While agents run, Ame can keep running in the background (open it again from the tray icon or by starting it). Quitting always ends the agents.",
+      "background": "Keep agents running",
+      "quit": "Quit"
+    },
+    "checkpoints": {
+      "label": "Checkpoints",
+      "description": "Before every prompt to an agent, Ame saves the project's files in a hidden git ref, so the agent's changes can be undone from the changes panel.",
+      "on": "On",
+      "off": "Off"
+    },
+    "prompts": {
+      "title": "Prompt library",
+      "description": "Prompts you send to agents again and again. Send one with Send Prompt… in the command palette; it waits in the queue until the agent is done.",
+      "name": "Name",
+      "text": "Prompt",
+      "textHint": "What the agent should do",
+      "placeholders": "Placeholders filled in when sending: {placeholders}",
+      "invalid": "A prompt needs a name and a text.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete prompt",
+      "add": "Add prompt"
+    },
+    "startAgent": {
+      "label": "Start an agent with each project",
+      "description": "When a project is shown for the first time and has no terminal sessions (and none to resume), this agent starts right away.",
+      "off": "Off"
+    }
+  },
+  "projectMenu": {
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "moveToGroup": "Move to group",
+    "newGroup": "New group…",
+    "removeFromGroup": "Remove from group",
+    "close": "Close project",
+    "mute": "Mute notifications",
+    "unmute": "Unmute notifications"
+  },
+  "commands": {
+    "openFolder": "Open Folder…",
+    "closeProject": "Close Project",
+    "nextProject": "Next Project",
+    "previousProject": "Previous Project",
+    "switchProject": "Switch to Project {n}",
+    "themeSystem": "Theme: System",
+    "themeDark": "Theme: Dark",
+    "themeLight": "Theme: Light",
+    "densityComfortable": "Density: Comfortable",
+    "densityCompact": "Density: Compact",
+    "rainOn": "Rain Effects: On",
+    "rainSubtle": "Rain Effects: Subtle",
+    "rainOff": "Rain Effects: Off",
+    "saveFile": "Save File",
+    "closeEditor": "Close Editor",
+    "goToFile": "Go to File…",
+    "searchInProject": "Search in Project",
+    "showFiles": "Show Files",
+    "commandPalette": "Show Command Palette",
+    "openSettings": "Open Settings",
+    "saveAllFiles": "Save All Files",
+    "newShellSession": "New Shell Session",
+    "toggleTerminal": "Toggle Terminal Panel",
+    "nextSession": "Next Terminal Session",
+    "previousSession": "Previous Terminal Session",
+    "closeSession": "Close Terminal Session",
+    "startAgent": "Start Agent…",
+    "sendToAgent": "Send Selection to Agent",
+    "showDashboard": "Show Dashboard",
+    "showChanges": "Show Changes",
+    "toggleDiff": "Toggle Inline Diff",
+    "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)",
+    "quit": "Quit Ame",
+    "queuePrompt": "Queue Prompt for Agent",
+    "paperDance": "Dance of the Paper",
+    "createCheckpoint": "Create Checkpoint",
+    "showScripts": "Show Scripts",
+    "startGroupAgent": "Start Agent for Project Group…",
+    "broadcastPrompt": "Send Prompt to Project Group…",
+    "switchBranch": "Switch Branch…",
+    "cleanUpBranches": "Ask Agent to Clean Up Branches",
+    "cleanUpBranchesGroup": "Ask Project Group's Agents to Clean Up Branches",
+    "sendPrompt": "Send Prompt…"
+  },
+  "sidePanel": {
+    "label": "Side panel",
+    "resize": "Resize side panel",
+    "files": "Files",
+    "search": "Search",
+    "changes": "Changes",
+    "scripts": "Scripts"
+  },
+  "fileTree": {
+    "label": "Files",
+    "empty": "This folder is empty",
+    "loadFailed": "Could not read folder: {message}",
+    "unsaved": "Unsaved changes"
+  },
+  "editor": {
+    "tabs": "Open files",
+    "close": "Close",
+    "closeUnsaved": "Close (unsaved changes)",
+    "closePrompt": "Save changes to {name} before closing?",
+    "save": "Save",
+    "dontSave": "Don't save",
+    "cancel": "Cancel",
+    "changedOnDisk": "This file changed on disk.",
+    "reload": "Reload from disk",
+    "keepMine": "Keep my version",
+    "deletedOnDisk": "This file was deleted on disk. Saving will recreate it.",
+    "binary": "This file is binary or not UTF-8 text and cannot be shown.",
+    "tooLarge": "This file is too large to open ({megabytes} MB).",
+    "loadFailed": "Could not open the file: {message}",
+    "saveFailed": "Could not save {name}: {message}",
+    "empty": "No file open",
+    "hintPalette": "Command palette",
+    "hintQuickOpen": "Open file",
+    "hintSearch": "Search in project",
+    "following": "Following",
+    "followingHint": "Follow mode: files that agents change open here as a diff. Click to stop."
+  },
+  "search": {
+    "placeholder": "Search in project",
+    "caseSensitive": "Match case",
+    "wholeWord": "Match whole word",
+    "regex": "Use regular expression",
+    "searching": "Searching…",
+    "noResults": "No results",
+    "summary": "Results: {matches} · Files: {files}",
+    "truncated": "Showing the first {matches} results",
+    "invalid": "Invalid search: {message}"
+  },
+  "quickOpen": {
+    "label": "Go to file",
+    "placeholder": "Search files by name",
+    "empty": "No matching files"
+  },
+  "palette": {
+    "label": "Command palette",
+    "placeholder": "Type a command, project or file name",
+    "empty": "Nothing found",
+    "kindProject": "Project"
+  },
+  "closeGuard": {
+    "quitPrompt": "Unsaved changes in {files}. Save before quitting?",
+    "closeProjectPrompt": "Unsaved changes in {files} ({project}). Save before closing the project?",
+    "moreFiles": "{files} and {count} more",
+    "runningSessions": "Running sessions will be stopped: {sessions}.",
+    "saveAndQuit": "Save all and quit",
+    "quitWithoutSaving": "Quit without saving",
+    "saveAndClose": "Save all and close",
+    "closeWithoutSaving": "Close without saving",
+    "quit": "Quit",
+    "closeProject": "Close project",
+    "cancel": "Cancel"
+  },
+  "terminal": {
+    "panel": "Terminal",
+    "sessions": "Terminal sessions",
+    "label": "Terminal: {title}",
+    "newShell": "New shell",
+    "startAgent": "Start agent…",
+    "hide": "Hide terminal panel",
+    "resize": "Resize terminal panel",
+    "close": "Close {title}",
+    "exited": "The process exited with code {code}.",
+    "endedBySignal": "The process was ended ({signal}).",
+    "restart": "Restart",
+    "resume": "Continue conversation",
+    "closeExited": "Close",
+    "stopPrompt": "{title} is still running. Stop it and close the session?",
+    "stopAndClose": "Stop and close",
+    "cancel": "Cancel",
+    "empty": "Start an agent in this project",
+    "startFailed": "Could not start the terminal: {message}",
+    "previousSession": "{title} was open when Ame was closed.",
+    "startAgain": "Start again",
+    "dismiss": "Dismiss {title}",
+    "dismissShort": "Dismiss"
+  },
+  "agents": {
+    "pickerLabel": "Start an agent",
+    "pickerPlaceholder": "Choose an agent or the shell",
+    "pickerEmpty": "No matching agent",
+    "resume": "{name}: continue last conversation",
+    "notInstalled": "Not found on the PATH",
+    "noneFound": "No agents found on the PATH. Install one, or add your own in the settings.",
+    "noRunningSession": "No agent is running in this project. Start one with {shortcut}."
+  },
+  "status": {
+    "starting": "Starting",
+    "working": "Working",
+    "needsInput": "Needs your input",
+    "idle": "Done, waiting",
+    "exited": "Exited",
+    "error": "Ended with an error",
+    "projectLabel": "{project}: {state}"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "close": "Close dashboard (Esc)",
+    "empty": "No agents are running.",
+    "emptyHint": "Open a project and start an agent with {shortcut}.",
+    "count": {
+      "needsInput": "{n} waiting",
+      "error": "{n} failed",
+      "working": "{n} working",
+      "starting": "{n} starting",
+      "idle": "{n} done",
+      "exited": "{n} exited"
+    }
+  },
+  "duration": {
+    "seconds": "{n} s",
+    "minutes": "{n} min",
+    "hours": "{h} h {m} min"
+  },
+  "notify": {
+    "needsInput": "{agent} needs your input",
+    "done": "{agent} is done",
+    "error": "{agent} ended with an error",
+    "body": "{project}: {message}"
+  },
+  "git": {
+    "modified": "Modified",
+    "added": "Added",
+    "renamed": "Renamed",
+    "untracked": "Untracked (new file)",
+    "deleted": "Deleted",
+    "conflicted": "Merge conflict"
+  },
+  "changes": {
+    "branch": "Current branch",
+    "detached": "Detached HEAD",
+    "aheadBehind": "↑{ahead} ↓{behind}",
+    "none": "No changes",
+    "staged": "Staged",
+    "unstaged": "Changes",
+    "stage": "Stage",
+    "unstage": "Unstage",
+    "stageAll": "Stage all",
+    "unstageAll": "Unstage all",
+    "message": "Commit message",
+    "messagePlaceholder": "Commit message (Ctrl/Cmd+Enter to commit)",
+    "commit": "Commit",
+    "commitHint": "Commit the staged changes",
+    "nothingStaged": "Stage changes to commit them"
+  },
+  "diff": {
+    "keep": "Keep",
+    "revert": "Revert"
+  },
+  "tray": {
+    "tooltipWaiting": "Ame — {count} waiting for you",
+    "tooltipWorking": "Ame — {count} working",
+    "session": "{agent} · {project} — {state}",
+    "show": "Show Ame",
+    "quit": "Quit Ame"
+  },
+  "background": {
+    "hintTitle": "Ame keeps running",
+    "hintBody": "Your agents keep working in the background. Quit with {shortcut} or from the tray icon."
+  },
+  "usage": {
+    "mb": "{value} MB",
+    "gb": "{value} GB",
+    "cpu": "{value} %",
+    "summary": "CPU {cpu} · RAM {memory}",
+    "projectLabel": "{project}: {usage}"
+  },
+  "queue": {
+    "label": "Prompt queue of {title}",
+    "waiting": "Queued prompts: {count} — sent one by one when the agent is done",
+    "count": "{count} queued",
+    "add": "Add",
+    "clear": "Clear all",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove from queue",
+    "inputLabel": "Prompt to queue for {title}",
+    "placeholder": "Next prompt for {title} — sent as soon as it is done",
+    "hint": "Enter queues · Shift+Enter new line · Esc closes",
+    "submit": "Queue",
+    "done": "Done",
+    "open": "Queue a prompt"
+  },
+  "easterEgg": {
+    "rainOff": "The paper stays folded while rain effects are off."
+  },
+  "checkpoints": {
+    "title": "Checkpoints",
+    "ago": "{duration} ago",
+    "loading": "Comparing with now…",
+    "unchanged": "The files are the same as at this checkpoint.",
+    "summary": "Restoring changes {changed} files back, removes {removed} new files and brings back {back} deleted ones.",
+    "restore": "Restore",
+    "confirm": "Restore the project's files to this checkpoint? Git history and staged changes stay as they are.",
+    "cancel": "Cancel",
+    "restored": "Files restored to the checkpoint.",
+    "undo": "Undo",
+    "dismiss": "Dismiss",
+    "manualLabel": "Created by hand"
+  },
+  "scripts": {
+    "run": "Run {name}",
+    "stop": "Stop {name}",
+    "succeeded": "Finished",
+    "failed": "Failed",
+    "paletteRun": "Run script: {name}"
+  },
+  "groups": {
+    "pickerLabel": "Start an agent for the group {group}",
+    "pickerPlaceholder": "Choose an agent; it also gets the {count} other folders of the group",
+    "pickerEmpty": "No installed agent can be given other folders (set a folder option in the settings)",
+    "broadcastLabel": "Send a prompt to the agents of {group}",
+    "broadcastPlaceholder": "Prompt for {count} agents — each gets it when it is done",
+    "broadcastEmpty": "Type a prompt (an agent must run in a project of the group)",
+    "broadcastItem": "Queue for {count} agents",
+    "broadcastDone": "Prompt queued for the agents in {group} ({count}).",
+    "noGroup": "Put the project into a group first (context menu in the sidebar).",
+    "ungrouped": "Without a group"
+  },
+  "branches": {
+    "pickerLabel": "Switch branch",
+    "pickerPlaceholder": "Choose a branch (uncommitted changes stay)",
+    "pickerEmpty": "No matching branch",
+    "current": "current",
+    "age": "{duration} ago",
+    "switched": "Switched to {branch}.",
+    "switchFailed": "Could not switch the branch: {message}",
+    "switchLabel": "Branch {branch}: switch branch"
+  },
+  "prompts": {
+    "cleanUpBranches": "Clean up branches and return to the main branch",
+    "builtIn": "built-in",
+    "toAgent": "to this project's agent",
+    "toGroup": "to every agent in {group}",
+    "pickerLabel": "Send a prompt from the library",
+    "pickerPlaceholder": "Choose a prompt — it is sent when the agent is done",
+    "pickerEmpty": "No matching prompt",
+    "queued": "“{name}” is queued (agents: {count}).",
+    "saved": "Saved “{name}” to the prompt library.",
+    "saveToLibrary": "Save to library"
   }
 }

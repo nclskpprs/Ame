@@ -24,6 +24,25 @@ transports information.
   drop — shows at a glance how much is happening across all projects.
 - Empty states and the app icon: a drop that is also a text cursor.
 - Optionally a quiet drop sound on `needs_input` (off by default).
+- Implementation: the density of the working rain follows the output rate
+  (`intensity` 1–3 from the backend, bytes per second without echo); every
+  submitted prompt (`prompts` counter) lets one drop fall into the status
+  dot and one drop fall in the dashboard sky, which ends in a ripple. The
+  sky is one canvas that only animates while drops fall.
+
+### Origami (paper)
+
+Ame's companion motif is folded paper, a nod to the paper ninja of the
+hidden rain village. Paper stands for what is _prepared but not yet
+falling_:
+
+- **Queued prompts** use a paper crane icon: a folded prompt that waits and
+  becomes a drop once it is sent.
+- **Easter egg:** typing `konan`, `amegakure`, `origami` or `紙` in the
+  command palette reveals "Dance of the Paper", a short swirl of folded
+  paper over the window (the same canvas rules as the rain; nothing happens
+  while rain effects are off).
+- Paper never appears as decoration beyond these two places.
 - **Not in the editor and not in the terminal** — there, only the code
   matters.
 
@@ -94,5 +113,8 @@ test in `src/lib/theme/contrast.test.ts` guards all of this.
 
 - Design tokens, both themes and the base layout: M0/M1.
 - Rain status animations and the prompt drop: M3.
-- Icon and branding: before M6.
+- Icon and branding: done in M6 — `branding/icon.svg` (night-sky square,
+  accent drop outline, a light text cursor inside, two faint drops of
+  rain); the platform icons are generated with
+  `pnpm tauri icon branding/icon.svg`.
 - Before 0.1: a UX review with screenshots of every view in light and dark.

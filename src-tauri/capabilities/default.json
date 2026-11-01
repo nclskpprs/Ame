@@ -3,5 +3,16 @@
   "identifier": "default",
   "description": "Default permissions for the main window.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-title",
+    "core:window:allow-destroy",
+    "log:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text",
+    "opener:default",
+    "notification:default",
+    "core:window:allow-set-badge-count",
+    "core:window:allow-set-overlay-icon"
+  ]
 }

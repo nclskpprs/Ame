@@ -1,13 +1,13 @@
 //! Persistent user settings stored as `settings.json` in the config directory.
 
-use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
+use super::storage;
+use crate::agents::profiles::AgentProfile;
 use crate::error::Result;
 
 pub const SETTINGS_FILE: &str = "settings.json";
@@ -35,6 +35,37 @@ pub struct Settings {
     pub rain_effects: RainEffects,
     /// Spacing of the UI.
     pub density: Density,
+    /// How a click in the file tree opens a file.
+    pub file_open: FileOpen,
+    /// Show file type icons in the file tree and the editor tabs.
+    pub file_icons: bool,
+    /// OS notifications when an agent needs input, is done or fails.
+    pub notifications: bool,
+    /// What closing the window does while agents run.
+    pub close_action: CloseAction,
+    /// Take a git checkpoint of the project before every prompt to an agent.
+    pub checkpoints: bool,
+    /// Agent profile started when a project is shown for the first time and
+    /// has no sessions; empty for none.
+    pub start_agent: String,
+    /// The hint that Ame keeps running in the background was shown.
+    pub background_hint_shown: bool,
+    /// Custom agent profiles; one with a built-in id replaces that profile.
+    pub agents: Vec<AgentProfile>,
+    /// The user's own prompt library (placeholders are filled in by the
+    /// frontend when a prompt is sent).
+    pub prompts: Vec<LibraryPrompt>,
+}
+
+/// A prompt the user saved to send to agents again.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase", default)]
+pub struct LibraryPrompt {
+    /// Stable id, unique within the library.
+    pub id: String,
+    pub name: String,
+    /// The prompt; may contain `{project}`, `{branch}` and `{main}`.
+    pub text: String,
 }
 
 impl Default for Settings {
@@ -45,6 +76,15 @@ impl Default for Settings {
             locale: "en".to_owned(),
             rain_effects: RainEffects::default(),
             density: Density::default(),
+            file_open: FileOpen::default(),
+            file_icons: true,
+            notifications: true,
+            close_action: CloseAction::default(),
+            checkpoints: true,
+            start_agent: String::new(),
+            background_hint_shown: false,
+            agents: Vec::new(),
+            prompts: Vec::new(),
         }
     }
 }
@@ -76,6 +116,26 @@ pub enum Density {
     Compact,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum CloseAction {
+    /// Hide the window while agents run; quitting ends them.
+    #[default]
+    Background,
+    /// Quit the app (after asking about running agents).
+    Quit,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub enum FileOpen {
+    /// A single click selects, a double click opens.
+    #[default]
+    DoubleClick,
+    /// A single click opens.
+    SingleClick,
+}
+
 /// Loads and saves [`Settings`]. Managed as Tauri state.
 #[derive(Debug)]
 pub struct SettingsStore {
@@ -88,7 +148,7 @@ impl SettingsStore {
     /// defaults are used, so the app always starts.
     pub fn load(dir: &Path) -> Self {
         let path = dir.join(SETTINGS_FILE);
-        let current = read_settings(&path);
+        let current = storage::read_json(&path);
         Self {
             path,
             current: Mutex::new(current),
@@ -106,8 +166,7 @@ impl SettingsStore {
     /// Replaces the settings and writes them to disk atomically.
     pub fn set(&self, settings: Settings) -> Result<()> {
         let mut current = self.lock();
-        let json = serde_json::to_string_pretty(&settings)?;
-        write_atomic(&self.path, format!("{json}\n").as_bytes())?;
+        storage::write_json(&self.path, &settings)?;
         *current = settings;
         Ok(())
     }
@@ -121,51 +180,10 @@ impl SettingsStore {
     }
 }
 
-fn read_settings(path: &Path) -> Settings {
-    let text = match fs::read_to_string(path) {
-        Ok(text) => text,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Settings::default(),
-        Err(err) => {
-            log::warn!("could not read {}: {err}; using defaults", path.display());
-            return Settings::default();
-        }
-    };
-
-    match serde_json::from_str::<Settings>(&text) {
-        Ok(settings) => settings,
-        Err(err) => {
-            let backup = path.with_file_name(CORRUPT_SETTINGS_FILE);
-            log::warn!(
-                "could not parse {}: {err}; moving it to {} and using defaults",
-                path.display(),
-                backup.display()
-            );
-            if let Err(err) = fs::rename(path, &backup) {
-                log::warn!("could not move corrupt settings file: {err}");
-            }
-            Settings::default()
-        }
-    }
-}
-
-/// Writes `bytes` to a temporary file next to `path` and renames it over
-/// `path`, so a crash never leaves a half-written file behind.
-fn write_atomic(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
-    if let Some(dir) = path.parent() {
-        fs::create_dir_all(dir)?;
-    }
-    let tmp = path.with_extension("json.tmp");
-    {
-        let mut file = fs::File::create(&tmp)?;
-        file.write_all(bytes)?;
-        file.sync_all()?;
-    }
-    fs::rename(&tmp, path)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     use tempfile::TempDir;
 
     #[test]
@@ -184,6 +202,7 @@ mod tests {
             theme: ThemePreference::Light,
             rain_effects: RainEffects::Subtle,
             density: Density::Compact,
+            file_open: FileOpen::SingleClick,
             ..Settings::default()
         };
         store.set(settings.clone()).unwrap();
@@ -220,6 +239,7 @@ mod tests {
         assert_eq!(settings.theme, ThemePreference::Dark);
         assert_eq!(settings.locale, "en");
         assert_eq!(settings.version, SETTINGS_VERSION);
+        assert_eq!(settings.file_open, FileOpen::DoubleClick);
     }
 
     #[test]

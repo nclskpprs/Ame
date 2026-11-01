@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Ame app icon: a rain drop that is also a text cursor (docs/DESIGN.md).
+       Source for `pnpm tauri icon branding/icon.svg`. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#152131"/>
+      <stop offset="1" stop-color="#0E1621"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#78B4FF"/>
+      <stop offset="1" stop-color="#5AA9FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#sky)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="none" stroke="#22324A" stroke-width="8"/>
+  <!-- Two faint drops falling in the background: it is raining. -->
+  <rect x="272" y="236" width="14" height="70" rx="7" fill="#5AA9FF" opacity="0.35"/>
+  <rect x="736" y="330" width="14" height="70" rx="7" fill="#5AA9FF" opacity="0.25"/>
+  <!-- The drop. -->
+  <path d="M512 176C512 176 288 444 288 590a224 224 0 0 0 448 0C736 444 512 176 512 176Z"
+        fill="none" stroke="url(#drop)" stroke-width="44" stroke-linejoin="round"/>
+  <!-- The text cursor inside it. -->
+  <rect x="490" y="470" width="44" height="236" rx="22" fill="#D8E2EE"/>
+</svg>

@@ -4,6 +4,8 @@
 //! overview of the modules.
 
 pub mod agents;
+pub mod background;
+pub mod bench;
 pub mod error;
 pub mod fs;
 pub mod git;
@@ -13,13 +15,30 @@ pub mod pty;
 pub mod scripts;
 pub mod workspace;
 
-use tauri::{App, Manager, WebviewWindowBuilder};
+use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
+use tauri_specta::Event;
 
+use agents::adapters::Adapters;
+use background::Tray;
+use fs::quick_open::QuickOpen;
+use fs::search::SearchControl;
+use fs::watcher::FsWatcher;
+use pty::PtyManager;
+use pty::commands::SessionsChanged;
 use workspace::paths::AppPaths;
+use workspace::projects::WorkspaceStore;
 use workspace::settings::SettingsStore;
 
 /// Label of the main window as defined in `tauri.conf.json`.
-const MAIN_WINDOW: &str = "main";
+pub(crate) const MAIN_WINDOW: &str = "main";
+
+/// Runs a command-line helper if the arguments ask for one (e.g. the hook
+/// helper `ame hook claude`) and returns its exit code; `None` starts the
+/// app. Must run before anything else, so helpers stay fast.
+pub fn run_cli() -> Option<i32> {
+    bench::mark_start();
+    agents::adapters::cli::run(std::env::args_os().skip(1))
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -30,7 +49,21 @@ pub fn run() {
         eprintln!("failed to export TypeScript bindings: {err}");
     }
 
-    let result = tauri::Builder::default()
+    pty::env::warm_up();
+
+    let mut app = tauri::Builder::default();
+    // Must come first: a second start only shows the running app. Benchmark
+    // runs are separate instances, so they work while Ame is open.
+    if std::env::var_os(bench::BENCH_ENV).is_none() {
+        app = app.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            background::show_main_window(app);
+        }));
+    }
+    let app = app
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             if cfg!(debug_assertions) {
@@ -49,15 +82,68 @@ pub fn run() {
                 paths.source
             );
             app.manage(SettingsStore::load(&paths.config_dir));
+            app.manage(WorkspaceStore::load(&paths.config_dir));
+            app.manage(FsWatcher::new(app.handle().clone())?);
+            app.manage(QuickOpen::default());
+            app.manage(Tray::default());
+            app.manage(SearchControl::default());
+            let handle = app.handle().clone();
+            let pty = PtyManager::new(move |sessions| {
+                if let Err(err) = (SessionsChanged { sessions }).emit(&handle) {
+                    log::warn!("could not emit session change: {err}");
+                }
+            });
+            let checkpoint_app = app.handle().clone();
+            pty.on_prompt(move |session| {
+                // Checkpoints are for agents; a shell submits every command.
+                let enabled = checkpoint_app.state::<SettingsStore>().get().checkpoints;
+                let agent = session.profile != agents::profiles::SHELL_PROFILE
+                    && !session.profile.starts_with(scripts::SCRIPT_PROFILE_PREFIX);
+                if enabled && agent {
+                    git::commands::checkpoint_in_background(
+                        checkpoint_app.clone(),
+                        session.project.clone(),
+                        format!("Before a prompt to {}", session.title),
+                    );
+                }
+            });
+            let hooks = pty.clone();
+            app.manage(Adapters::start(&paths.config_dir, move |message| {
+                hooks.apply_hook(&message);
+            }));
+            app.manage(pty);
             create_main_window(app, &paths)?;
             app.manage(paths);
             Ok(())
         })
-        .run(tauri::generate_context!());
+        .build(tauri::generate_context!());
 
-    if let Err(err) = result {
-        eprintln!("error while running Ame: {err}");
-        std::process::exit(1);
+    match app {
+        Ok(app) => app.run(|app, event| match event {
+            RunEvent::Exit => app.state::<PtyManager>().shutdown(),
+            // Quitting from the OS (the macOS app menu, Cmd+Q) while the
+            // window still exists goes through the frontend's checks for
+            // unsaved files and running agents, which then call `quit_app`
+            // (that exit has a code). Closing the last window has no window
+            // left and exits right away.
+            RunEvent::ExitRequested {
+                code: None, api, ..
+            } if app.get_webview_window(MAIN_WINDOW).is_some() => {
+                api.prevent_exit();
+                background::show_main_window(app);
+                if let Err(err) = background::TrayAction::Quit.emit(app) {
+                    log::warn!("could not ask the window to quit: {err}");
+                }
+            }
+            // A click on the dock icon brings a hidden window back.
+            #[cfg(target_os = "macos")]
+            RunEvent::Reopen { .. } => background::show_main_window(app),
+            _ => {}
+        }),
+        Err(err) => {
+            eprintln!("error while running Ame: {err}");
+            std::process::exit(1);
+        }
     }
 }
 

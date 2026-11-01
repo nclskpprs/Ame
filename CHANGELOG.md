@@ -127,6 +127,7 @@ and this project adheres to
   the other projects of its group (Claude Code, Codex, Gemini CLI), send
   one prompt to the agents of all projects in a group, and see the
   dashboard grouped by project group.
+- App icon: a rain drop that is also a text cursor.
 
 ### Fixed
 

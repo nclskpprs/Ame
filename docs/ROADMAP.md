@@ -103,7 +103,8 @@ milestones and marked with 💡.
 
 ## M6 — Release 0.1
 
-- [ ] Icon and branding (a drop that is also a text cursor)
+- [x] Icon and branding (a drop that is also a text cursor;
+      source `branding/icon.svg`)
 - [ ] UX review with screenshots of every view in light and dark
 - [ ] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
       portable `.exe` (Windows)

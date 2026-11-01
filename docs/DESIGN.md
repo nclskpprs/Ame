@@ -113,5 +113,8 @@ test in `src/lib/theme/contrast.test.ts` guards all of this.
 
 - Design tokens, both themes and the base layout: M0/M1.
 - Rain status animations and the prompt drop: M3.
-- Icon and branding: before M6.
+- Icon and branding: done in M6 — `branding/icon.svg` (night-sky square,
+  accent drop outline, a light text cursor inside, two faint drops of
+  rain); the platform icons are generated with
+  `pnpm tauri icon branding/icon.svg`.
 - Before 0.1: a UX review with screenshots of every view in light and dark.

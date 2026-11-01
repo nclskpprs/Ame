@@ -19,6 +19,17 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — M6: app icon
+
+**Done**
+
+- `branding/icon.svg` and the generated desktop icons in `src-tauri/icons`
+  (mobile icons removed). Checked at 256 and 32 px.
+
+**Open**
+
+- The tray icon is still drawn by the frontend (badge); unchanged.
+
 ### 2026-11-01 — M5b: project groups for agents
 
 **Done**

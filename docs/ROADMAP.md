@@ -78,6 +78,9 @@ milestones and marked with 💡.
 - [x] Branches: list and switch (maintainer request); ready-made prompt
       "clean up branches and return to the main branch" for one agent or a
       project group
+- [x] Prompt library (maintainer request): own prompts with `{project}`,
+      `{branch}`, `{main}`, sent with "Send Prompt…" to the project's agent
+      or the project group
 - [x] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden
       ref; roll back agent changes with one click (ADR 0023)
 - [ ] 💡 Review mode: when an agent is done, walk through the diff,
@@ -135,7 +138,7 @@ milestones and marked with 💡.
 - Themes, keybinding configuration
 - Optional LSP support (opt-in per project only)
 - More adapters for agents with hook systems
-- 💡 Prompt library: recurring prompts as snippets per project or global
+- 💡 Prompt library per project (`.ame.json`); the global library is done
 - 💡 Focus mode: bundle notifications, report only `needs_input` immediately
 - 💡 Push to phone: report status changes e.g. via ntfy or Pushover
 - 💡 Token/cost display for agents that print their usage

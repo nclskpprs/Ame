@@ -6,6 +6,7 @@
     queuePrompt,
     removeQueuedPrompt,
   } from '$lib/agents/queue';
+  import { saveToLibrary } from '$lib/agents/library';
   import { t } from '$lib/i18n';
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
@@ -111,6 +112,9 @@
         <span class="hint">{t('queue.hint')}</span>
         <button class="primary" disabled={!text.trim()} onclick={() => void submit()}>
           {t('queue.submit')}
+        </button>
+        <button disabled={!text.trim()} onclick={() => void saveToLibrary(text)}>
+          {t('prompts.saveToLibrary')}
         </button>
         <button onclick={close}>{t('queue.done')}</button>
       </div>

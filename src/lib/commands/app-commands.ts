@@ -1,6 +1,7 @@
 import { openAgentPicker } from '$lib/agents/picker';
 import { openQueueComposer } from '$lib/agents/queue';
-import { askToCleanUpBranches, projectAgent } from '$lib/agents/cleanup';
+import { openPromptPicker, sendToGroup, sendToProject } from '$lib/agents/library';
+import { CLEAN_UP_BRANCHES, libraryPrompts } from '$lib/agents/prompts';
 import { openBranchPicker } from '$lib/git/branches';
 import {
   broadcastTargets,
@@ -175,15 +176,25 @@ export function registerAppCommands(): () => void {
       },
     },
     {
+      id: 'agents.sendPrompt',
+      title: 'commands.sendPrompt',
+      shortcut: 'Mod+Alt+P',
+      terminal: true,
+      when: hasProject,
+      run: () => {
+        const project = workspace.active;
+        if (project) openPromptPicker(project);
+      },
+    },
+    {
       id: 'agents.cleanUpBranches',
       title: 'commands.cleanUpBranches',
       terminal: true,
       when: () => activeSession()?.git.status != null,
       run: () => {
         const path = workspace.activePath;
-        if (!path) return;
-        const agent = projectAgent(terminalSessions.list, path);
-        return askToCleanUpBranches(agent ? [agent] : []);
+        const entry = libraryPrompts([]).find((p) => p.id === CLEAN_UP_BRANCHES);
+        if (path && entry) return sendToProject(entry, path);
       },
     },
     {
@@ -193,11 +204,8 @@ export function registerAppCommands(): () => void {
       when: () => Boolean(workspace.active?.group),
       run: () => {
         const group = workspace.active?.group;
-        if (group) {
-          return askToCleanUpBranches(
-            broadcastTargets(workspace.projects, group, terminalSessions.list),
-          );
-        }
+        const entry = libraryPrompts([]).find((p) => p.id === CLEAN_UP_BRANCHES);
+        if (group && entry) return sendToGroup(entry, group);
       },
     },
     {

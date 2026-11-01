@@ -97,6 +97,21 @@
       "description": "Before every prompt to an agent, Ame saves the project's files in a hidden git ref, so the agent's changes can be undone from the changes panel.",
       "on": "On",
       "off": "Off"
+    },
+    "prompts": {
+      "title": "Prompt library",
+      "description": "Prompts you send to agents again and again. Send one with Send Prompt… in the command palette; it waits in the queue until the agent is done.",
+      "name": "Name",
+      "text": "Prompt",
+      "textHint": "What the agent should do",
+      "placeholders": "Placeholders filled in when sending: {placeholders}",
+      "invalid": "A prompt needs a name and a text.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete prompt",
+      "add": "Add prompt"
     }
   },
   "projectMenu": {
@@ -151,7 +166,8 @@
     "broadcastPrompt": "Send Prompt to Project Group…",
     "switchBranch": "Switch Branch…",
     "cleanUpBranches": "Ask Agent to Clean Up Branches",
-    "cleanUpBranchesGroup": "Ask Project Group's Agents to Clean Up Branches"
+    "cleanUpBranchesGroup": "Ask Project Group's Agents to Clean Up Branches",
+    "sendPrompt": "Send Prompt…"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -387,7 +403,7 @@
     "broadcastPlaceholder": "Prompt for {count} agents — each gets it when it is done",
     "broadcastEmpty": "Type a prompt (an agent must run in a project of the group)",
     "broadcastItem": "Queue for {count} agents",
-    "broadcastDone": "Queued for {count} agents in {group}.",
+    "broadcastDone": "Prompt queued for the agents in {group} ({count}).",
     "noGroup": "Put the project into a group first (context menu in the sidebar).",
     "ungrouped": "Without a group"
   },
@@ -399,7 +415,18 @@
     "age": "{duration} ago",
     "switched": "Switched to {branch}.",
     "switchFailed": "Could not switch the branch: {message}",
-    "switchLabel": "Branch {branch}: switch branch",
-    "cleanUpQueued": "Asked {count} agents to clean up the branches."
+    "switchLabel": "Branch {branch}: switch branch"
+  },
+  "prompts": {
+    "cleanUpBranches": "Clean up branches and return to the main branch",
+    "builtIn": "built-in",
+    "toAgent": "to this project's agent",
+    "toGroup": "to every agent in {group}",
+    "pickerLabel": "Send a prompt from the library",
+    "pickerPlaceholder": "Choose a prompt — it is sent when the agent is done",
+    "pickerEmpty": "No matching prompt",
+    "queued": "“{name}” is queued (agents: {count}).",
+    "saved": "Saved “{name}” to the prompt library.",
+    "saveToLibrary": "Save to library"
   }
 }

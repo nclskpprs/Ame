@@ -466,6 +466,27 @@ export type GitStatus_Serialize = {
 	files: GitFile_Serialize[],
 };
 
+/**  A prompt the user saved to send to agents again. */
+export type LibraryPrompt = LibraryPrompt_Serialize | LibraryPrompt_Deserialize;
+
+/**  A prompt the user saved to send to agents again. */
+export type LibraryPrompt_Deserialize = {
+	/**  Stable id, unique within the library. */
+	id?: string,
+	name?: string,
+	/**  The prompt; may contain `{project}`, `{branch}` and `{main}`. */
+	text?: string,
+};
+
+/**  A prompt the user saved to send to agents again. */
+export type LibraryPrompt_Serialize = {
+	/**  Stable id, unique within the library. */
+	id: string,
+	name: string,
+	/**  The prompt; may contain `{project}`, `{branch}` and `{main}`. */
+	text: string,
+};
+
 export type LineMatch = {
 	/**  1-based line number. */
 	line: number,
@@ -745,6 +766,11 @@ export type Settings_Deserialize = {
 	backgroundHintShown?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents?: AgentProfile_Deserialize[],
+	/**
+	 *  The user's own prompt library (placeholders are filled in by the
+	 *  frontend when a prompt is sent).
+	 */
+	prompts?: LibraryPrompt_Deserialize[],
 };
 
 /**
@@ -776,6 +802,11 @@ export type Settings_Serialize = {
 	backgroundHintShown: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents: AgentProfile_Serialize[],
+	/**
+	 *  The user's own prompt library (placeholders are filled in by the
+	 *  frontend when a prompt is sent).
+	 */
+	prompts: LibraryPrompt_Serialize[],
 };
 
 export type SidePanel = "files" | "search" | 

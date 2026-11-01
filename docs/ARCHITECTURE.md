@@ -230,12 +230,17 @@ Module: `src-tauri/src/pty/` (see
   and git refuses when they would be overwritten.
 - Frontend: the branch name in the changes panel and "Switch Branch…" open
   the branch picker (`lib/git/branches.ts`).
-- `lib/agents/prompts.ts` is a small prompt library. "Ask Agent to Clean
-  Up Branches" queues `cleanUpBranchesPrompt(main)` for the project's
-  newest agent; the group variant does it for every project's agent, each
-  with its own main branch (`lib/agents/cleanup.ts`). The prompt only
-  allows `git branch -d`, protects the main branches and asks before
-  touching unmerged work.
+- Prompt library: built-in prompts (`lib/agents/prompts.ts`) plus the
+  user's own in `settings.prompts` (`LibraryPrompt`: id, name, text).
+  `{project}`, `{branch}` and `{main}` are filled in per target agent from
+  `git_branches` when sending. "Send Prompt…" (`Mod+Alt+P`,
+  `lib/agents/library.ts`) offers every prompt for the project's newest
+  agent and, in a group, for each project's agent; everything goes through
+  the prompt queue. Edited in the settings (`PromptSettings.svelte`); the
+  queue composer can save its text to the library.
+- Built-in "clean up branches": only `git branch -d`, protects the main
+  branches, asks before touching unmerged work; also reachable as its own
+  commands for the project and the group.
 
 ## Checkpoints — implemented (M4)
 

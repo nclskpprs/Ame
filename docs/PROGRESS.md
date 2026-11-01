@@ -19,6 +19,28 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — Prompt library
+
+**Done** (maintainer request)
+
+- `settings.prompts` (`LibraryPrompt`), placeholders `{project}`,
+  `{branch}`, `{main}`; "Send Prompt…" (`Mod+Alt+P`) with each prompt for
+  the project's agent and for the project group; settings section "Prompt
+  library" (add, edit, delete with inline confirmation; Cancel takes the
+  focus so a double Enter never deletes); "Save to library" in the queue
+  composer. The built-in "clean up branches" is part of the library.
+
+**Verified**
+
+- Unit tests (placeholders, ordering, unnamed prompts, ids, picker items
+  with and without a group, target agent).
+- In `pnpm tauri dev`: the picker lists the built-in and a user prompt,
+  each for the agent and for the group; sending filled in `develop` and
+  `ux-demo`; the settings list shows both, delete asks inline and saves.
+  The add form was not driven in the GUI (keyboard focus got lost in the
+  test tool); it follows the agent profile form.
+- `pnpm verify` green.
+
 ### 2026-11-01 — Branches and the "clean up branches" prompt
 
 **Done** (maintainer request)

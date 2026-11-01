@@ -132,6 +132,10 @@ and this project adheres to
   changes panel or the command palette.
 - Ready-made prompt: ask an agent (or the agents of a project group) to
   clean up the git branches and return to `develop` or the main branch.
+- Prompt library: save your own prompts (in the settings or straight from
+  the queue), with `{project}`, `{branch}` and `{main}` placeholders, and
+  send them with Ctrl/Cmd+Alt+P to the project's agent or to every agent of
+  its group.
 
 ### Fixed
 

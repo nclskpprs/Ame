@@ -49,6 +49,20 @@ pub struct Settings {
     pub background_hint_shown: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
     pub agents: Vec<AgentProfile>,
+    /// The user's own prompt library (placeholders are filled in by the
+    /// frontend when a prompt is sent).
+    pub prompts: Vec<LibraryPrompt>,
+}
+
+/// A prompt the user saved to send to agents again.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase", default)]
+pub struct LibraryPrompt {
+    /// Stable id, unique within the library.
+    pub id: String,
+    pub name: String,
+    /// The prompt; may contain `{project}`, `{branch}` and `{main}`.
+    pub text: String,
 }
 
 impl Default for Settings {
@@ -66,6 +80,7 @@ impl Default for Settings {
             checkpoints: true,
             background_hint_shown: false,
             agents: Vec::new(),
+            prompts: Vec::new(),
         }
     }
 }

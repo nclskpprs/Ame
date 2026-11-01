@@ -1,6 +1,7 @@
 //! One PTY session: the child process, its output buffer and the threads
 //! that move data between the PTY and the UI.
 
+use std::borrow::Cow;
 use std::io::{Read, Write};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::{Arc, Mutex, MutexGuard};
@@ -414,12 +415,29 @@ impl Session {
     fn push_output(&self, bytes: &[u8]) {
         lock(&self.status).on_output(bytes, Instant::now());
         let mut output = lock(&self.output);
-        output.ring.push(bytes);
-        output.modes.feed(bytes);
+        // Without a view nobody answers a cursor position request, and a
+        // program waiting for the answer stalls. On Windows, ConPTY itself
+        // asks before it starts the program (`PSEUDOCONSOLE_INHERIT_CURSOR`),
+        // so a hidden session would never run. The backend answers instead
+        // and drops the request from the scrollback, so the view does not
+        // answer it a second time on replay.
+        let (bytes, requests) = if output.attached.is_none() {
+            take_cursor_requests(bytes)
+        } else {
+            (Cow::Borrowed(bytes), 0)
+        };
+        output.ring.push(&bytes);
+        output.modes.feed(&bytes);
         if let Some(attached) = output.attached.as_mut() {
-            let text = attached.decoder.decode(bytes);
+            let text = attached.decoder.decode(&bytes);
             if !text.is_empty() && !attached.sink.send(text) {
                 output.attached = None;
+            }
+        }
+        drop(output);
+        for _ in 0..requests {
+            if let Err(err) = self.write(CURSOR_POSITION_REPLY) {
+                log::debug!("could not answer a cursor position request: {err}");
             }
         }
     }
@@ -428,6 +446,32 @@ impl Session {
         lock(&self.writer).take();
         lock(&self.master).take();
     }
+}
+
+/// A cursor position request (DSR 6) and the reply of a hidden session.
+const CURSOR_POSITION_REQUEST: &[u8] = b"\x1b[6n";
+const CURSOR_POSITION_REPLY: &[u8] = b"\x1b[1;1R";
+
+/// Removes cursor position requests from output and counts them. A request
+/// split across two reads is not seen; ConPTY writes it in one piece.
+fn take_cursor_requests(bytes: &[u8]) -> (Cow<'_, [u8]>, usize) {
+    let request = CURSOR_POSITION_REQUEST;
+    if !bytes.windows(request.len()).any(|w| w == request) {
+        return (Cow::Borrowed(bytes), 0);
+    }
+    let mut kept = Vec::with_capacity(bytes.len());
+    let mut count = 0;
+    let mut rest = bytes;
+    while !rest.is_empty() {
+        if rest.starts_with(request) {
+            count += 1;
+            rest = &rest[request.len()..];
+        } else {
+            kept.push(rest[0]);
+            rest = &rest[1..];
+        }
+    }
+    (Cow::Owned(kept), count)
 }
 
 /// Whether input is only an automatic reply of the terminal (cursor
@@ -563,6 +607,16 @@ pub(super) fn lock<T: ?Sized>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn takes_cursor_position_requests_out_of_the_output() {
+        let (kept, count) = take_cursor_requests(b"a\x1b[6nb\x1b[6n");
+        assert_eq!(&*kept, b"ab");
+        assert_eq!(count, 2);
+        let (kept, count) = take_cursor_requests(b"\x1b[5n plain");
+        assert!(matches!(kept, Cow::Borrowed(_)));
+        assert_eq!(count, 0);
+    }
 
     #[test]
     fn terminal_replies_are_not_user_input() {

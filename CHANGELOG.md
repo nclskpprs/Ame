@@ -142,6 +142,8 @@ and this project adheres to
 
 ### Fixed
 
+- Windows: sessions started in the background (no visible terminal) no
+  longer hang before the program starts.
 - The side panel tabs stay on one line with four tabs, settings with long
   descriptions keep their switch on the right, and arrow keys show as
   arrows in shortcuts.

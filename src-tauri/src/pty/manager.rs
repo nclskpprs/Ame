@@ -621,6 +621,27 @@ mod tests {
         assert!(manager.list().is_empty());
     }
 
+    #[cfg(unix)]
+    #[test]
+    fn a_hidden_session_answers_cursor_position_requests() {
+        let (manager, exits) = manager();
+        let script =
+            "stty -icanon -echo; printf 'ask\\033[6n'; head -c 6 > /dev/null; echo answered";
+        let info = manager.spawn(spec("/bin/sh", &["-c", script])).unwrap();
+        assert!(matches!(
+            wait_for_exit(&exits, info.id),
+            SessionStatus::Exited { exit_code: 0, .. }
+        ));
+        let output = Collect::default();
+        manager
+            .get(info.id)
+            .unwrap()
+            .attach(Box::new(output.clone()));
+        let text = output.text();
+        assert!(text.contains("answered"), "{text:?}");
+        assert!(!text.contains("\x1b[6n"), "{text:?}");
+    }
+
     #[cfg(windows)]
     #[test]
     fn runs_a_command_on_windows() {

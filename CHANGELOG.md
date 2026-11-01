@@ -136,6 +136,9 @@ and this project adheres to
   the queue), with `{project}`, `{branch}` and `{main}` placeholders, and
   send them with Ctrl/Cmd+Alt+P to the project's agent or to every agent of
   its group.
+- Start an agent with each project: choose your preferred agent in the
+  settings, and it starts as soon as a project without terminal sessions is
+  opened.
 
 ### Fixed
 

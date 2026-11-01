@@ -267,6 +267,13 @@ Module: `src-tauri/src/pty/` (see
 - `pty/tree.rs` leaves threads out of process trees (sysinfo lists them as
   processes on Linux), which the resource monitor relies on as well.
 
+## Starting the preferred agent — implemented
+
+- Setting `startAgent` (profile id, empty = off). `ProjectView` calls
+  `TerminalGroup.autoStart` once the sessions are loaded; it starts the
+  agent once per project and app run, only when the project has no
+  sessions and none to resume, and only if the agent is installed.
+
 ## Running in the background — implemented (M2)
 
 Module: `src-tauri/src/background/` (see

@@ -32,6 +32,8 @@ export class TerminalGroup {
   focusPending = $state(false);
   /** A running session waiting for "stop / cancel" before it closes. */
   pendingClose = $state<number | null>(null);
+  /** The preferred agent was started (or skipped) for this project. */
+  #autoStartDone = false;
   /** The prompt queue composer is open for the shown session. */
   composing = $state(false);
   /** Size of the terminal view, used for new sessions. */
@@ -176,6 +178,19 @@ export class TerminalGroup {
       if (next) this.activate(next.id);
       else this.#activeId = null;
     }
+  }
+
+  /**
+   * Starts the preferred agent once per app run when the project is shown
+   * and has neither sessions nor previous ones to resume. Returns whether
+   * it started one. Call only after the sessions were loaded.
+   */
+  async autoStart(profile: string): Promise<boolean> {
+    if (this.#autoStartDone || sessions.initial === null) return false;
+    this.#autoStartDone = true;
+    if (!profile || this.sessions.length > 0 || this.restorable.length > 0) return false;
+    await this.start(profile);
+    return true;
   }
 
   /** The running session of a script, if any. */

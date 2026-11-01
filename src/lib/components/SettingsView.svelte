@@ -15,6 +15,7 @@
   } from '$lib/settings/options';
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
+  import { agents } from '$lib/agents/agents.svelte';
   import AgentSettings from './AgentSettings.svelte';
   import PromptSettings from './PromptSettings.svelte';
   import SegmentedControl from './SegmentedControl.svelte';
@@ -154,6 +155,23 @@
       </div>
       <div class="row">
         <div class="text">
+          <span class="label">{t('settings.startAgent.label')}</span>
+          <span class="description">{t('settings.startAgent.description')}</span>
+        </div>
+        <select
+          class="select"
+          aria-label={t('settings.startAgent.label')}
+          value={settings.value.startAgent}
+          onchange={(event) => void settings.update({ startAgent: event.currentTarget.value })}
+        >
+          <option value="">{t('settings.startAgent.off')}</option>
+          {#each agents.list.filter((agent) => agent.path) as agent (agent.profile.id)}
+            <option value={agent.profile.id}>{agent.profile.name}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="row">
+        <div class="text">
           <span class="label">{t('settings.checkpoints.label')}</span>
           <span class="description">{t('settings.checkpoints.description')}</span>
         </div>
@@ -180,6 +198,15 @@
 </section>
 
 <style>
+  .select {
+    padding: var(--ame-space-1) var(--ame-space-2);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+    background: var(--ame-bg);
+    color: var(--ame-text);
+    font: inherit;
+  }
+
   .settings {
     display: flex;
     flex-direction: column;

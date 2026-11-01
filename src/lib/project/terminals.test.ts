@@ -106,3 +106,21 @@ describe('TerminalGroup scripts', () => {
     expect(group.saved()).toEqual([]);
   });
 });
+
+describe('TerminalGroup auto start', () => {
+  it('starts the preferred agent once, only without sessions', async () => {
+    backend = [];
+    await sessions.load();
+    const group = new TerminalGroup('/auto');
+    expect(await group.autoStart('claude')).toBe(true);
+    expect(group.active?.profile).toBe('claude');
+    await group.close(group.active?.id ?? 0, true);
+    expect(await group.autoStart('claude')).toBe(false);
+  });
+
+  it('leaves projects with previous sessions or no preference alone', async () => {
+    const previous = new TerminalGroup('/prev', [{ profile: 'shell', title: 'Shell', dirs: [] }]);
+    expect(await previous.autoStart('claude')).toBe(false);
+    expect(await new TerminalGroup('/none').autoStart('')).toBe(false);
+  });
+});

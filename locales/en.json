@@ -112,6 +112,11 @@
       "delete": "Delete",
       "confirmDelete": "Delete prompt",
       "add": "Add prompt"
+    },
+    "startAgent": {
+      "label": "Start an agent with each project",
+      "description": "When a project is shown for the first time and has no terminal sessions (and none to resume), this agent starts right away.",
+      "off": "Off"
     }
   },
   "projectMenu": {

@@ -48,6 +48,8 @@ milestones and marked with 💡.
       closing the window hides it while agents run; tray icon with the
       sessions, single instance, Mod+Q quits and ends all sessions and
       everything they started
+- [x] Start the preferred agent automatically when a project is shown
+      (maintainer request; setting, off by default)
 - [x] 💡 Session resume: a resume command per profile (e.g.
       `claude --continue`), one click after a restart
 - [x] 💡 "Send to agent": select code → `path:line-range` plus the selection

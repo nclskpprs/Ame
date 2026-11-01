@@ -762,6 +762,11 @@ export type Settings_Deserialize = {
 	closeAction?: CloseAction,
 	/**  Take a git checkpoint of the project before every prompt to an agent. */
 	checkpoints?: boolean,
+	/**
+	 *  Agent profile started when a project is shown for the first time and
+	 *  has no sessions; empty for none.
+	 */
+	startAgent?: string,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
@@ -798,6 +803,11 @@ export type Settings_Serialize = {
 	closeAction: CloseAction,
 	/**  Take a git checkpoint of the project before every prompt to an agent. */
 	checkpoints: boolean,
+	/**
+	 *  Agent profile started when a project is shown for the first time and
+	 *  has no sessions; empty for none.
+	 */
+	startAgent: string,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */

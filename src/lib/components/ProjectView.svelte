@@ -13,6 +13,9 @@
   import SearchPanel from './SearchPanel.svelte';
   import TerminalPanel from './TerminalPanel.svelte';
   import type { SidePanel } from '$lib/ipc/bindings';
+  import { untrack } from 'svelte';
+  import { agents } from '$lib/agents/agents.svelte';
+  import { sessions } from '$lib/terminal/sessions.svelte';
 
   let { project }: { project: Project } = $props();
 
@@ -35,6 +38,20 @@
       : []),
   ]);
   const changeCount = $derived(session.git.status?.files.length ?? 0);
+
+  // Starts the preferred agent the first time the project is shown (if it
+  // has no sessions); see TerminalGroup.autoStart.
+  $effect(() => {
+    const profile = settings.value.startAgent;
+    if (sessions.initial === null) return;
+    const terminals = session.terminals;
+    untrack(() => {
+      void agents.load().then((list) => {
+        const installed = list.some((agent) => agent.profile.id === profile && agent.path);
+        return terminals.autoStart(installed ? profile : '');
+      });
+    });
+  });
 </script>
 
 <div class="project-view" style:--side-width="{project.layout.sidePanelWidth}px">

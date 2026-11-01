@@ -19,6 +19,28 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — Push, and starting the preferred agent per project
+
+**Done**
+
+- Pushed `feat/m1-project-shell` (44 commits, pre-push `pnpm verify`
+  green). `gh` is not installed here, so the maintainer opens the draft PR
+  (CI only runs for pull requests and `main`).
+- Maintainer request: setting "Start an agent with each project" (off by
+  default, a list of installed agents). `TerminalGroup.autoStart` starts it
+  once per project and app run when the project has no sessions and none
+  to resume.
+- Answered: the Claude Code profile's command stays `claude`; "Claude
+  Code" is only its name.
+
+**Verified**
+
+- Unit tests (starts once; not again after closing; not with previous
+  sessions or without a preference). In `pnpm tauri dev` with a demo agent
+  as preference: it started in `web` at launch and in `api` on switching;
+  the setting shows the chosen agent.
+- `pnpm verify` green.
+
 ### 2026-11-01 — Prompt library
 
 **Done** (maintainer request)

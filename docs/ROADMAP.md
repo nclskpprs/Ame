@@ -75,6 +75,9 @@ milestones and marked with 💡.
 - [x] Git status, diff view, highlighting of changed files
 - [x] Follow mode
 - [x] Simple staging/commit (optional)
+- [x] Branches: list and switch (maintainer request); ready-made prompt
+      "clean up branches and return to the main branch" for one agent or a
+      project group
 - [x] 💡 Checkpoints before every prompt: automatic git snapshot on a hidden
       ref; roll back agent changes with one click (ADR 0023)
 - [ ] 💡 Review mode: when an agent is done, walk through the diff,

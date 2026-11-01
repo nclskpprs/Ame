@@ -128,6 +128,10 @@ and this project adheres to
   one prompt to the agents of all projects in a group, and see the
   dashboard grouped by project group.
 - App icon: a rain drop that is also a text cursor.
+- Branches: see the local branches and switch between them from the
+  changes panel or the command palette.
+- Ready-made prompt: ask an agent (or the agents of a project group) to
+  clean up the git branches and return to `develop` or the main branch.
 
 ### Fixed
 

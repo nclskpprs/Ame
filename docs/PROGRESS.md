@@ -19,6 +19,33 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — Branches and the "clean up branches" prompt
+
+**Done** (maintainer request)
+
+- `git_branches` / `git_switch`, branch picker from the changes panel's
+  branch name and "Switch Branch…".
+- Prompt library `lib/agents/prompts.ts` with "clean up branches": safe
+  steps (`fetch --prune`, `branch -d` only, protected main branches, ask
+  before unmerged work, `pull --ff-only`). Commands for the project's agent
+  and for the project group; sent through the prompt queue.
+
+**Verified**
+
+- Rust tests (listing, switching, refusing options and unknown branches,
+  main branch choice), frontend tests (prompt, target agent).
+- In `pnpm tauri dev`: the picker lists four branches with ages and marks
+  `main` as current; switching to `develop` kept the uncommitted changes;
+  the clean-up prompt reached the demo agent and named `develop`. The
+  same run showed a checkpoint created before that prompt (first GUI
+  check of checkpoints).
+- `pnpm verify` green.
+
+**Open**
+
+- Creating and deleting branches from the UI is not planned (agents or
+  the terminal do that); say if wanted.
+
 ### 2026-11-01 — M6: UX review in light, README screenshots
 
 **Done**

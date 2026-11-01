@@ -1,5 +1,7 @@
 import { openAgentPicker } from '$lib/agents/picker';
 import { openQueueComposer } from '$lib/agents/queue';
+import { askToCleanUpBranches, projectAgent } from '$lib/agents/cleanup';
+import { openBranchPicker } from '$lib/git/branches';
 import {
   broadcastTargets,
   groupFolders,
@@ -161,6 +163,41 @@ export function registerAppCommands(): () => void {
       run: () => {
         const session = activeSession();
         if (session) session.setFollowing(!session.following);
+      },
+    },
+    {
+      id: 'git.switchBranch',
+      title: 'commands.switchBranch',
+      when: () => activeSession()?.git.status != null,
+      run: () => {
+        const session = activeSession();
+        if (session) openBranchPicker(session);
+      },
+    },
+    {
+      id: 'agents.cleanUpBranches',
+      title: 'commands.cleanUpBranches',
+      terminal: true,
+      when: () => activeSession()?.git.status != null,
+      run: () => {
+        const path = workspace.activePath;
+        if (!path) return;
+        const agent = projectAgent(terminalSessions.list, path);
+        return askToCleanUpBranches(agent ? [agent] : []);
+      },
+    },
+    {
+      id: 'agents.cleanUpBranchesGroup',
+      title: 'commands.cleanUpBranchesGroup',
+      terminal: true,
+      when: () => Boolean(workspace.active?.group),
+      run: () => {
+        const group = workspace.active?.group;
+        if (group) {
+          return askToCleanUpBranches(
+            broadcastTargets(workspace.projects, group, terminalSessions.list),
+          );
+        }
       },
     },
     {

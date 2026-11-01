@@ -4,6 +4,7 @@
   import { fileMark, markLetters } from '$lib/git/marks';
   import { formatDuration } from '$lib/agents/duration';
   import { summarize } from '$lib/project/checkpoints.svelte';
+  import { openBranchPicker } from '$lib/git/branches';
   import { t } from '$lib/i18n';
   import type { GitFile } from '$lib/ipc/types';
   import type { ProjectSession } from '$lib/project/session';
@@ -123,7 +124,12 @@
 
 <div class="changes">
   {#if status}
-    <div class="branch" title={t('changes.branch')}>
+    <button
+      class="branch"
+      title={t('branches.pickerLabel')}
+      aria-label={t('branches.switchLabel', { branch: status.branch ?? t('changes.detached') })}
+      onclick={() => openBranchPicker(session)}
+    >
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
         <circle cx="5" cy="3.5" r="1.5" />
         <circle cx="5" cy="12.5" r="1.5" />
@@ -136,7 +142,7 @@
           >{t('changes.aheadBehind', { ahead: status.ahead, behind: status.behind })}</span
         >
       {/if}
-    </div>
+    </button>
     <form
       class="commit"
       onsubmit={(event) => {
@@ -338,8 +344,17 @@
     display: flex;
     align-items: center;
     gap: var(--ame-space-2);
+    width: 100%;
     padding: 0 var(--ame-space-3) var(--ame-space-2);
+    border: 0;
+    background: transparent;
     color: var(--ame-text);
+    font: inherit;
+    text-align: left;
+  }
+
+  .branch:hover span:first-of-type {
+    text-decoration: underline;
   }
 
   .branch svg {

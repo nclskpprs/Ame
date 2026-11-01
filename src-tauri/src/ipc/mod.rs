@@ -61,6 +61,8 @@ pub fn builder() -> Builder<Wry> {
             git::git_commit,
             scripts::list_scripts,
             scripts::run_script,
+            git::git_branches,
+            git::git_switch,
             git::list_checkpoints,
             git::create_checkpoint,
             git::checkpoint_changes,

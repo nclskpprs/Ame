@@ -7,6 +7,7 @@ use specta::Type;
 use tauri::AppHandle;
 use tauri_specta::Event;
 
+use super::branches::{self, Branches};
 use super::checkpoints::{self, Checkpoint, CheckpointFile};
 use super::cli::{git, repo_prefix};
 use super::status::{self, GitStatus};
@@ -141,6 +142,39 @@ pub async fn git_commit(
         return Err(Error::Git("empty commit message".into()));
     }
     blocking(move || git(&root, &["commit", "-m", &message]).map(drop)).await
+}
+
+/// The local branches and the main branch, `None` outside a repository.
+#[tauri::command]
+#[specta::specta]
+pub async fn git_branches(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+) -> Result<Option<Branches>> {
+    let root = store.root(&project)?;
+    blocking(move || {
+        if repo_prefix(&root)?.is_none() {
+            return Ok(None);
+        }
+        branches::list(&root).map(Some)
+    })
+    .await
+    .or_else(|err| match err {
+        Error::GitMissing => Ok(None),
+        err => Err(err),
+    })
+}
+
+/// Switches to a local branch (`git switch`); uncommitted changes stay.
+#[tauri::command]
+#[specta::specta]
+pub async fn git_switch(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    branch: String,
+) -> Result<()> {
+    let root = store.root(&project)?;
+    blocking(move || branches::switch(&root, &branch)).await
 }
 
 /// A checkpoint was taken or restored in a project.

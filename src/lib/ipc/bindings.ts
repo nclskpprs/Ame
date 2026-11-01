@@ -73,6 +73,10 @@ export const commands = {
 	listScripts: (project: string) => typedError<Script[], AppError>(__TAURI_INVOKE("list_scripts", { project })),
 	/**  Runs a script in a new terminal session of the project. */
 	runScript: (project: string, id: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("run_script", { project, id, cols, rows })),
+	/**  The local branches and the main branch, `None` outside a repository. */
+	gitBranches: (project: string) => typedError<Branches_Serialize | null, AppError>(__TAURI_INVOKE("git_branches", { project })),
+	/**  Switches to a local branch (`git switch`); uncommitted changes stay. */
+	gitSwitch: (project: string, branch: string) => typedError<null, AppError>(__TAURI_INVOKE("git_switch", { project, branch })),
 	/**  The project's checkpoints, newest first (empty outside git). */
 	listCheckpoints: (project: string) => typedError<Checkpoint[], AppError>(__TAURI_INVOKE("list_checkpoints", { project })),
 	/**  Takes a checkpoint now; `None` if nothing changed since the last one. */
@@ -287,6 +291,48 @@ export type AppInfo = {
 	/**  `true` when running in portable mode (config next to the executable). */
 	portable: boolean,
 	configDir: string,
+};
+
+export type Branch = Branch_Serialize | Branch_Deserialize;
+
+export type Branch_Deserialize = {
+	name: string,
+	current: boolean,
+	/**  The remote branch it tracks, e.g. `origin/main`. */
+	upstream?: string | null,
+	/**  Time of its last commit in milliseconds since the Unix epoch. */
+	committedAt: number | null,
+};
+
+export type Branch_Serialize = {
+	name: string,
+	current: boolean,
+	/**  The remote branch it tracks, e.g. `origin/main`. */
+	upstream: string | null,
+	/**  Time of its last commit in milliseconds since the Unix epoch. */
+	committedAt: number | null,
+};
+
+export type Branches = Branches_Serialize | Branches_Deserialize;
+
+export type Branches_Deserialize = {
+	/**  Most recently committed first. */
+	branches: Branch_Deserialize[],
+	/**
+	 *  The branch agents return to after cleaning up (see
+	 *  [`MAIN_CANDIDATES`]), `None` if none of them exists.
+	 */
+	main?: string | null,
+};
+
+export type Branches_Serialize = {
+	/**  Most recently committed first. */
+	branches: Branch_Serialize[],
+	/**
+	 *  The branch agents return to after cleaning up (see
+	 *  [`MAIN_CANDIDATES`]), `None` if none of them exists.
+	 */
+	main: string | null,
 };
 
 export type Change = "added" | "modified" | "deleted" | "renamed" | "copied" | "typeChanged" | "untracked" | "conflicted";

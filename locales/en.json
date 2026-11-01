@@ -148,7 +148,10 @@
     "createCheckpoint": "Create Checkpoint",
     "showScripts": "Show Scripts",
     "startGroupAgent": "Start Agent for Project Group…",
-    "broadcastPrompt": "Send Prompt to Project Group…"
+    "broadcastPrompt": "Send Prompt to Project Group…",
+    "switchBranch": "Switch Branch…",
+    "cleanUpBranches": "Ask Agent to Clean Up Branches",
+    "cleanUpBranchesGroup": "Ask Project Group's Agents to Clean Up Branches"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -387,5 +390,16 @@
     "broadcastDone": "Queued for {count} agents in {group}.",
     "noGroup": "Put the project into a group first (context menu in the sidebar).",
     "ungrouped": "Without a group"
+  },
+  "branches": {
+    "pickerLabel": "Switch branch",
+    "pickerPlaceholder": "Choose a branch (uncommitted changes stay)",
+    "pickerEmpty": "No matching branch",
+    "current": "current",
+    "age": "{duration} ago",
+    "switched": "Switched to {branch}.",
+    "switchFailed": "Could not switch the branch: {message}",
+    "switchLabel": "Branch {branch}: switch branch",
+    "cleanUpQueued": "Asked {count} agents to clean up the branches."
   }
 }

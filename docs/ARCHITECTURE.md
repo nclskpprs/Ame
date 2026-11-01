@@ -221,6 +221,22 @@ Module: `src-tauri/src/pty/` (see
   scripts) with run/stop and the last result, "Run script: …" entries in
   the command palette, command "Show Scripts".
 
+## Branches and ready-made prompts — implemented
+
+- `git/branches.rs`: `git_branches` lists local branches (newest commit
+  first, upstream, current) and the main branch (`develop` if it exists,
+  else the branch `origin/HEAD` points to, else `main`/`master`/`trunk`);
+  `git_switch` runs `git switch --no-guess`, so uncommitted changes stay
+  and git refuses when they would be overwritten.
+- Frontend: the branch name in the changes panel and "Switch Branch…" open
+  the branch picker (`lib/git/branches.ts`).
+- `lib/agents/prompts.ts` is a small prompt library. "Ask Agent to Clean
+  Up Branches" queues `cleanUpBranchesPrompt(main)` for the project's
+  newest agent; the group variant does it for every project's agent, each
+  with its own main branch (`lib/agents/cleanup.ts`). The prompt only
+  allows `git branch -d`, protects the main branches and asks before
+  touching unmerged work.
+
 ## Checkpoints — implemented (M4)
 
 - `git/checkpoints.rs` (ADR 0023): snapshots on hidden refs

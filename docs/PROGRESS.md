@@ -60,6 +60,28 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — macOS smoke test of a release build; editor styles fixed
+
+**Done**
+
+- Release build of `main` driven on macOS (fake agent, AppleScript keys,
+  window screenshots): start, file tree, command palette, go to file,
+  project search, agent terminal and session restore work. Benchmark:
+  303 ms to first frame, 111 MB idle with three projects (the `ame`
+  process only, without the WebKit helper processes).
+- Fixed: in release builds the editor rendered unstyled (line numbers
+  above the code, no highlighting). The inline `<style>` in `index.html`
+  made Tauri add a hash to the CSP `style-src`, which disables
+  `'unsafe-inline'` and blocks the styles CodeMirror injects. The boot
+  background moved to `public/boot.css`; a test keeps `index.html` free of
+  inline styles. `pnpm tauri dev` has no CSP, so this only showed in
+  release builds — check the editor in a release build after CSP changes.
+
+**Open**
+
+- A dark strip of a few pixels below the terminal panel (seen on macOS,
+  not caused by the CSP).
+
 ### 2026-11-01 — Test release 0.1.0-1 for macOS testing
 
 **Done**

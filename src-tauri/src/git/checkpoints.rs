@@ -369,6 +369,8 @@ mod tests {
         let dir = tempfile::TempDir::new().unwrap();
         let root = dir.path();
         run(root, &["init", "-q", "-b", "main"]);
+        // Git for Windows defaults to CRLF on checkout; the tests compare bytes.
+        run(root, &["config", "core.autocrlf", "false"]);
         run(root, &["config", "user.email", "test@example.com"]);
         run(root, &["config", "user.name", "Test"]);
         fs::create_dir(root.join("web")).unwrap();
@@ -450,6 +452,7 @@ mod tests {
         assert_eq!(create(dir.path(), "x").unwrap(), None);
         assert!(list(dir.path()).unwrap().is_empty());
         run(dir.path(), &["init", "-q"]);
+        run(dir.path(), &["config", "core.autocrlf", "false"]);
         fs::write(dir.path().join("a.txt"), "a\n").unwrap();
         let checkpoint = create(dir.path(), "first").unwrap().unwrap();
         fs::write(dir.path().join("a.txt"), "b\n").unwrap();

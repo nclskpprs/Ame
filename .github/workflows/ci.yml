@@ -101,32 +101,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build release binary
         run: pnpm tauri build --no-bundle
-      # Temporary: find the ~30 s startup delay on the runner (docs/PROGRESS.md).
-      - name: Diagnose the environment
-        continue-on-error: true
-        run: |
-          echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-<unset>}"
-          echo "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-<unset>}"
-          ls -la "/run/user/$(id -u)" || true
-          sysctl kernel.apparmor_restrict_unprivileged_userns kernel.unprivileged_userns_clone || true
-          which bwrap xdg-dbus-proxy dbus-run-session || true
-          dpkg -l libwebkit2gtk-4.1-0 | tail -1
-      - name: 'Diagnose: plain'
-        continue-on-error: true
-        run: xvfb-run --auto-servernum node scripts/bench.mjs --runs 1 --no-fail
-      - name: 'Diagnose: with a session bus'
-        continue-on-error: true
-        run: dbus-run-session -- xvfb-run --auto-servernum node scripts/bench.mjs --runs 1 --no-fail
-      - name: 'Diagnose: without the WebKit sandbox'
-        continue-on-error: true
-        env:
-          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: '1'
-        run: xvfb-run --auto-servernum node scripts/bench.mjs --runs 1 --no-fail
-      - name: 'Diagnose: without the accessibility bridge'
-        continue-on-error: true
-        env:
-          NO_AT_BRIDGE: '1'
-        run: xvfb-run --auto-servernum node scripts/bench.mjs --runs 1 --no-fail
       - name: Measure startup time and idle memory
-        # The web view needs a display; xvfb provides a virtual one.
-        run: xvfb-run --auto-servernum node scripts/bench.mjs --runs 5
+        # The web view needs a display; xvfb provides a virtual one. The
+        # runner's own session bus stalls portal requests until the D-Bus
+        # timeout (~30 s of startup), so the run gets a private session bus.
+        run: dbus-run-session -- xvfb-run --auto-servernum node scripts/bench.mjs --runs 5

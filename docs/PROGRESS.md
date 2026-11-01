@@ -19,7 +19,7 @@ is open, what comes next.
 
 ## Log
 
-### 2026-11-01 — CI: Windows and macOS tests
+### 2026-11-01 — CI: Windows, macOS and the benchmark
 
 **Done**
 
@@ -27,17 +27,25 @@ is open, what comes next.
   Tauri embeds the Common Controls v6 manifest only into the app binary,
   so `build.rs` now embeds `src-tauri/windows-app-manifest.xml` through the
   linker for every binary, tests included. This was red since M0.
+- With the tests running on Windows for the first time, a real bug showed:
+  portable-pty creates ConPTY with `PSEUDOCONSOLE_INHERIT_CURSOR`, so
+  ConPTY asks for the cursor position (`ESC[6n`) before it starts the
+  program. Without an attached view nobody answered and hidden sessions
+  never ran. The backend now answers cursor position requests while no
+  view is attached and drops them from the scrollback.
+- Checkpoint tests disable `core.autocrlf` (Git for Windows checks out
+  CRLF).
 - macOS: `closing_ends_what_the_program_started` used `/proc` and the
   `setsid` command, which macOS lacks. It now uses `ps` and Perl's
   `POSIX::setsid`.
+- Benchmark: startup was ~31 s on the runner. A diagnostic CI run showed
+  that the runner's systemd session bus stalls portal requests until the
+  D-Bus timeout; with `dbus-run-session` startup was 916 ms. The bench now
+  runs with a private session bus. Locally (WSLg) startup is 0.4–1.5 s.
 
 **Open**
 
-- Benchmark job: startup is ~31 s on the Ubuntu 24.04 runner (budget
-  1 s). The 30 s pass between GTK init and the web process starting, so
-  it looks like a timeout in the runner environment (xvfb, no session
-  services). Locally (WSLg, also X11 without D-Bus) it starts in 0.4–1.5 s.
-  Needs a diagnostic CI run.
+- Startup in CI (916 ms) is close to the 1 s budget; watch for flakes.
 
 ### 2026-11-01 — Push, and starting the preferred agent per project
 

@@ -15,7 +15,8 @@ is open, what comes next.
 - **Test release `v0.1.0-1`:** draft release with the macOS `.dmg` and the
   Windows builds (Linux failed: `.rpm` rejects the `-`, so use plain
   versions from now on). The maintainer tests it on a Mac; the feedback
-  comes as a German summary from a local checklist.
+  comes as a German summary from a local checklist. The tag stays on its
+  own commit; `main` keeps version `0.0.0` until the 0.1.0 release.
 - **Acceptance:** the per-feature acceptance test is paused; the
   maintainer reviews everything at the end. The M1 checklists for file
   tree, editor, search and palette are still unreviewed (local `abnahme/`
@@ -73,6 +74,9 @@ is open, what comes next.
   in `0.1.0-1`. Rule added to `docs/RELEASING.md`: plain versions only.
 - macOS builds are ad-hoc signed (`signingIdentity: "-"`), so Gatekeeper
   offers "Open Anyway" instead of calling the app damaged.
+- The release branch is merged into `main` for its docs and the ad-hoc
+  signing setting; the version goes back to `0.0.0` there, since
+  `0.1.0-1` was only for the test tag.
 
 **Decided**
 

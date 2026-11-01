@@ -1,6 +1,6 @@
 {
   "name": "ame",
-  "version": "0.1.0-1",
+  "version": "0.0.0",
   "private": true,
   "description": "Ame — Agent Manager Editor: a lean desktop cockpit for terminal coding agents across many projects.",
   "license": "MIT OR Apache-2.0",

@@ -69,4 +69,10 @@ describe('formatShortcut', () => {
     expect(formatShortcut(shortcut, true)).toBe('⇧⌘F');
     expect(formatShortcut(shortcut, false)).toBe('Ctrl+Shift+F');
   });
+
+  it('shows arrow keys as arrows', () => {
+    const shortcut = parseShortcut('Mod+Alt+ArrowDown');
+    expect(formatShortcut(shortcut, false)).toBe('Ctrl+Alt+↓');
+    expect(formatShortcut(shortcut, true)).toBe('⌥⌘↓');
+  });
 });

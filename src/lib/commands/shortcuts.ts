@@ -47,8 +47,18 @@ export function matchesShortcut(event: KeyEventLike, shortcut: Shortcut, mac = i
 }
 
 /** Human-readable form, e.g. `⌘⇧F` on macOS and `Ctrl+Shift+F` elsewhere. */
+/** Symbols for keys whose names are long, e.g. `ArrowDown` → `↓`. */
+const KEY_SYMBOLS: Readonly<Record<string, string>> = {
+  ArrowUp: '↑',
+  ArrowDown: '↓',
+  ArrowLeft: '←',
+  ArrowRight: '→',
+};
+
 export function formatShortcut(shortcut: Shortcut, mac = isMac): string {
-  const key = shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key;
+  const key =
+    KEY_SYMBOLS[shortcut.key] ??
+    (shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key);
   if (mac) {
     return `${shortcut.alt ? '⌥' : ''}${shortcut.shift ? '⇧' : ''}${shortcut.mod ? '⌘' : ''}${key}`;
   }

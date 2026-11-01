@@ -19,6 +19,23 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — M6: UX review, first pass
+
+**Done**
+
+- Dark theme screenshots (WSLg) of the project view with a git repository,
+  the changes panel, a terminal, the dashboard with a project group, the
+  settings and the command palette.
+- Fixes: side panel tabs wrapped the change count and cut off "Scripts"
+  (now one line, tighter spacing, horizontal scroll as a fallback);
+  settings rows with long descriptions pushed the switch below the text;
+  shortcuts show `↑↓←→` instead of `ArrowDown`.
+
+**Open**
+
+- Light theme, search, quick open, inline diff and the editor's merge
+  view still to review; screenshots for the README (M6 "Docs").
+
 ### 2026-11-01 — M6: release workflow
 
 **Done**

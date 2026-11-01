@@ -105,7 +105,9 @@ milestones and marked with 💡.
 
 - [x] Icon and branding (a drop that is also a text cursor;
       source `branding/icon.svg`)
-- [ ] UX review with screenshots of every view in light and dark
+- [ ] UX review with screenshots of every view in light and dark — first
+      pass done (main views in dark, see PROGRESS); light theme, search,
+      quick open and the diff view still to review
 - [x] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
       portable `.exe` (Windows) — in the release workflow, not run yet
 - [x] Release workflow per tag (`tauri-action`), see `docs/RELEASING.md`;

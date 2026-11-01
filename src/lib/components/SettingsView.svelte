@@ -253,8 +253,10 @@
     border-bottom: 1px solid var(--ame-border);
   }
 
+  /* Long descriptions wrap inside the text, so the control stays on the right. */
   .text {
     display: flex;
+    flex: 1 1 240px;
     flex-direction: column;
     min-width: 0;
   }

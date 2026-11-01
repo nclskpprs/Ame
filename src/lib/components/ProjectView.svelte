@@ -125,13 +125,17 @@
 
   .panel-tabs {
     display: flex;
-    gap: var(--ame-space-3);
+    column-gap: var(--ame-space-2);
     padding: var(--ame-space-2) var(--ame-space-3) 0;
+    overflow-x: auto;
     border-bottom: 1px solid var(--ame-border);
+    scrollbar-width: none;
   }
 
   .panel-tabs button {
+    flex: none;
     padding: var(--ame-space-1) 0;
+    white-space: nowrap;
     border: 0;
     border-bottom: 2px solid transparent;
     background: transparent;
@@ -139,7 +143,7 @@
     font: inherit;
     font-size: var(--ame-font-size-small);
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
   }
 

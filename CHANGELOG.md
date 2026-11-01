@@ -131,6 +131,10 @@ and this project adheres to
 
 ### Fixed
 
+- The side panel tabs stay on one line with four tabs, settings with long
+  descriptions keep their switch on the right, and arrow keys show as
+  arrows in shortcuts.
+
 - The resource monitor counted every thread of an agent as a process, so
   memory and CPU of multi-threaded agents were shown far too high.
 

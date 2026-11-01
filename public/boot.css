@@ -1,0 +1,14 @@
+/* Paints the theme background before the app has loaded to avoid a white
+   flash. Values must match `bg` in src/lib/theme/tokens.ts.
+
+   This lives in its own file on purpose: an inline <style> in index.html
+   makes Tauri add a hash to the CSP `style-src`, which disables
+   'unsafe-inline' and blocks the styles CodeMirror injects at runtime. */
+html {
+  background: #0e1621;
+}
+@media (prefers-color-scheme: light) {
+  html {
+    background: #f5f8fb;
+  }
+}

@@ -51,4 +51,11 @@
   .terminal :global(.xterm) {
     height: 100%;
   }
+
+  /* xterm.css paints the viewport black; xterm only colors the rows it
+     draws, so the space below the last full row would show as a dark
+     strip. The terminal theme uses the same background (palette.bg). */
+  .terminal :global(.xterm .xterm-viewport) {
+    background-color: var(--ame-bg);
+  }
 </style>

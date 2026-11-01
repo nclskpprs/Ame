@@ -145,6 +145,7 @@ and this project adheres to
 - Release builds: the editor shows line numbers beside the code and
   syntax highlighting again; the content security policy blocked the
   editor's styles.
+- Terminal panel: no dark strip below the last line anymore.
 - Windows: sessions started in the background (no visible terminal) no
   longer hang before the program starts.
 - The side panel tabs stay on one line with four tabs, settings with long

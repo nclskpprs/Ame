@@ -31,11 +31,12 @@ is open, what comes next.
 - macOS builds are ad-hoc signed (`signingIdentity: "-"`), so Gatekeeper
   offers "Open Anyway" instead of calling the app damaged.
 
-**Open**
+**Decided**
 
-- Real signing: Apple Developer ID + notarization (paid account), Windows
-  signing (e.g. SignPath for open source, or Azure Trusted Signing).
-  Decision by the maintainer before the public 0.1.
+- Signing (maintainer, 2026-11-01): ad-hoc signing on macOS is enough for
+  now; an Apple Developer ID and notarization are not needed while the app
+  can be opened on macOS. Windows signing (e.g. SignPath for open source)
+  stays optional.
 
 ### 2026-11-01 — CI: Windows, macOS and the benchmark
 

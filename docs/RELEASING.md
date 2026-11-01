@@ -8,6 +8,12 @@ How a version of Ame gets built and published. The workflow is
 1. On `main`, set the new version in **both** places:
    - `Cargo.toml` → `[workspace.package] version`
    - `package.json` → `version`
+
+   Use plain `MAJOR.MINOR.PATCH` versions. Pre-release suffixes break a
+   bundle: the Windows `.msi` (WiX) accepts only a numeric one, and the
+   Linux `.rpm` rejects any `-` (`0.1.0-1` failed). A test build is simply
+   a draft release that is not published.
+
 2. In `CHANGELOG.md`, rename _Unreleased_ to the version and date and add a
    new empty _Unreleased_ section.
 3. Commit (`chore(release): 0.1.0`), then tag and push:

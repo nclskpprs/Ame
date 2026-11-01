@@ -1,4 +1,5 @@
 import { openAgentPicker } from '$lib/agents/picker';
+import { openQueueComposer } from '$lib/agents/queue';
 import { sendSelectionToAgent } from '$lib/agents/send';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
@@ -198,6 +199,17 @@ export function registerAppCommands(): () => void {
       run: () => {
         const file = activeFile();
         if (file) activeSession()?.editors.close(file.path);
+      },
+    },
+    {
+      id: 'agents.queuePrompt',
+      title: 'commands.queuePrompt',
+      shortcut: 'Mod+Alt+Enter',
+      terminal: true,
+      when: hasProject,
+      run: () => {
+        const session = activeSession();
+        if (session) openQueueComposer(session.terminals);
       },
     },
     {

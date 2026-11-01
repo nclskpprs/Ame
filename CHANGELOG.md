@@ -107,6 +107,10 @@ and this project adheres to
 - Files an agent just changed are marked in the file tree for a minute.
   Follow mode (Ctrl/Cmd+Alt+F) opens the file an agent changed last as an
   inline diff, without taking the focus from the terminal.
+- Prompt queue: queue follow-up prompts for an agent (Ctrl/Cmd+Alt+Enter or
+  the queue button in the terminal bar); they are sent one by one as soon
+  as the agent is done, also while the window is hidden. Reorder or remove
+  waiting prompts above the terminal; the dashboard shows the count.
 
 ### Fixed
 

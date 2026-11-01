@@ -6,20 +6,55 @@ is open, what comes next.
 ## Current state
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
-  background, ADR 0020). M3 — Status and dashboard: hooks adapter done,
-  animations, prompt queue, resource monitor and benchmarks open. M4 —
+  background, ADR 0020). M3 — Status and dashboard: hooks adapter,
+  resource monitor and prompt queue done; rain animations and benchmarks
+  open. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M3: prompt queue per agent, rain status animations and the prompt
-     drop, performance benchmarks in CI.
+  1. M3: rain status animations and the prompt drop, performance
+     benchmarks in CI.
   2. M4: checkpoints before every prompt, review mode.
   3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M3: prompt queue per agent
+
+**Done**
+
+- `agents/queue.rs` (ADR 0021): a queue per session in the backend, part
+  of `SessionInfo.queue`. The status loop sends the next prompt (paste,
+  then Enter after 150 ms, on its own thread) when the agent is idle, the
+  user did not type for 4 s and the previous prompt was picked up (or 30 s
+  passed). Commands `queue_prompt`, `remove_queued_prompt`,
+  `move_queued_prompt`, `clear_prompt_queue`; new error kind
+  `promptRejected`.
+- Frontend: `PromptQueue.svelte` above the terminal (composer: Enter
+  queues, Shift+Enter new line, Esc closes; list with move up/down and
+  remove, "Clear all"), shown only while composing or prompts wait.
+  Command "Queue Prompt for Agent" (`Mod+Alt+Enter`, also from a focused
+  terminal) and a queue button in the terminal bar for running sessions;
+  "N queued" on dashboard cards.
+
+**Verified**
+
+- Unit tests for the queue rules (idle only, typing pause, picked up,
+  30 s fallback, limits, reorder) and the preview; a PTY test where a shell
+  receives the first queued prompt by itself and keeps the second queued.
+- `pnpm verify` green (131 Rust tests, 408 frontend tests).
+- Not tried in the GUI yet (no WSLg run this session) and not with a real
+  agent — check in the final review: queue two prompts for Claude Code
+  while it works and watch them go out one after the other.
+
+**Open**
+
+- Prompts are not persisted; quitting or closing a session drops them.
+- Heuristic agents (no adapter) that pause longer than `idleAfterMs` while
+  thinking may get the next prompt early.
 
 ### 2026-11-01 — M3: resource monitor
 

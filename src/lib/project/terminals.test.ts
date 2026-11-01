@@ -15,6 +15,7 @@ function info(id: number, project: string, profile: string): SessionInfo {
     status: { state: 'running' },
     state: 'starting',
     attention: null,
+    queue: [],
   };
 }
 

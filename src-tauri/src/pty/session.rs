@@ -15,6 +15,7 @@ use super::ring::RingBuffer;
 use super::utf8::Utf8Decoder;
 use crate::agents::adapters::{self, endpoint::HookMessage};
 use crate::agents::cpu::TreeUsage;
+use crate::agents::queue::{PromptQueue, QueueRejection, QueuedPrompt};
 use crate::agents::status::{AgentState, StatusConfig, StatusTracker};
 use crate::error::{Error, Result};
 
@@ -28,6 +29,9 @@ const MAX_BATCH: usize = 256 * 1024;
 /// How long to wait for the last output after the process exited.
 const DRAIN_TIMEOUT: Duration = Duration::from_millis(500);
 const READ_BUFFER: usize = 64 * 1024;
+/// Pause between pasting a queued prompt and pressing Enter, so programs
+/// that handle the paste asynchronously see the whole text first.
+const SUBMIT_DELAY: Duration = Duration::from_millis(150);
 
 pub type SessionId = u32;
 
@@ -57,6 +61,8 @@ pub struct SessionInfo {
     pub state: AgentState,
     /// Text of the last terminal notification (OSC 9 / 777) not answered yet.
     pub attention: Option<String>,
+    /// Follow-up prompts sent one by one whenever the agent is idle.
+    pub queue: Vec<QueuedPrompt>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -91,6 +97,7 @@ pub struct Session {
     status: Mutex<StatusTracker>,
     /// CPU and memory of the process tree, measured by the status loop.
     usage: Mutex<Option<TreeUsage>>,
+    queue: Mutex<PromptQueue>,
     output: Mutex<Output>,
     writer: Mutex<Option<Box<dyn Write + Send>>>,
     master: Mutex<Option<Box<dyn MasterPty + Send>>>,
@@ -125,6 +132,7 @@ impl Session {
             info: Mutex::new(info),
             status: Mutex::new(StatusTracker::new(status, Instant::now())),
             usage: Mutex::new(None),
+            queue: Mutex::new(PromptQueue::default()),
             output: Mutex::new(Output {
                 ring: RingBuffer::new(SCROLLBACK_BYTES),
                 modes: ModeTracker::default(),
@@ -213,6 +221,61 @@ impl Session {
             }
         }
         self.refresh_state(now)
+    }
+
+    /// Adds a follow-up prompt; it is sent once the agent is idle.
+    pub fn queue_prompt(&self, text: &str) -> Result<QueuedPrompt> {
+        let mut queue = lock(&self.queue);
+        let prompt = queue.push(text).map_err(|rejection| {
+            Error::PromptRejected(
+                match rejection {
+                    QueueRejection::Empty => "the prompt is empty",
+                    QueueRejection::TooLong => "the prompt is too long",
+                    QueueRejection::Full => "the queue is full",
+                }
+                .into(),
+            )
+        })?;
+        self.sync_queue(&queue);
+        Ok(prompt)
+    }
+
+    /// Changes the queue; returns whether anything changed.
+    pub fn edit_queue(&self, edit: impl FnOnce(&mut PromptQueue) -> bool) -> bool {
+        let mut queue = lock(&self.queue);
+        let changed = edit(&mut queue);
+        if changed {
+            self.sync_queue(&queue);
+        }
+        changed
+    }
+
+    /// Takes the next queued prompt if the agent is ready for it.
+    pub fn take_due_prompt(&self, now: Instant) -> Option<QueuedPrompt> {
+        let (running, state) = {
+            let info = lock(&self.info);
+            (info.status == SessionStatus::Running, info.state)
+        };
+        if !running {
+            return None;
+        }
+        let last_input = lock(&self.status).last_input();
+        let mut queue = lock(&self.queue);
+        let prompt = queue.take_due(state, last_input, now)?;
+        self.sync_queue(&queue);
+        Some(prompt)
+    }
+
+    /// Types a prompt into the program and submits it. Blocks while the
+    /// program does not read its input, so it runs off the status thread.
+    pub fn submit(&self, text: &str) -> Result<()> {
+        self.paste(text)?;
+        std::thread::sleep(SUBMIT_DELAY);
+        self.write(b"\r")
+    }
+
+    fn sync_queue(&self, queue: &PromptQueue) {
+        lock(&self.info).queue = queue.items().to_vec();
     }
 
     /// The last line of output, see [`StatusTracker::last_line`].

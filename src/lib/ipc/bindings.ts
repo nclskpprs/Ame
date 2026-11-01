@@ -97,6 +97,17 @@ export const commands = {
 	writeSession: (id: number, data: string) => typedError<null, AppError>(__TAURI_INVOKE("write_session", { id, data })),
 	/**  Sends text as a paste (e.g. code sent from the editor to an agent). */
 	pasteSession: (id: number, text: string) => typedError<null, AppError>(__TAURI_INVOKE("paste_session", { id, text })),
+	/**
+	 *  Queues a follow-up prompt; it is typed into the agent and submitted as
+	 *  soon as the agent is idle.
+	 */
+	queuePrompt: (id: number, text: string) => typedError<QueuedPrompt, AppError>(__TAURI_INVOKE("queue_prompt", { id, text })),
+	/**  Removes a prompt that is still waiting. */
+	removeQueuedPrompt: (id: number, prompt: number) => typedError<null, AppError>(__TAURI_INVOKE("remove_queued_prompt", { id, prompt })),
+	/**  Moves a waiting prompt one place earlier (`by < 0`) or later. */
+	moveQueuedPrompt: (id: number, prompt: number, by: number) => typedError<null, AppError>(__TAURI_INVOKE("move_queued_prompt", { id, prompt, by })),
+	/**  Removes all waiting prompts of a session. */
+	clearPromptQueue: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("clear_prompt_queue", { id })),
 	resizeSession: (id: number, cols: number, rows: number) => typedError<null, AppError>(__TAURI_INVOKE("resize_session", { id, cols, rows })),
 	/**  Ends the program; the session and its output stay until it is closed. */
 	stopSession: (id: number) => typedError<null, AppError>(__TAURI_INVOKE("stop_session", { id })),
@@ -234,7 +245,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -437,6 +448,13 @@ export type Project_Serialize = {
 	layout: ProjectLayout_Serialize,
 };
 
+/**  A prompt waiting for its turn. */
+export type QueuedPrompt = {
+	/**  Unique within its session. */
+	id: number,
+	text: string,
+};
+
 export type RainEffects = "on" | "subtle" | "off";
 
 /**  A terminal session remembered across restarts. */
@@ -482,6 +500,8 @@ export type SessionInfo_Deserialize = {
 	state: AgentState,
 	/**  Text of the last terminal notification (OSC 9 / 777) not answered yet. */
 	attention?: string | null,
+	/**  Follow-up prompts sent one by one whenever the agent is idle. */
+	queue: QueuedPrompt[],
 };
 
 /**  Public information about a session, sent to the frontend. */
@@ -502,6 +522,8 @@ export type SessionInfo_Serialize = {
 	state: AgentState,
 	/**  Text of the last terminal notification (OSC 9 / 777) not answered yet. */
 	attention: string | null,
+	/**  Follow-up prompts sent one by one whenever the agent is idle. */
+	queue: QueuedPrompt[],
 };
 
 /**  A glimpse of what a session printed last, for the dashboard. */

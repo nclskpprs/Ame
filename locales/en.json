@@ -134,7 +134,8 @@
     "showChanges": "Show Changes",
     "toggleDiff": "Toggle Inline Diff",
     "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)",
-    "quit": "Quit Ame"
+    "quit": "Quit Ame",
+    "queuePrompt": "Queue Prompt for Agent"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -320,5 +321,21 @@
     "cpu": "{value} %",
     "summary": "CPU {cpu} · RAM {memory}",
     "projectLabel": "{project}: {usage}"
+  },
+  "queue": {
+    "label": "Prompt queue of {title}",
+    "waiting": "Queued prompts: {count} — sent one by one when the agent is done",
+    "count": "{count} queued",
+    "add": "Add",
+    "clear": "Clear all",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Remove from queue",
+    "inputLabel": "Prompt to queue for {title}",
+    "placeholder": "Next prompt for {title} — sent as soon as it is done",
+    "hint": "Enter queues · Shift+Enter new line · Esc closes",
+    "submit": "Queue",
+    "done": "Done",
+    "open": "Queue a prompt"
   }
 }

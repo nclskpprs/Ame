@@ -124,6 +124,9 @@
               <span class="state">
                 {session.attention ?? t(stateLabels[session.state])}
                 · {formatDuration(now - (session.startedAt ?? now))}
+                {#if session.queue.length > 0}
+                  · {t('queue.count', { count: session.queue.length })}
+                {/if}
                 {#if usage.forSession(session.id)}
                   · {describeUsage(usage.forSession(session.id) ?? { cpu: 0, memory: 0 })}
                 {/if}

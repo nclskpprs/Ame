@@ -12,6 +12,7 @@ use super::session::{Session, SessionId, SessionInfo, SessionStatus, Spawned, lo
 use super::tree;
 use crate::agents::adapters::endpoint::HookMessage;
 use crate::agents::cpu::CpuMonitor;
+use crate::agents::queue::{PromptQueue, QueuedPrompt};
 use crate::agents::status::{AgentState, StatusConfig};
 use crate::error::{Error, Result};
 
@@ -122,6 +123,7 @@ impl PtyManager {
             status: SessionStatus::Running,
             state: AgentState::Starting,
             attention: None,
+            queue: Vec::new(),
         };
         let weak = Arc::downgrade(&self.inner);
         let session = Session::start(
@@ -164,6 +166,25 @@ impl PtyManager {
         if session.is_running() && session.apply_hook(message, Instant::now()) {
             self.inner.notify();
         }
+    }
+
+    /// Queues a follow-up prompt for a session (see `agents::queue`).
+    pub fn queue_prompt(&self, id: SessionId, text: &str) -> Result<QueuedPrompt> {
+        let prompt = self.get(id)?.queue_prompt(text)?;
+        self.inner.notify();
+        Ok(prompt)
+    }
+
+    /// Changes a session's queue and reports the change.
+    pub fn edit_queue(
+        &self,
+        id: SessionId,
+        edit: impl FnOnce(&mut PromptQueue) -> bool,
+    ) -> Result<()> {
+        if self.get(id)?.edit_queue(edit) {
+            self.inner.notify();
+        }
+        Ok(())
     }
 
     /// Asks the process to end; the session stays listed as exited.
@@ -249,11 +270,29 @@ fn status_loop(inner: &Weak<Inner>) {
         let mut changed = false;
         for session in &sessions {
             changed |= session.refresh_state(now);
+            if let Some(prompt) = session.take_due_prompt(now) {
+                changed = true;
+                submit_in_background(Arc::clone(session), prompt.text);
+            }
         }
         if changed {
             inner.notify();
         }
         tick = tick.wrapping_add(1);
+    }
+}
+
+/// Sends a queued prompt without blocking the status loop.
+fn submit_in_background(session: Arc<Session>, text: String) {
+    let spawned = std::thread::Builder::new()
+        .name("prompt-queue".into())
+        .spawn(move || {
+            if let Err(err) = session.submit(&text) {
+                log::warn!("could not send a queued prompt: {err}");
+            }
+        });
+    if let Err(err) = spawned {
+        log::warn!("could not start the prompt thread: {err}");
     }
 }
 
@@ -477,6 +516,32 @@ mod tests {
         wait_until(|| state() == AgentState::NeedsInput);
         manager.get(info.id).unwrap().write(b"y\r").unwrap();
         wait_until(|| state() != AgentState::NeedsInput);
+        manager.close(info.id).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn sends_queued_prompts_when_idle() {
+        let (manager, _exits) = manager();
+        let mut spec = spec(
+            "/bin/sh",
+            &["-c", "printf '> '; read a; echo \"got:$a\"; sleep 30"],
+        );
+        spec.status = StatusConfig::new(Some(500), &[]);
+        let info = manager.spawn(spec).unwrap();
+        let session = manager.get(info.id).unwrap();
+        let output = Collect::default();
+        session.attach(Box::new(output.clone()));
+        manager.queue_prompt(info.id, "first").unwrap();
+        manager.queue_prompt(info.id, "second").unwrap();
+        assert_eq!(session.info().queue.len(), 2);
+        wait_until(|| output.text().contains("got:first"));
+        // The next prompt waits until the agent was seen working; the quick
+        // reply of `read` looks like an echo, so it stays queued for now.
+        let queue = session.info().queue;
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue[0].text, "second");
+        assert!(manager.queue_prompt(info.id, " ").is_err());
         manager.close(info.id).unwrap();
     }
 

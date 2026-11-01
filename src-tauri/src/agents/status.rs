@@ -181,6 +181,11 @@ impl StatusTracker {
         }
     }
 
+    /// When the user (or the prompt queue) last sent input.
+    pub fn last_input(&self) -> Option<Instant> {
+        self.last_input
+    }
+
     pub fn on_exit(&mut self, success: bool) {
         self.exit = Some(success);
     }

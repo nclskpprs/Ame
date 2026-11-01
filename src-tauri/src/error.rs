@@ -31,6 +31,8 @@ pub enum Error {
     UnknownSession(u32),
     #[error("session has exited: {0}")]
     SessionExited(u32),
+    #[error("prompt not queued: {0}")]
+    PromptRejected(String),
     #[error("unknown agent profile: {0}")]
     UnknownProfile(String),
     #[error("git is not installed")]

@@ -62,7 +62,7 @@ milestones and marked with 💡.
 - [x] Claude Code hooks adapter with helper CLI
 - [ ] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
 - [ ] Performance benchmarks (RAM, startup time) in CI
-- [ ] 💡 Prompt queue per agent: queue follow-up prompts that are sent
+- [x] 💡 Prompt queue per agent: queue follow-up prompts that are sent
       automatically as soon as the agent is idle
 - [x] 💡 Resource monitor: RAM/CPU per project (agents + dev servers) in the
       sidebar

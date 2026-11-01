@@ -25,6 +25,8 @@ export class TerminalGroup {
   focusPending = $state(false);
   /** A running session waiting for "stop / cancel" before it closes. */
   pendingClose = $state<number | null>(null);
+  /** The prompt queue composer is open for the shown session. */
+  composing = $state(false);
   /** Size of the terminal view, used for new sessions. */
   size = { ...DEFAULT_SIZE };
 

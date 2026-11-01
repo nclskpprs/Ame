@@ -7,11 +7,13 @@
     orderedAgents,
   } from '$lib/agents/agents.svelte';
   import { openAgentPicker } from '$lib/agents/picker';
+  import { openQueueComposer } from '$lib/agents/queue';
   import { stateLabels } from '$lib/agents/state';
   import { t } from '$lib/i18n';
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
   import { isRunning } from '$lib/terminal/sessions.svelte';
+  import PromptQueue from './PromptQueue.svelte';
   import StatusDot from './StatusDot.svelte';
   import Terminal from './Terminal.svelte';
 
@@ -99,6 +101,18 @@
         </div>
       {/each}
     </div>
+    {#if active && isRunning(active)}
+      <button
+        class="icon"
+        aria-label={t('queue.open')}
+        title={t('queue.open')}
+        onclick={() => openQueueComposer(group)}
+      >
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M3 4h10M3 8h10M3 12h5M11 10.5v3M9.5 12h3" />
+        </svg>
+      </button>
+    {/if}
     <button
       class="icon"
       aria-label={t('terminal.startAgent')}
@@ -149,6 +163,10 @@
       </button>
       <button onclick={() => void group.close(active.id)}>{t('terminal.closeExited')}</button>
     </div>
+  {/if}
+
+  {#if !restoring && active && (active.queue.length > 0 || (group.composing && isRunning(active)))}
+    <PromptQueue session={active} {group} />
   {/if}
 
   <div class="body">

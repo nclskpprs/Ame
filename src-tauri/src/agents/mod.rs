@@ -7,5 +7,6 @@ pub mod commands;
 pub mod cpu;
 pub mod detect;
 pub mod profiles;
+pub mod queue;
 pub mod signals;
 pub mod status;

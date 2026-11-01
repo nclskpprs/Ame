@@ -12,6 +12,7 @@ use super::session::{OutputSink, SessionId, SessionInfo};
 use crate::agents::adapters::Adapters;
 use crate::agents::detect;
 use crate::agents::profiles::merged_profiles;
+use crate::agents::queue::QueuedPrompt;
 use crate::agents::status::StatusConfig;
 use crate::error::{Error, Result};
 use crate::workspace::projects::WorkspaceStore;
@@ -174,6 +175,44 @@ pub async fn write_session(pty: State<'_, PtyManager>, id: SessionId, data: Stri
 pub async fn paste_session(pty: State<'_, PtyManager>, id: SessionId, text: String) -> Result<()> {
     let session = pty.get(id)?;
     blocking(move || session.paste(&text)).await
+}
+
+/// Queues a follow-up prompt; it is typed into the agent and submitted as
+/// soon as the agent is idle.
+#[tauri::command]
+#[specta::specta]
+pub fn queue_prompt(
+    pty: State<'_, PtyManager>,
+    id: SessionId,
+    text: String,
+) -> Result<QueuedPrompt> {
+    pty.queue_prompt(id, &text)
+}
+
+/// Removes a prompt that is still waiting.
+#[tauri::command]
+#[specta::specta]
+pub fn remove_queued_prompt(pty: State<'_, PtyManager>, id: SessionId, prompt: u32) -> Result<()> {
+    pty.edit_queue(id, |queue| queue.remove(prompt))
+}
+
+/// Moves a waiting prompt one place earlier (`by < 0`) or later.
+#[tauri::command]
+#[specta::specta]
+pub fn move_queued_prompt(
+    pty: State<'_, PtyManager>,
+    id: SessionId,
+    prompt: u32,
+    by: i32,
+) -> Result<()> {
+    pty.edit_queue(id, |queue| queue.shift(prompt, by))
+}
+
+/// Removes all waiting prompts of a session.
+#[tauri::command]
+#[specta::specta]
+pub fn clear_prompt_queue(pty: State<'_, PtyManager>, id: SessionId) -> Result<()> {
+    pty.edit_queue(id, |queue| queue.clear())
 }
 
 #[tauri::command]

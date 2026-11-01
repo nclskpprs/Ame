@@ -314,6 +314,12 @@ Implementation (`src-tauri/src/agents/`):
   paused when the window is inactive or rain is off), the most urgent state
   per project in the sidebar, the waiting count in the window title.
 
+- Prompt queue (ADR 0021, `agents/queue.rs`): follow-up prompts per
+  session, part of `SessionInfo.queue`. The status loop sends the next one
+  as a paste plus Enter when the session is idle, the user did not type for
+  4 s and the previous prompt was picked up (or 30 s passed). Frontend:
+  `PromptQueue.svelte` above the terminal, `lib/agents/queue.ts`.
+
 Example agent profile:
 
 ```json

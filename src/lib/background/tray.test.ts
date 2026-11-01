@@ -14,6 +14,7 @@ function session(id: number, state: AgentState): SessionInfo {
     status: { state: 'running' },
     state,
     attention: null,
+    queue: [],
   };
 }
 

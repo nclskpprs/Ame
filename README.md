@@ -11,20 +11,29 @@ Ame is **not** an IDE replacement. There is no indexing and no language
 server by default. It is a cockpit: terminals, agent status, a file tree,
 a lightweight editor and a live diff of what your agents changed.
 
-> **Status:** pre-alpha. Projects, file tree, editor and search work (M1);
-> terminals and agents are next (M2). There is nothing to install yet. See
-> the [roadmap](docs/ROADMAP.md).
+> **Status:** pre-alpha, heading for 0.1. Projects, editor, terminals,
+> agents with live status, git, scripts and project groups work; the first
+> release is being prepared. See the [roadmap](docs/ROADMAP.md).
+
+![Ame with a project, its changes, an inline diff and an agent](docs/screenshots/project-dark.png)
 
 ## Why
 
-- **Low memory, no crashes.** A Rust backend, no indexing, lazy loading
-  everywhere. Target: under 150 MB RAM idle with three projects open and a
-  cold start under one second.
+- **Low memory, fast start.** A Rust backend, no indexing, lazy loading
+  everywhere. Startup under one second; memory is measured in CI on every
+  change (see [ADR 0022](docs/decisions/0022-self-measuring-benchmarks.md)).
 - **Switch projects instantly.** All open projects live in one sidebar,
   one click or `Ctrl/Cmd+1…9` away.
 - **Know what your agents are doing.** A dashboard and status dots show
   whether each agent is _working_, _needs input_, _idle_, _exited_ or in
-  _error_, plus a system notification when it needs you.
+  _error_, plus a system notification when it needs you. Claude Code
+  reports its state precisely through its hooks.
+- **Keep agents busy.** Queue follow-up prompts that are sent when the
+  agent is done, and every prompt takes a git checkpoint you can roll back
+  to.
+- **Work across projects.** Group projects, start an agent with access to
+  the whole group, or send one prompt to the agents of every project in
+  it.
 - **See the code.** File tree, editor and a live diff of agent changes next
   to the terminal.
 - **Run scripts.** `package.json` and `composer.json` scripts as one-click
@@ -32,17 +41,20 @@ a lightweight editor and a live diff of what your agents changed.
 
 ## Screenshots
 
-Screenshots will be added with the first release (0.1).
+| Light theme                                                            | Dashboard                                                              |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| ![Project view in the light theme](docs/screenshots/project-light.png) | ![Dashboard with a project group](docs/screenshots/dashboard-dark.png) |
 
 ## Installation
 
-There are no releases yet. Release 0.1 will ship:
+There are no releases yet. Release 0.1 will ship (see
+[docs/RELEASING.md](docs/RELEASING.md)):
 
-| Platform | Format                          |
-| -------- | ------------------------------- |
-| macOS    | `.dmg` (universal)              |
-| Linux    | AppImage, `.deb`                |
-| Windows  | Installer and a portable `.exe` |
+| Platform | Format                                |
+| -------- | ------------------------------------- |
+| macOS    | `.dmg` (universal)                    |
+| Linux    | AppImage, `.deb`                      |
+| Windows  | Installer and a portable `.exe` (ZIP) |
 
 Early builds will not be code-signed. macOS Gatekeeper and Windows
 SmartScreen will warn you before the first launch. The Windows build needs
@@ -50,7 +62,8 @@ the WebView2 runtime, which is preinstalled on Windows 10 and 11.
 
 ### Portable mode (Windows)
 
-Place an empty file named `portable` (or `portable.txt`) next to `ame.exe`.
+The portable ZIP already contains it: an empty file named `portable` (or
+`portable.txt`) next to `Ame.exe`.
 Ame then stores its settings and web view data in a `data` folder next to
 the executable instead of your user profile, so you can run it from a USB
 stick without installing anything.

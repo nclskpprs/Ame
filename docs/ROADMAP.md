@@ -105,9 +105,8 @@ milestones and marked with 💡.
 
 - [x] Icon and branding (a drop that is also a text cursor;
       source `branding/icon.svg`)
-- [ ] UX review with screenshots of every view in light and dark — first
-      pass done (main views in dark, see PROGRESS); light theme, search,
-      quick open and the diff view still to review
+- [x] UX review with screenshots of every view in light and dark (main
+      views; see PROGRESS)
 - [x] Builds: `.dmg` (macOS universal), AppImage + `.deb` (Linux), installer +
       portable `.exe` (Windows) — in the release workflow, not run yet
 - [x] Release workflow per tag (`tauri-action`), see `docs/RELEASING.md`;
@@ -118,7 +117,8 @@ milestones and marked with 💡.
       `tauri-plugin-updater` and signed GitHub release artifacts; the
       portable `.exe` gets a download link instead. The maintainer creates
       the signing key and stores it as a GitHub secret.
-- [ ] Docs, screenshots, first publication
+- [ ] Docs, screenshots, first publication — README and screenshots
+      updated; publication waits for the first release
 
 ## Later
 

@@ -83,6 +83,8 @@ const editorTheme = EditorView.theme({
   '.cm-changeGutter': { width: '3px', paddingLeft: '0' },
   '.cm-changedLineGutter': { backgroundColor: 'var(--ame-git-added)' },
   '.cm-deletedLineGutter': { backgroundColor: 'var(--ame-git-deleted)' },
+  // Keep the buttons off the editor's right edge.
+  '.cm-deletedChunk .cm-chunkButtons': { right: '8px' },
   '.cm-deletedChunk .cm-chunkButtons button': {
     padding: '0 6px',
     border: '1px solid var(--ame-border)',

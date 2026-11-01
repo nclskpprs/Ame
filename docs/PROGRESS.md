@@ -19,6 +19,23 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — M6: UX review in light, README screenshots
+
+**Done**
+
+- Light theme: search, quick open, inline diff, scripts panel, dashboard
+  reviewed. Fix: the diff's Keep/Revert buttons sat on the editor's right
+  edge (moved in by 8 px).
+- `docs/screenshots/` (project view dark and light, dashboard with a
+  project group; a "Demo Agent" profile prints a scripted run, no real
+  agent output is shown). README updated: status, features (queue,
+  checkpoints, groups), screenshots, release formats.
+
+**Open**
+
+- Settings and the agent picker in the light theme were not captured
+  separately (seen during earlier work).
+
 ### 2026-11-01 — M6: UX review, first pass
 
 **Done**

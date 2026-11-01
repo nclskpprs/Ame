@@ -502,9 +502,10 @@ mod tests {
         let (manager, _exits) = manager();
         let dir = tempfile::tempdir().unwrap();
         let pid_file = dir.path().join("pid");
-        // `setsid` escapes the hangup of the terminal, like a daemonized server.
+        // A new session escapes the hangup of the terminal, like a daemonized
+        // server. Perl's `setsid`, because macOS has no `setsid` command.
         let script = format!(
-            "setsid sleep 300 & echo $! > '{}'; sleep 300",
+            "perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' sleep 300 & echo $! > '{}'; sleep 300",
             pid_file.display()
         );
         let info = manager.spawn(spec("/bin/sh", &["-c", &script])).unwrap();
@@ -514,10 +515,17 @@ mod tests {
             .trim()
             .parse()
             .unwrap();
+        // `ps` instead of `/proc`, which macOS lacks. No output means the
+        // process is gone; a state starting with `Z` is a zombie.
         let alive = |pid: u32| {
-            std::path::Path::new(&format!("/proc/{pid}")).exists()
-                && !std::fs::read_to_string(format!("/proc/{pid}/stat"))
-                    .is_ok_and(|stat| stat.contains(") Z "))
+            std::process::Command::new("ps")
+                .args(["-o", "stat=", "-p", &pid.to_string()])
+                .output()
+                .is_ok_and(|out| {
+                    let stat = String::from_utf8_lossy(&out.stdout);
+                    let stat = stat.trim();
+                    !stat.is_empty() && !stat.starts_with('Z')
+                })
         };
         assert!(alive(pid));
         manager.close(info.id).unwrap();

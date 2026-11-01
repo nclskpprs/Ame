@@ -19,6 +19,26 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — CI: Windows and macOS tests
+
+**Done**
+
+- Windows: the test binary crashed with `STATUS_ENTRYPOINT_NOT_FOUND`.
+  Tauri embeds the Common Controls v6 manifest only into the app binary,
+  so `build.rs` now embeds `src-tauri/windows-app-manifest.xml` through the
+  linker for every binary, tests included. This was red since M0.
+- macOS: `closing_ends_what_the_program_started` used `/proc` and the
+  `setsid` command, which macOS lacks. It now uses `ps` and Perl's
+  `POSIX::setsid`.
+
+**Open**
+
+- Benchmark job: startup is ~31 s on the Ubuntu 24.04 runner (budget
+  1 s). The 30 s pass between GTK init and the web process starting, so
+  it looks like a timeout in the runner environment (xvfb, no session
+  services). Locally (WSLg, also X11 without D-Bus) it starts in 0.4–1.5 s.
+  Needs a diagnostic CI run.
+
 ### 2026-11-01 — Push, and starting the preferred agent per project
 
 **Done**

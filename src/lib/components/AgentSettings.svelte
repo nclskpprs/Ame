@@ -14,6 +14,7 @@
     command: string;
     args: string;
     resumeArgs: string;
+    addDirArg: string;
   }
 
   let draft = $state<Draft | null>(null);
@@ -32,12 +33,13 @@
       command: profile.command,
       args: joinArgs(profile.args),
       resumeArgs: joinArgs(profile.resumeArgs),
+      addDirArg: profile.addDirArg ?? '',
     };
   }
 
   function add() {
     invalid = false;
-    draft = { id: '', name: '', command: '', args: '', resumeArgs: '' };
+    draft = { id: '', name: '', command: '', args: '', resumeArgs: '', addDirArg: '' };
   }
 
   async function save(event: SubmitEvent) {
@@ -67,6 +69,8 @@
       needsInputPatterns: previous?.needsInputPatterns ?? [],
       idleAfterMs: previous?.idleAfterMs ?? null,
       adapter: previous?.adapter ?? null,
+      // An empty string (not null) turns a built-in folder option off.
+      addDirArg: draft.addDirArg.trim(),
     };
     draft = null;
     await settings.update({ agents: [...custom.filter((p) => p.id !== id), profile] });
@@ -107,6 +111,15 @@
       <input
         bind:value={current.resumeArgs}
         placeholder={t('settings.agents.resumeHint')}
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </label>
+    <label>
+      <span>{t('settings.agents.addDirArg')}</span>
+      <input
+        bind:value={current.addDirArg}
+        placeholder={t('settings.agents.addDirHint')}
         autocomplete="off"
         spellcheck="false"
       />

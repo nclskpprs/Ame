@@ -67,6 +67,8 @@ pub struct SessionInfo {
     pub prompts: u32,
     /// How heavily the agent prints while working, 1 (light) to 3 (heavy).
     pub intensity: u8,
+    /// Other project folders the agent was given (group sessions).
+    pub dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]

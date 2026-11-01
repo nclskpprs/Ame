@@ -57,6 +57,7 @@ pub async fn run_script(
             cols,
             rows,
             status: StatusConfig::default(),
+            dirs: Vec::new(),
         })
     })
     .await

@@ -189,6 +189,22 @@ Module: `src-tauri/src/pty/` (see
   terminal has focus if they opt in (`terminal: true`), so Ctrl+K, Ctrl+P, …
   reach the program.
 
+## Project groups for agents — implemented (M5b)
+
+- Profiles have `addDirArg` (Claude Code and Codex `--add-dir`, Gemini CLI
+  `--include-directories`; editable, an empty string turns it off).
+  `start_session(…, dirs)` checks that every folder is an open project and
+  repeats the option per folder; the session keeps `dirs` (restart, and
+  `SavedSession.dirs` for restoring after a restart). The title gets
+  `(+N)`.
+- `lib/agents/group.ts`: "Start Agent for Project Group…" (agents with a
+  folder option, started in the active project with the group's other
+  folders) and "Send Prompt to Project Group…" (the palette as a text
+  input; the prompt is queued for the newest running agent of each project
+  in the group, so busy agents get it when they are done).
+- Dashboard: cards in blocks per group (alphabetical) with a combined
+  status, then the ungrouped ones (`lib/agents/dashboard.ts`).
+
 ## Scripts — implemented (M5)
 
 - `scripts/detect.rs` reads `package.json` and `composer.json` at the

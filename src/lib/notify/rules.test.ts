@@ -17,6 +17,7 @@ function session(state: AgentState): SessionInfo {
     queue: [],
     prompts: 0,
     intensity: 1,
+    dirs: [],
   };
 }
 

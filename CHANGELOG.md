@@ -123,6 +123,10 @@ and this project adheres to
 - Scripts: `package.json` (npm, pnpm, yarn or bun, from the lock file) and
   `composer.json` scripts appear in a scripts panel and in the command
   palette; each runs in its own terminal tab with a status.
+- Project groups for agents: start an agent in one project with access to
+  the other projects of its group (Claude Code, Codex, Gemini CLI), send
+  one prompt to the agents of all projects in a group, and see the
+  dashboard grouped by project group.
 
 ### Fixed
 

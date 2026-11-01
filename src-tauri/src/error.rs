@@ -35,6 +35,8 @@ pub enum Error {
     PromptRejected(String),
     #[error("unknown script: {0}")]
     UnknownScript(String),
+    #[error("{0} cannot be given other folders; set its folder option in the settings")]
+    NoFolderOption(String),
     #[error("unknown agent profile: {0}")]
     UnknownProfile(String),
     #[error("git is not installed")]

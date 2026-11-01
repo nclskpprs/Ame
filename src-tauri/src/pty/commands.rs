@@ -11,7 +11,7 @@ use super::manager::{PtyManager, SpawnSpec};
 use super::session::{OutputSink, SessionId, SessionInfo};
 use crate::agents::adapters::Adapters;
 use crate::agents::detect;
-use crate::agents::profiles::merged_profiles;
+use crate::agents::profiles::{dir_args, merged_profiles};
 use crate::agents::queue::QueuedPrompt;
 use crate::agents::status::StatusConfig;
 use crate::error::{Error, Result};
@@ -33,6 +33,8 @@ impl OutputSink for Channel<String> {
 
 /// Starts an agent profile (or the shell) in the project folder. With
 /// `resume`, the profile's resume arguments continue the last conversation.
+/// `dirs` are other open projects the agent gets access to (a project
+/// group, M5b).
 #[tauri::command]
 #[specta::specta]
 #[allow(clippy::too_many_arguments)] // Tauri passes every argument separately.
@@ -44,14 +46,20 @@ pub async fn start_session(
     project: String,
     profile: String,
     resume: bool,
+    dirs: Vec<String>,
     cols: u16,
     rows: u16,
 ) -> Result<SessionInfo> {
     let cwd = store.root(&project)?;
+    for dir in &dirs {
+        store.root(dir)?;
+    }
     let profile = merged_profiles(&settings.get().agents)
         .into_iter()
         .find(|p| p.id == profile)
         .ok_or(Error::UnknownProfile(profile))?;
+    let folders =
+        dir_args(&profile, &dirs).ok_or_else(|| Error::NoFolderOption(profile.name.clone()))?;
     let pty = pty.inner().clone();
     let launch = adapters.launch(profile.adapter.as_deref());
     blocking(move || {
@@ -59,6 +67,7 @@ pub async fn start_session(
         if resume {
             args.extend(profile.resume_args.iter().cloned());
         }
+        args.extend(folders);
         args.extend(launch.args);
         let mut env = env::session_env();
         env.extend(profile.env.clone());
@@ -67,7 +76,11 @@ pub async fn start_session(
         pty.spawn(SpawnSpec {
             project,
             profile: profile.id,
-            title: profile.name,
+            title: if dirs.is_empty() {
+                profile.name
+            } else {
+                format!("{} (+{})", profile.name, dirs.len())
+            },
             program,
             args,
             cwd,
@@ -75,6 +88,7 @@ pub async fn start_session(
             cols,
             rows,
             status,
+            dirs,
         })
     })
     .await

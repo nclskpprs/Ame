@@ -30,6 +30,8 @@ pub struct SpawnSpec {
     pub cols: u16,
     pub rows: u16,
     pub status: StatusConfig,
+    /// Other project folders the agent was given (group sessions).
+    pub dirs: Vec<String>,
 }
 
 /// How often agent states are re-evaluated.
@@ -136,6 +138,7 @@ impl PtyManager {
             queue: Vec::new(),
             prompts: 0,
             intensity: 1,
+            dirs: spec.dirs.clone(),
         };
         let weak = Arc::downgrade(&self.inner);
         let session = Session::start(
@@ -392,6 +395,7 @@ mod tests {
             cols: 80,
             rows: 24,
             status: StatusConfig::default(),
+            dirs: Vec::new(),
         }
     }
 

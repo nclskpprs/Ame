@@ -68,6 +68,9 @@ pub struct SavedSession {
     /// Id of the agent profile.
     pub profile: String,
     pub title: String,
+    /// Other project folders the agent was given (group sessions).
+    #[serde(default)]
+    pub dirs: Vec<String>,
 }
 
 impl Default for ProjectLayout {

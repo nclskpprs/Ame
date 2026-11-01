@@ -1,7 +1,7 @@
 import { SHELL_PROFILE } from '$lib/agents/agents.svelte';
 import { t } from '$lib/i18n';
 import { commands } from '$lib/ipc/bindings';
-import type { SavedSession } from '$lib/ipc/bindings';
+import type { SavedSession_Serialize as SavedSession } from '$lib/ipc/bindings';
 import { describeError, type SessionInfo } from '$lib/ipc/types';
 import { notices } from '$lib/stores/notices.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
@@ -79,10 +79,10 @@ export class TerminalGroup {
    */
   saved(): SavedSession[] {
     return [
-      ...this.restorable.map(({ profile, title }) => ({ profile, title })),
+      ...this.restorable.map(({ profile, title, dirs }) => ({ profile, title, dirs })),
       ...this.sessions
         .filter((session) => !isScript(session.profile))
-        .map(({ profile, title }) => ({ profile, title })),
+        .map(({ profile, title, dirs }) => ({ profile, title, dirs })),
     ];
   }
 
@@ -100,7 +100,7 @@ export class TerminalGroup {
     const entry = this.#restorable.find((r) => r.key === key);
     if (!entry) return;
     this.dismissRestorable(key);
-    await this.start(entry.profile, resume);
+    await this.start(entry.profile, resume, entry.dirs ?? []);
   }
 
   get open(): boolean {
@@ -136,14 +136,15 @@ export class TerminalGroup {
   }
 
   /**
-   * Starts an agent profile (`resume` continues its last conversation) or,
-   * for a `script:` profile, runs that script.
+   * Starts an agent profile (`resume` continues its last conversation;
+   * `dirs` are other projects it gets, for a group) or, for a `script:`
+   * profile, runs that script.
    */
-  async start(profile: string, resume = false): Promise<void> {
+  async start(profile: string, resume = false, dirs: string[] = []): Promise<void> {
     const { cols, rows } = this.size;
     const result = isScript(profile)
       ? await commands.runScript(this.project, profile.slice(SCRIPT_PREFIX.length), cols, rows)
-      : await commands.startSession(this.project, profile, resume, cols, rows);
+      : await commands.startSession(this.project, profile, resume, dirs, cols, rows);
     if (result.status === 'error') {
       notices.push(t('terminal.startFailed', { message: describeError(result.error) }));
       return;
@@ -199,8 +200,8 @@ export class TerminalGroup {
 
   /** Replaces an exited session with a new one of the same profile. */
   async restart(id: number, resume = false): Promise<void> {
-    const profile = sessions.find(id)?.profile ?? SHELL_PROFILE;
+    const session = sessions.find(id);
     await this.close(id, true);
-    await this.start(profile, resume);
+    await this.start(session?.profile ?? SHELL_PROFILE, resume, session?.dirs ?? []);
   }
 }

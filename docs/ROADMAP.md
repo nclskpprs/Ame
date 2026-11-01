@@ -92,13 +92,13 @@ milestones and marked with 💡.
 
 ## M5b — Project groups for agents (maintainer idea)
 
-- [ ] Start an agent for a whole group: it runs in a chosen project and
+- [x] Start an agent for a whole group: it runs in a chosen project and
       gets the other folders of the group (e.g. Claude Code `--add-dir`,
       Gemini CLI `--include-directories`), so it knows the projects belong
       together and can work across them
-- [ ] Broadcast prompt to a group: send the same task to the agents of all
+- [x] Broadcast prompt to a group: send the same task to the agents of all
       projects in a group (moved up from "Later")
-- [ ] Group view in the dashboard: status of all agents of a group at a
+- [x] Group view in the dashboard: status of all agents of a group at a
       glance
 
 ## M6 — Release 0.1

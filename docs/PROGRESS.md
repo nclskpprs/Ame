@@ -8,7 +8,8 @@ is open, what comes next.
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
   background, ADR 0020). M3 — Status and dashboard is complete. M4 —
   checkpoints done; review mode skipped for now (extra). M5 — scripts:
-  detection and runner done. M4 —
+  detection and runner done; dev server detection and `.ame.json` skipped
+  for now (extras). M5b — project groups for agents done. Next: M6. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
@@ -17,6 +18,34 @@ is open, what comes next.
 - **Next steps:** 2. M4: checkpoints before every prompt, review mode. 3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M5b: project groups for agents
+
+**Done**
+
+- Profile field `addDirArg` (built-in for Claude Code, Codex, Gemini CLI;
+  editable in the agent settings), `start_session` with `dirs`, sessions
+  and saved sessions keep their folders.
+- "Start Agent for Project Group…", "Send Prompt to Project Group…" (via
+  the prompt queue), dashboard grouped by project group.
+- Maintainer: dev server detection and `.ame.json` (M5 extras) wait.
+
+**Verified**
+
+- Unit tests (folder options, group folders, eligible agents, broadcast
+  targets, card blocks). `pnpm verify` green.
+- In `pnpm tauri dev` with two projects in a group and a fake agent
+  profile (prints its arguments, echoes input): the group agent starts
+  with `--add-dir <other project>` and is titled "Fake Agent (+1)"; the
+  broadcast reached both agents; the dashboard shows the "client" block.
+- Claude Code is installed on the dev machine: picking it in the group
+  picker started it with `--add-dir` (its trust prompt appeared); it was
+  cancelled at once, nothing was sent.
+
+**Open**
+
+- Whether Codex and OpenCode accept `--add-dir` in the installed versions
+  is unchecked (OpenCode has no folder option yet).
 
 ### 2026-11-01 — M5: script detection and runner
 

@@ -35,6 +35,9 @@ pub struct AgentProfile {
     /// Precise status adapter, e.g. `claude-hooks` (see
     /// `agents::adapters`). `None` uses the heuristics only.
     pub adapter: Option<String>,
+    /// Option that gives the agent access to another folder, repeated per
+    /// folder, e.g. `--add-dir`. Needed to start it for a project group.
+    pub add_dir_arg: Option<String>,
 }
 
 fn profile(
@@ -60,6 +63,7 @@ pub fn builtin_profiles() -> Vec<AgentProfile> {
     vec![
         AgentProfile {
             adapter: Some(CLAUDE_HOOKS.to_owned()),
+            add_dir_arg: Some("--add-dir".to_owned()),
             ..profile(
                 "claude",
                 "Claude Code",
@@ -68,24 +72,30 @@ pub fn builtin_profiles() -> Vec<AgentProfile> {
                 &["Do you want to", r"❯ 1\. Yes", "Would you like to"],
             )
         },
-        profile(
-            "codex",
-            "Codex CLI",
-            "codex",
-            &["resume", "--last"],
-            &["Would you like to", "Yes, proceed", "Allow command"],
-        ),
-        profile(
-            "gemini",
-            "Gemini CLI",
-            "gemini",
-            &["--resume"],
-            &[
-                "Allow execution",
-                "Apply this change",
-                "Waiting for user confirmation",
-            ],
-        ),
+        AgentProfile {
+            add_dir_arg: Some("--add-dir".to_owned()),
+            ..profile(
+                "codex",
+                "Codex CLI",
+                "codex",
+                &["resume", "--last"],
+                &["Would you like to", "Yes, proceed", "Allow command"],
+            )
+        },
+        AgentProfile {
+            add_dir_arg: Some("--include-directories".to_owned()),
+            ..profile(
+                "gemini",
+                "Gemini CLI",
+                "gemini",
+                &["--resume"],
+                &[
+                    "Allow execution",
+                    "Apply this change",
+                    "Waiting for user confirmation",
+                ],
+            )
+        },
         profile(
             "opencode",
             "OpenCode",
@@ -126,6 +136,9 @@ pub fn merged_profiles(custom: &[AgentProfile]) -> Vec<AgentProfile> {
             if profile.adapter.is_none() {
                 profile.adapter = existing.adapter.take();
             }
+            if profile.add_dir_arg.is_none() {
+                profile.add_dir_arg = existing.add_dir_arg.take();
+            }
             *existing = profile;
         } else {
             let shell = profiles
@@ -136,6 +149,24 @@ pub fn merged_profiles(custom: &[AgentProfile]) -> Vec<AgentProfile> {
         }
     }
     profiles
+}
+
+/// Arguments that give the agent the other folders, e.g.
+/// `--add-dir /a --add-dir /b`. Empty without folders; `None` if the
+/// profile cannot take folders.
+pub fn dir_args(profile: &AgentProfile, dirs: &[String]) -> Option<Vec<String>> {
+    if dirs.is_empty() {
+        return Some(Vec::new());
+    }
+    let flag = profile
+        .add_dir_arg
+        .as_deref()
+        .filter(|flag| !flag.trim().is_empty())?;
+    Some(
+        dirs.iter()
+            .flat_map(|dir| [flag.to_owned(), dir.clone()])
+            .collect(),
+    )
 }
 
 /// Whether a profile can continue the last conversation.
@@ -162,6 +193,26 @@ mod tests {
                 assert!(regex::Regex::new(pattern).is_ok(), "{pattern}");
             }
         }
+    }
+
+    #[test]
+    fn group_folders_become_repeated_options() {
+        let claude = &builtin_profiles()[0];
+        assert_eq!(dir_args(claude, &[]), Some(vec![]));
+        assert_eq!(
+            dir_args(claude, &["/a".into(), "/b".into()]),
+            Some(vec![
+                "--add-dir".into(),
+                "/a".into(),
+                "--add-dir".into(),
+                "/b".into()
+            ])
+        );
+        let aider = builtin_profiles()
+            .into_iter()
+            .find(|p| p.id == "aider")
+            .unwrap();
+        assert_eq!(dir_args(&aider, &["/a".into()]), None);
     }
 
     #[test]

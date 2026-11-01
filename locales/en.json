@@ -75,6 +75,8 @@
       "args": "Arguments",
       "resumeArgs": "Resume arguments",
       "resumeHint": "Continue the last conversation, e.g. --continue",
+      "addDirArg": "Folder option",
+      "addDirHint": "Gives the agent another folder for project groups, e.g. --add-dir",
       "save": "Save",
       "cancel": "Cancel",
       "invalid": "A name and a command are required.",
@@ -144,7 +146,9 @@
     "queuePrompt": "Queue Prompt for Agent",
     "paperDance": "Dance of the Paper",
     "createCheckpoint": "Create Checkpoint",
-    "showScripts": "Show Scripts"
+    "showScripts": "Show Scripts",
+    "startGroupAgent": "Start Agent for Project Group…",
+    "broadcastPrompt": "Send Prompt to Project Group…"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -371,5 +375,17 @@
     "succeeded": "Finished",
     "failed": "Failed",
     "paletteRun": "Run script: {name}"
+  },
+  "groups": {
+    "pickerLabel": "Start an agent for the group {group}",
+    "pickerPlaceholder": "Choose an agent; it also gets the {count} other folders of the group",
+    "pickerEmpty": "No installed agent can be given other folders (set a folder option in the settings)",
+    "broadcastLabel": "Send a prompt to the agents of {group}",
+    "broadcastPlaceholder": "Prompt for {count} agents — each gets it when it is done",
+    "broadcastEmpty": "Type a prompt (an agent must run in a project of the group)",
+    "broadcastItem": "Queue for {count} agents",
+    "broadcastDone": "Queued for {count} agents in {group}.",
+    "noGroup": "Put the project into a group first (context menu in the sidebar).",
+    "ungrouped": "Without a group"
   }
 }

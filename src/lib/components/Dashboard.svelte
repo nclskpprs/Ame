@@ -7,6 +7,7 @@
   import { describeUsage } from '$lib/agents/usage';
   import { usage } from '$lib/agents/usage.svelte';
   import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
+  import { groupCards } from '$lib/agents/dashboard';
   import { basename } from '$lib/fs/paths';
   import { t } from '$lib/i18n';
   import { commands, type AgentState } from '$lib/ipc/bindings';
@@ -44,6 +45,8 @@
   );
   const overall = $derived(combinedState(sessions.list));
   const rain = $derived(combinedRain(sessions.list));
+  /** Cards per project group (M5b); a single block without groups. */
+  const blocks = $derived(groupCards(cards, workspace.projects));
 
   onMount(() => {
     root?.focus();
@@ -111,38 +114,47 @@
         {/if}
       </div>
     {:else}
-      <ul class="grid">
-        {#each cards as session (session.id)}
-          <li>
-            <button
-              class="card"
-              class:waiting={session.state === 'needsInput'}
-              onclick={() => open(session)}
-            >
-              <span class="top">
-                <StatusDot
-                  state={session.state}
-                  intensity={session.intensity}
-                  prompts={session.prompts}
-                />
-                <span class="title">{session.title}</span>
-                <span class="project">{projectName(session.project)}</span>
-              </span>
-              <span class="state">
-                {session.attention ?? t(stateLabels[session.state])}
-                · {formatDuration(now - (session.startedAt ?? now))}
-                {#if session.queue.length > 0}
-                  · {t('queue.count', { count: session.queue.length })}
-                {/if}
-                {#if usage.forSession(session.id)}
-                  · {describeUsage(usage.forSession(session.id) ?? { cpu: 0, memory: 0 })}
-                {/if}
-              </span>
-              <span class="line">{previews.get(session.id) || ' '}</span>
-            </button>
-          </li>
-        {/each}
-      </ul>
+      {#each blocks as block (block.group)}
+        {#if blocks.length > 1 || block.group !== null}
+          {@const blockState = combinedState(block.sessions)}
+          <h2 class="group">
+            {#if blockState}<StatusDot state={blockState} />{/if}
+            {block.group ?? t('groups.ungrouped')}
+          </h2>
+        {/if}
+        <ul class="grid">
+          {#each block.sessions as session (session.id)}
+            <li>
+              <button
+                class="card"
+                class:waiting={session.state === 'needsInput'}
+                onclick={() => open(session)}
+              >
+                <span class="top">
+                  <StatusDot
+                    state={session.state}
+                    intensity={session.intensity}
+                    prompts={session.prompts}
+                  />
+                  <span class="title">{session.title}</span>
+                  <span class="project">{projectName(session.project)}</span>
+                </span>
+                <span class="state">
+                  {session.attention ?? t(stateLabels[session.state])}
+                  · {formatDuration(now - (session.startedAt ?? now))}
+                  {#if session.queue.length > 0}
+                    · {t('queue.count', { count: session.queue.length })}
+                  {/if}
+                  {#if usage.forSession(session.id)}
+                    · {describeUsage(usage.forSession(session.id) ?? { cpu: 0, memory: 0 })}
+                  {/if}
+                </span>
+                <span class="line">{previews.get(session.id) || ' '}</span>
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/each}
     {/if}
   </div>
 </section>
@@ -218,6 +230,22 @@
     min-height: 0;
     overflow-y: auto;
     padding: var(--ame-space-4) var(--ame-space-6) var(--ame-space-6);
+  }
+
+  .group {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-2);
+    margin: var(--ame-space-4) 0 var(--ame-space-2);
+    color: var(--ame-text-muted);
+    font-size: var(--ame-font-size-small);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .group:first-child {
+    margin-top: 0;
   }
 
   .grid {

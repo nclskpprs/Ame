@@ -41,6 +41,7 @@ fn hooks_drive_the_state_of_a_session() {
             cols: 80,
             rows: 24,
             status: StatusConfig::default(),
+            dirs: Vec::new(),
         })
         .expect("spawn");
 

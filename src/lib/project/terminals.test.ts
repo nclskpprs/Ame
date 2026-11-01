@@ -18,6 +18,7 @@ function info(id: number, project: string, profile: string): SessionInfo {
     queue: [],
     prompts: 0,
     intensity: 1,
+    dirs: [],
   };
 }
 
@@ -52,8 +53,8 @@ const { sessions } = await import('$lib/terminal/sessions.svelte');
 const { TerminalGroup } = await import('./terminals.svelte');
 
 const saved = [
-  { profile: 'claude', title: 'Claude Code' },
-  { profile: 'shell', title: 'Shell' },
+  { profile: 'claude', title: 'Claude Code', dirs: [] },
+  { profile: 'shell', title: 'Shell', dirs: [] },
 ];
 
 describe('TerminalGroup restoring', () => {

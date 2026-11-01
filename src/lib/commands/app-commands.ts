@@ -1,5 +1,12 @@
 import { openAgentPicker } from '$lib/agents/picker';
 import { openQueueComposer } from '$lib/agents/queue';
+import {
+  broadcastTargets,
+  groupFolders,
+  openBroadcast,
+  openGroupAgentPicker,
+} from '$lib/agents/group';
+import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { sendSelectionToAgent } from '$lib/agents/send';
 import { currentRainMode } from '$lib/rain/canvas';
 import { paper } from '$lib/rain/paper.svelte';
@@ -154,6 +161,37 @@ export function registerAppCommands(): () => void {
       run: () => {
         const session = activeSession();
         if (session) session.setFollowing(!session.following);
+      },
+    },
+    {
+      id: 'agents.startForGroup',
+      title: 'commands.startGroupAgent',
+      terminal: true,
+      when: () => Boolean(workspace.active?.group),
+      run: () => {
+        const session = activeSession();
+        const project = workspace.active;
+        if (!session || !project?.group) return;
+        const dirs = groupFolders(workspace.projects, project.path);
+        if (dirs.length === 0) {
+          notices.push(t('groups.noGroup'));
+          return;
+        }
+        openGroupAgentPicker(session.terminals, dirs, project.group);
+      },
+    },
+    {
+      id: 'agents.broadcast',
+      title: 'commands.broadcastPrompt',
+      terminal: true,
+      when: () => Boolean(workspace.active?.group),
+      run: () => {
+        const group = workspace.active?.group;
+        if (group) {
+          openBroadcast(group, () =>
+            broadcastTargets(workspace.projects, group, terminalSessions.list),
+          );
+        }
       },
     },
     {

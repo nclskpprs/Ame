@@ -92,8 +92,10 @@ export const commands = {
 	/**
 	 *  Starts an agent profile (or the shell) in the project folder. With
 	 *  `resume`, the profile's resume arguments continue the last conversation.
+	 *  `dirs` are other open projects the agent gets access to (a project
+	 *  group, M5b).
 	 */
-	startSession: (project: string, profile: string, resume: boolean, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, profile, resume, cols, rows })),
+	startSession: (project: string, profile: string, resume: boolean, dirs: string[], cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("start_session", { project, profile, resume, dirs, cols, rows })),
 	listSessions: () => __TAURI_INVOKE<SessionInfo_Serialize[]>("list_sessions"),
 	/**
 	 *  The last output line of every session. Polled while the dashboard is
@@ -211,6 +213,11 @@ export type AgentProfile_Deserialize = {
 	 *  `agents::adapters`). `None` uses the heuristics only.
 	 */
 	adapter?: string | null,
+	/**
+	 *  Option that gives the agent access to another folder, repeated per
+	 *  folder, e.g. `--add-dir`. Needed to start it for a project group.
+	 */
+	addDirArg?: string | null,
 };
 
 /**  How to start an agent (or a shell) in a terminal session. */
@@ -244,6 +251,11 @@ export type AgentProfile_Serialize = {
 	 *  `agents::adapters`). `None` uses the heuristics only.
 	 */
 	adapter: string | null,
+	/**
+	 *  Option that gives the agent access to another folder, repeated per
+	 *  folder, e.g. `--add-dir`. Needed to start it for a project group.
+	 */
+	addDirArg: string | null,
 };
 
 /**  What an agent is doing, as shown in the sidebar, tabs and dashboard. */
@@ -267,7 +279,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -443,7 +455,7 @@ export type ProjectLayout_Deserialize = {
 	terminalOpen?: boolean,
 	terminalHeight?: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
-	sessions?: SavedSession[],
+	sessions?: SavedSession_Deserialize[],
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow?: boolean,
 };
@@ -461,7 +473,7 @@ export type ProjectLayout_Serialize = {
 	terminalOpen: boolean,
 	terminalHeight: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
-	sessions: SavedSession[],
+	sessions: SavedSession_Serialize[],
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow: boolean,
 };
@@ -511,10 +523,24 @@ export type RainEffects = "on" | "subtle" | "off";
 export type Runner = "npm" | "pnpm" | "yarn" | "bun" | "composer";
 
 /**  A terminal session remembered across restarts. */
-export type SavedSession = {
+export type SavedSession = SavedSession_Serialize | SavedSession_Deserialize;
+
+/**  A terminal session remembered across restarts. */
+export type SavedSession_Deserialize = {
 	/**  Id of the agent profile. */
 	profile: string,
 	title: string,
+	/**  Other project folders the agent was given (group sessions). */
+	dirs?: string[],
+};
+
+/**  A terminal session remembered across restarts. */
+export type SavedSession_Serialize = {
+	/**  Id of the agent profile. */
+	profile: string,
+	title: string,
+	/**  Other project folders the agent was given (group sessions). */
+	dirs: string[],
 };
 
 export type Script = {
@@ -568,6 +594,8 @@ export type SessionInfo_Deserialize = {
 	prompts: number,
 	/**  How heavily the agent prints while working, 1 (light) to 3 (heavy). */
 	intensity: number,
+	/**  Other project folders the agent was given (group sessions). */
+	dirs: string[],
 };
 
 /**  Public information about a session, sent to the frontend. */
@@ -594,6 +622,8 @@ export type SessionInfo_Serialize = {
 	prompts: number,
 	/**  How heavily the agent prints while working, 1 (light) to 3 (heavy). */
 	intensity: number,
+	/**  Other project folders the agent was given (group sessions). */
+	dirs: string[],
 };
 
 /**  A glimpse of what a session printed last, for the dashboard. */

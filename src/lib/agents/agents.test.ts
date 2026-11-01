@@ -15,6 +15,7 @@ function agent(id: string, path: string | null, resumeArgs: string[] = []): Agen
       needsInputPatterns: [],
       idleAfterMs: null,
       adapter: null,
+      addDirArg: null,
     },
     path,
     builtin: true,

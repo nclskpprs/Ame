@@ -77,10 +77,14 @@ is open, what comes next.
   inline styles. `pnpm tauri dev` has no CSP, so this only showed in
   release builds — check the editor in a release build after CSP changes.
 
+- Fixed: a dark strip below the terminal. `xterm.css` paints
+  `.xterm-viewport` black and xterm 6 only colors the rows it draws;
+  the viewport now uses `--ame-bg` (the terminal theme background).
+
 **Open**
 
-- A dark strip of a few pixels below the terminal panel (seen on macOS,
-  not caused by the CSP).
+- A tiny lighter square (~12 px) in the bottom-right corner of the
+  terminal, probably the scrollbar corner. Cosmetic.
 
 ### 2026-11-01 — Test release 0.1.0-1 for macOS testing
 

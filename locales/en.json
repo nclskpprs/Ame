@@ -135,7 +135,8 @@
     "toggleDiff": "Toggle Inline Diff",
     "toggleFollow": "Toggle Follow Mode (Open Files Agents Change)",
     "quit": "Quit Ame",
-    "queuePrompt": "Queue Prompt for Agent"
+    "queuePrompt": "Queue Prompt for Agent",
+    "paperDance": "Dance of the Paper"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -337,5 +338,8 @@
     "submit": "Queue",
     "done": "Done",
     "open": "Queue a prompt"
+  },
+  "easterEgg": {
+    "rainOff": "The paper stays folded while rain effects are off."
   }
 }

@@ -60,7 +60,9 @@ milestones and marked with 💡.
 - [x] Dashboard view, status dots in the sidebar
 - [x] OS notifications + dock/taskbar badge (configurable per project)
 - [x] Claude Code hooks adapter with helper CLI
-- [ ] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
+- [x] Rain status animations and the prompt drop (see `docs/DESIGN.md`)
+- [x] Origami motif (maintainer idea): paper crane for queued prompts and
+      a hidden "Dance of the Paper" easter egg in the palette
 - [ ] Performance benchmarks (RAM, startup time) in CI
 - [x] 💡 Prompt queue per agent: queue follow-up prompts that are sent
       automatically as soon as the agent is idle

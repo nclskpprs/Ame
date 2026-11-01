@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { AgentState } from '$lib/ipc/bindings';
 import type { SessionInfo } from '$lib/ipc/types';
-import { combinedState, waitingCount } from './state';
+import { combinedRain, combinedState, waitingCount } from './state';
 
 function session(state: AgentState): SessionInfo {
   return {
@@ -15,6 +15,8 @@ function session(state: AgentState): SessionInfo {
     state,
     attention: null,
     queue: [],
+    prompts: 0,
+    intensity: 1,
   };
 }
 
@@ -28,5 +30,12 @@ describe('combinedState', () => {
 
   it('counts sessions that wait for the user', () => {
     expect(waitingCount([session('needsInput'), session('idle'), session('needsInput')])).toBe(2);
+  });
+
+  it('combines the rain of sessions', () => {
+    expect(combinedRain([])).toEqual({ intensity: 1, prompts: 0 });
+    const heavyIdle = { ...session('idle'), intensity: 3, prompts: 2 };
+    const working = { ...session('working'), intensity: 2, prompts: 3 };
+    expect(combinedRain([heavyIdle, working])).toEqual({ intensity: 2, prompts: 5 });
   });
 });

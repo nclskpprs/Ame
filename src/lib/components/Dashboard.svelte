@@ -6,7 +6,7 @@
   import { showSession } from '$lib/agents/show';
   import { describeUsage } from '$lib/agents/usage';
   import { usage } from '$lib/agents/usage.svelte';
-  import { combinedState, stateLabels } from '$lib/agents/state';
+  import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
   import { basename } from '$lib/fs/paths';
   import { t } from '$lib/i18n';
   import { commands, type AgentState } from '$lib/ipc/bindings';
@@ -15,6 +15,7 @@
   import { workspace } from '$lib/stores/workspace.svelte';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import DropMark from './DropMark.svelte';
+  import RainSky from './RainSky.svelte';
   import StatusDot from './StatusDot.svelte';
 
   /** Last output lines are polled while the dashboard is visible. */
@@ -42,6 +43,7 @@
     }).join(' · '),
   );
   const overall = $derived(combinedState(sessions.list));
+  const rain = $derived(combinedRain(sessions.list));
 
   onMount(() => {
     root?.focus();
@@ -79,8 +81,9 @@
   {onkeydown}
 >
   <header class="header">
+    <RainSky />
     <div class="heading">
-      {#if overall}<StatusDot state={overall} />{/if}
+      {#if overall}<StatusDot state={overall} intensity={rain.intensity} />{/if}
       <h1 id="dashboard-title">{t('dashboard.title')}</h1>
       <span class="summary">{summary}</span>
     </div>
@@ -117,7 +120,11 @@
               onclick={() => open(session)}
             >
               <span class="top">
-                <StatusDot state={session.state} />
+                <StatusDot
+                  state={session.state}
+                  intensity={session.intensity}
+                  prompts={session.prompts}
+                />
                 <span class="title">{session.title}</span>
                 <span class="project">{projectName(session.project)}</span>
               </span>
@@ -150,12 +157,18 @@
   }
 
   .header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--ame-space-3);
     padding: var(--ame-space-3) var(--ame-space-6);
     border-bottom: 1px solid var(--ame-border);
+  }
+
+  .heading,
+  .close {
+    position: relative;
   }
 
   .heading {

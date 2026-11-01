@@ -310,6 +310,15 @@ Implementation (`src-tauri/src/agents/`):
   `notifications` nor the project's `muted` flag turns it off. The badge
   shows the waiting count (`setBadgeCount` on macOS/Linux, a drawn overlay
   icon on Windows).
+- Rain (`lib/rain/`): `SessionInfo.intensity` (1–3, output bytes per
+  second over 1 s windows, only while working) sets the density of the
+  working rain; `SessionInfo.prompts` counts submitted prompts (input
+  ending in Enter outside a bracketed paste) and makes `StatusDot` play a
+  one-shot falling drop. `Sky` is a pure particle model (drops → ripples,
+  paper), `RainCanvas` draws it on one canvas at ≤ 30 fps and only while
+  particles exist, stopping when the window is inactive or rain is off.
+  `RainSky.svelte` is the dashboard header sky; `PaperOverlay.svelte` is
+  the origami easter egg (a secret palette command: `Command.secret`).
 - Frontend: `StatusDot` (rain style, CSS transforms on pseudo-elements,
   paused when the window is inactive or rain is off), the most urgent state
   per project in the sidebar, the waiting count in the window title.

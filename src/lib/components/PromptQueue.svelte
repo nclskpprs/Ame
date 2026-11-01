@@ -9,6 +9,7 @@
   import { t } from '$lib/i18n';
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
+  import CraneIcon from './CraneIcon.svelte';
 
   let { session, group }: { session: SessionInfo; group: TerminalGroup } = $props();
 
@@ -44,6 +45,7 @@
 <div class="queue" role="region" aria-label={t('queue.label', { title: session.title })}>
   {#if session.queue.length > 0}
     <div class="head">
+      <CraneIcon size={12} />
       <span>{t('queue.waiting', { count: session.queue.length })}</span>
       {#if session.queue.length > 1}
         <button class="text" onclick={() => void clearPromptQueue(session)}>
@@ -120,10 +122,9 @@
   .queue {
     display: flex;
     flex-direction: column;
+    flex: none;
     gap: var(--ame-space-1);
-    max-height: 40%;
     padding: var(--ame-space-1) var(--ame-space-3);
-    overflow-y: auto;
     background: var(--ame-surface);
     border-bottom: 1px solid var(--ame-border);
   }
@@ -141,8 +142,10 @@
   }
 
   ol {
+    max-height: 7.5em;
     margin: 0;
     padding: 0 0 0 var(--ame-space-4);
+    overflow-y: auto;
   }
 
   li {

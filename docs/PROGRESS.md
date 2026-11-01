@@ -6,21 +6,63 @@ is open, what comes next.
 ## Current state
 
 - **Milestone:** M2 is complete (the daemon was replaced by running in the
-  background, ADR 0020). M3 — Status and dashboard: hooks adapter,
-  resource monitor and prompt queue done; rain animations and benchmarks
-  open. M4 —
+  background, ADR 0020). M3 — Status and dashboard: everything done
+  except the performance benchmarks in CI. M4 —
   Git: checkpoints and review mode open.
 - **Process (maintainer decision, 2026-10-31):** all further milestones go
   on the branch `feat/m1-project-shell`, one commit per task. The
   per-feature acceptance test is paused; the maintainer reviews everything
   at the end. The projects feature passed its acceptance test (10/10).
 - **Next steps:**
-  1. M3: rain status animations and the prompt drop, performance
-     benchmarks in CI.
+  1. M3: performance benchmarks (RAM, startup time) in CI.
   2. M4: checkpoints before every prompt, review mode.
   3. M5: scripts; M5b: project groups for agents.
 
 ## Log
+
+### 2026-11-01 — M3: rain status animations, prompt drop and origami
+
+**Done**
+
+- Backend: `SessionInfo.prompts` (submitted prompts: input ending in Enter
+  outside a bracketed paste, also from the queue) and
+  `SessionInfo.intensity` (1–3 from output bytes per second, only while
+  working), both refreshed by the status loop.
+- `StatusDot`: rain density per intensity, a one-shot drop falling into
+  the dot for each new prompt (tabs, dashboard cards, sidebar projects),
+  the error state as a static red drop.
+- `lib/rain/`: `Sky` particle model, `RainCanvas` (one canvas, ≤ 30 fps,
+  runs only while particles exist, stops when the window is inactive or
+  rain is off; subtle halves the strength). `RainSky.svelte` in the
+  dashboard header: each prompt falls as a drop and ends in a ripple.
+- Origami (maintainer idea, a Konan easter egg): paper crane icon
+  (`CraneIcon.svelte`) for the prompt queue; secret palette commands
+  (`Command.secret`, shown only for an exact word) and "Dance of the
+  Paper" for `konan`, `amegakure`, `origami` or `紙`: a swirl of white
+  folded paper over the window (`PaperOverlay.svelte`, mounted on first
+  use). Described in `docs/DESIGN.md`.
+- Fix: the prompt queue composer was clipped in a small terminal panel
+  (only the list scrolls now).
+
+**Verified**
+
+- Unit tests: intensity windows, prompt counting, submit detection, sky
+  particles (drop → ripple, paper leaves, bound), `newPrompts`, rain mode,
+  secret commands, `combinedRain`.
+- In `pnpm tauri dev` on WSLg (light theme), driven with XTest: the queue
+  sends the first prompt, the second waits; the dashboard sky drop and the
+  drops into the status dots are visible; `konan` shows "Dance of the
+  Paper" and white origami swirls over the window.
+- `pnpm verify` green.
+
+**Open**
+
+- Vite's watcher does not see file changes on `/mnt/c` under WSL, so the
+  dev app must be restarted after edits (F5 serves stale modules).
+- A short black strip under the terminal while the queue bar appears
+  (WebGL resize on WSLg); it was gone a moment later. Check on real
+  platforms.
+- Dark theme of the paper and the sky not looked at yet.
 
 ### 2026-11-01 — M3: prompt queue per agent
 

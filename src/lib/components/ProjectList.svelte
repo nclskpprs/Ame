@@ -6,7 +6,7 @@
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
-  import { combinedState, stateLabels } from '$lib/agents/state';
+  import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import StatusDot from './StatusDot.svelte';
@@ -22,6 +22,15 @@
         const state = combinedState(sessions.forProject(project.path));
         return state ? [[project.path, state] as const] : [];
       }),
+    ),
+  );
+  /** Rain density and sent prompts per project. */
+  const rains = $derived(
+    new Map(
+      workspace.projects.map((project) => [
+        project.path,
+        combinedRain(sessions.forProject(project.path)),
+      ]),
     ),
   );
   /** CPU and memory of each project's running sessions. */
@@ -145,6 +154,8 @@
             {#if states.has(project.path)}
               <StatusDot
                 state={states.get(project.path) ?? 'idle'}
+                intensity={rains.get(project.path)?.intensity}
+                prompts={rains.get(project.path)?.prompts}
                 label={t('status.projectLabel', {
                   project: project.name,
                   state: t(stateLabels[states.get(project.path) ?? 'idle']),

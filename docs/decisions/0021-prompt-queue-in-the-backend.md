@@ -51,5 +51,8 @@ together.
   the turn really ended.
 - Programs that answer instantly and briefly (their reply looks like the
   echo of the input) make the next prompt wait for the 30 s fallback.
+  Conversely, a program that stays silent for more than 30 s after a
+  prompt (e.g. `sleep 100` in a shell) gets the next one while it is still
+  busy. Agents print while they work, so this mainly affects shells.
 - The queue of a session is lost when the app quits or the session is
   closed; it is not persisted.

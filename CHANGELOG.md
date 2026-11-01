@@ -111,6 +111,11 @@ and this project adheres to
   the queue button in the terminal bar); they are sent one by one as soon
   as the agent is done, also while the window is hidden. Reorder or remove
   waiting prompts above the terminal; the dashboard shows the count.
+- Rain status: the rain in a working agent's status dot gets denser the
+  more it prints, each sent prompt drops into its dot, errors show as a red
+  drop, and the dashboard header has a narrow sky where every prompt falls.
+- Origami: queued prompts carry a paper crane, and the command palette
+  hides a small paper easter egg for fans of the hidden rain village.
 
 ### Fixed
 

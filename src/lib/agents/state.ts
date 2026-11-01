@@ -28,6 +28,20 @@ export function waitingCount(sessions: readonly SessionInfo[]): number {
   return sessions.filter((session) => session.state === 'needsInput').length;
 }
 
+/** Rain of several sessions: the heaviest output and all prompts sent. */
+export function combinedRain(sessions: readonly SessionInfo[]): {
+  intensity: number;
+  prompts: number;
+} {
+  let intensity = 1;
+  let prompts = 0;
+  for (const session of sessions) {
+    if (session.state === 'working') intensity = Math.max(intensity, session.intensity);
+    prompts += session.prompts;
+  }
+  return { intensity, prompts };
+}
+
 export const stateLabels: Record<AgentState, MessageKey> = {
   starting: 'status.starting',
   working: 'status.working',

@@ -1,6 +1,9 @@
 import { openAgentPicker } from '$lib/agents/picker';
 import { openQueueComposer } from '$lib/agents/queue';
 import { sendSelectionToAgent } from '$lib/agents/send';
+import { currentRainMode } from '$lib/rain/canvas';
+import { paper } from '$lib/rain/paper.svelte';
+import { notices } from '$lib/stores/notices.svelte';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -271,6 +274,16 @@ export function registerAppCommands(): () => void {
       shortcut: 'Mod+Shift+D',
       terminal: true,
       run: () => view.toggle('dashboard'),
+    },
+    {
+      // Easter egg: Ame means rain; the hidden rain village had a paper ninja.
+      id: 'fun.paperDance',
+      title: 'commands.paperDance',
+      secret: ['konan', 'amegakure', 'origami', '紙'],
+      run: () => {
+        if (currentRainMode() === 'off') notices.push(t('easterEgg.rainOff'));
+        else paper.burst();
+      },
     },
     {
       id: 'app.quit',

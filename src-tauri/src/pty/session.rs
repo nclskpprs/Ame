@@ -63,6 +63,10 @@ pub struct SessionInfo {
     pub attention: Option<String>,
     /// Follow-up prompts sent one by one whenever the agent is idle.
     pub queue: Vec<QueuedPrompt>,
+    /// Prompts submitted so far; the frontend lets a drop fall on each new one.
+    pub prompts: u32,
+    /// How heavily the agent prints while working, 1 (light) to 3 (heavy).
+    pub intensity: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -199,14 +203,31 @@ impl Session {
 
     /// Re-evaluates the agent state; returns whether it changed.
     pub fn refresh_state(&self, now: Instant) -> bool {
-        let (state, attention) = {
+        let (state, attention, prompts, intensity) = {
             let mut status = lock(&self.status);
-            (status.state(now), status.message().map(str::to_owned))
+            let state = status.state(now);
+            let intensity = status.intensity(now);
+            (
+                state,
+                status.message().map(str::to_owned),
+                status.prompts(),
+                // Only the rain of a working agent has a density.
+                if state == AgentState::Working {
+                    intensity
+                } else {
+                    1
+                },
+            )
         };
         let mut info = lock(&self.info);
-        let changed = info.state != state || info.attention != attention;
+        let changed = info.state != state
+            || info.attention != attention
+            || info.prompts != prompts
+            || info.intensity != intensity;
         info.state = state;
         info.attention = attention;
+        info.prompts = prompts;
+        info.intensity = intensity;
         changed
     }
 
@@ -341,7 +362,11 @@ impl Session {
 
     pub fn write(&self, data: &[u8]) -> Result<()> {
         if !is_terminal_reply(data) {
-            lock(&self.status).on_input(Instant::now());
+            let mut status = lock(&self.status);
+            status.on_input(Instant::now());
+            if is_submit(data) {
+                status.on_submit();
+            }
         }
         let mut writer = lock(&self.writer);
         let writer = writer
@@ -446,6 +471,12 @@ fn is_terminal_reply(data: &[u8]) -> bool {
     rest.is_empty()
 }
 
+/// Whether input submits a prompt: Enter typed on its own or at the end of
+/// typed text, not a line break inside a paste.
+fn is_submit(data: &[u8]) -> bool {
+    data.ends_with(b"\r") && !data.starts_with(PASTE_START.as_bytes())
+}
+
 const PASTE_START: &str = "\x1b[200~";
 const PASTE_END: &str = "\x1b[201~";
 
@@ -543,6 +574,14 @@ mod tests {
         assert!(!is_terminal_reply(b"\x1b"));
         assert!(!is_terminal_reply(b"\x1b[Ix"));
         assert!(!is_terminal_reply(b""));
+    }
+
+    #[test]
+    fn enter_submits_but_a_paste_does_not() {
+        assert!(is_submit(b"\r"));
+        assert!(is_submit(b"ls\r"));
+        assert!(!is_submit(b"l"));
+        assert!(!is_submit(b"\x1b[200~a\rb\r\x1b[201~"));
     }
 
     #[test]

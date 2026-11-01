@@ -11,6 +11,11 @@ export interface Command {
   /** Hidden from the command palette (e.g. "switch to project 3"). */
   hidden?: boolean;
   /**
+   * Easter eggs: the command only shows up in the palette when the query is
+   * exactly one of these words (case-insensitive).
+   */
+  secret?: readonly string[];
+  /**
    * Also runs while a terminal has the focus. On Linux and Windows, Ctrl
    * shortcuts belong to the program in the terminal (Ctrl+K, Ctrl+P, …)
    * unless the command opts in. On macOS, Cmd never reaches the terminal.
@@ -44,10 +49,14 @@ function available(command: Command): boolean {
 }
 
 /** Commands for the command palette, in registration order. */
-export function paletteCommands(): Command[] {
+export function paletteCommands(query = ''): Command[] {
+  const word = query.trim().toLowerCase();
   return [...registry.values()]
     .map((entry) => entry.command)
-    .filter((command) => !command.hidden && available(command));
+    .filter(
+      (command) =>
+        !command.hidden && (!command.secret || command.secret.includes(word)) && available(command),
+    );
 }
 
 export function runCommand(id: string): void {

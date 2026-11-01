@@ -502,6 +502,10 @@ export type SessionInfo_Deserialize = {
 	attention?: string | null,
 	/**  Follow-up prompts sent one by one whenever the agent is idle. */
 	queue: QueuedPrompt[],
+	/**  Prompts submitted so far; the frontend lets a drop fall on each new one. */
+	prompts: number,
+	/**  How heavily the agent prints while working, 1 (light) to 3 (heavy). */
+	intensity: number,
 };
 
 /**  Public information about a session, sent to the frontend. */
@@ -524,6 +528,10 @@ export type SessionInfo_Serialize = {
 	attention: string | null,
 	/**  Follow-up prompts sent one by one whenever the agent is idle. */
 	queue: QueuedPrompt[],
+	/**  Prompts submitted so far; the frontend lets a drop fall on each new one. */
+	prompts: number,
+	/**  How heavily the agent prints while working, 1 (light) to 3 (heavy). */
+	intensity: number,
 };
 
 /**  A glimpse of what a session printed last, for the dashboard. */

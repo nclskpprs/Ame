@@ -15,6 +15,8 @@ function session(id: number, state: AgentState): SessionInfo {
     state,
     attention: null,
     queue: [],
+    prompts: 0,
+    intensity: 1,
   };
 }
 

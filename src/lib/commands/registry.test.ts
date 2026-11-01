@@ -28,6 +28,15 @@ describe('command registry', () => {
     expect(paletteCommands().map((c) => c.id)).toEqual(['a']);
   });
 
+  it('shows secret commands only for their exact word', () => {
+    cleanup = registerCommands([
+      { id: 'egg', title: 'app.name', secret: ['konan'], run: () => {} },
+    ]);
+    expect(paletteCommands('').map((c) => c.id)).not.toContain('egg');
+    expect(paletteCommands('kon').map((c) => c.id)).not.toContain('egg');
+    expect(paletteCommands(' Konan ').map((c) => c.id)).toContain('egg');
+  });
+
   it('runs commands by id and respects `when`', () => {
     const run = vi.fn();
     let enabled = false;

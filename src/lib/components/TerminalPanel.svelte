@@ -14,6 +14,7 @@
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
   import { isRunning } from '$lib/terminal/sessions.svelte';
   import PromptQueue from './PromptQueue.svelte';
+  import CraneIcon from './CraneIcon.svelte';
   import StatusDot from './StatusDot.svelte';
   import Terminal from './Terminal.svelte';
 
@@ -61,7 +62,11 @@
             onclick={() => group.activate(session.id)}
             onauxclick={(event) => onauxclick(event, session.id)}
           >
-            <StatusDot state={session.state} />
+            <StatusDot
+              state={session.state}
+              intensity={session.intensity}
+              prompts={session.prompts}
+            />
             {session.title}
           </button>
           <button
@@ -108,9 +113,7 @@
         title={t('queue.open')}
         onclick={() => openQueueComposer(group)}
       >
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-          <path d="M3 4h10M3 8h10M3 12h5M11 10.5v3M9.5 12h3" />
-        </svg>
+        <CraneIcon size={14} />
       </button>
     {/if}
     <button

@@ -48,9 +48,10 @@ function byScore(a: Scored, b: Scored): number {
 
 /** Commands that can run right now, fuzzy-matched by title. */
 function commandItems(query: string): Scored[] {
-  return paletteCommands().flatMap((command) => {
+  return paletteCommands(query).flatMap((command) => {
     const title = t(command.title);
-    const match = fuzzyMatch(query, title);
+    // A secret command matched its word exactly; it goes first.
+    const match = command.secret ? { score: Infinity, indices: [] } : fuzzyMatch(query, title);
     if (!match) return [];
     const shortcut = shortcutOf(command.id);
     return [

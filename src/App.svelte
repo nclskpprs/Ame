@@ -8,6 +8,8 @@
   import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import Palette from '$lib/components/Palette.svelte';
+  import PaperOverlay from '$lib/components/PaperOverlay.svelte';
+  import { paper } from '$lib/rain/paper.svelte';
   import ProjectView from '$lib/components/ProjectView.svelte';
   import SettingsView from '$lib/components/SettingsView.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
@@ -264,6 +266,11 @@
   {#key palette.config}
     <Palette config={palette.config} />
   {/key}
+{/if}
+
+<!-- Mounted with the first paper burst of the origami easter egg. -->
+{#if paper.bursts > 0}
+  <PaperOverlay />
 {/if}
 
 {#if contextMenu.config}

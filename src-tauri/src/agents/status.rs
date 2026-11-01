@@ -46,6 +46,11 @@ const TAIL_BYTES: usize = 4096;
 const RECENT_BYTES: usize = 2048;
 /// Longest last line returned, in characters.
 const MAX_LINE_CHARS: usize = 200;
+/// The output rate is measured over windows of this length.
+const RATE_WINDOW: Duration = Duration::from_secs(1);
+/// Output rates (bytes per second) from which the rain gets denser.
+const RATE_MEDIUM: f64 = 300.0;
+const RATE_HIGH: f64 = 4000.0;
 
 /// Text that most command-line programs print when they ask a yes/no question.
 const GENERIC_PATTERNS: &[&str] = &[r"\(y/n\)", r"\[y/N\]", r"\[Y/n\]", r"\(yes/no\)"];
@@ -109,6 +114,13 @@ pub struct StatusTracker {
     /// The last state an adapter reported, `None` without an adapter.
     adapter: Option<AdapterState>,
     adapter_message: Option<String>,
+    /// Prompts the user submitted (Enter outside a paste).
+    prompts: u32,
+    /// Output bytes (without echo) in the current rate window.
+    window_bytes: usize,
+    window_start: Instant,
+    /// Output intensity of the last full window, 1 (light) to 3 (heavy).
+    intensity: u8,
 }
 
 impl StatusTracker {
@@ -128,6 +140,10 @@ impl StatusTracker {
             exit: None,
             adapter: None,
             adapter_message: None,
+            prompts: 0,
+            window_bytes: 0,
+            window_start: now,
+            intensity: 1,
         }
     }
 
@@ -159,6 +175,7 @@ impl StatusTracker {
             .is_some_and(|input| now.saturating_duration_since(input) < ECHO_WINDOW);
         if !echo {
             self.last_output = Some(now);
+            self.window_bytes += bytes.len();
         }
         if !text.is_empty() {
             append_bounded(&mut self.tail, &text, TAIL_BYTES);
@@ -179,6 +196,35 @@ impl StatusTracker {
             self.adapter = Some(AdapterState::Working);
             self.adapter_message = None;
         }
+    }
+
+    /// A prompt was submitted (Enter), by the user or the prompt queue.
+    pub fn on_submit(&mut self) {
+        self.prompts = self.prompts.wrapping_add(1);
+    }
+
+    /// How many prompts were submitted so far.
+    pub fn prompts(&self) -> u32 {
+        self.prompts
+    }
+
+    /// How heavily the agent prints, 1 (light) to 3 (heavy), measured over
+    /// the last full second. Drives the density of the rain while working.
+    pub fn intensity(&mut self, now: Instant) -> u8 {
+        let elapsed = now.saturating_duration_since(self.window_start);
+        if elapsed >= RATE_WINDOW {
+            let rate = self.window_bytes as f64 / elapsed.as_secs_f64();
+            self.intensity = if rate >= RATE_HIGH {
+                3
+            } else if rate >= RATE_MEDIUM {
+                2
+            } else {
+                1
+            };
+            self.window_bytes = 0;
+            self.window_start = now;
+        }
+        self.intensity
     }
 
     /// When the user (or the prompt queue) last sent input.
@@ -306,6 +352,26 @@ mod tests {
         assert_eq!(status.state(t0 + ms(300)), AgentState::Working);
         assert_eq!(status.state(t0 + ms(900)), AgentState::Working);
         assert_eq!(status.state(t0 + ms(1300)), AgentState::Idle);
+    }
+
+    #[test]
+    fn intensity_follows_the_output_rate() {
+        let (mut status, t0) = tracker(&[]);
+        assert_eq!(status.intensity(t0), 1);
+        status.on_output(&[b'x'; 500], t0 + ms(100));
+        assert_eq!(status.intensity(t0 + ms(500)), 1, "window not full yet");
+        assert_eq!(status.intensity(t0 + ms(1000)), 2);
+        status.on_output(&vec![b'x'; 9000], t0 + ms(1500));
+        assert_eq!(status.intensity(t0 + ms(2000)), 3);
+        assert_eq!(status.intensity(t0 + ms(3000)), 1, "quiet again");
+    }
+
+    #[test]
+    fn counts_submitted_prompts() {
+        let (mut status, _) = tracker(&[]);
+        status.on_submit();
+        status.on_submit();
+        assert_eq!(status.prompts(), 2);
     }
 
     #[test]

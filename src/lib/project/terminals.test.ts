@@ -16,6 +16,8 @@ function info(id: number, project: string, profile: string): SessionInfo {
     state: 'starting',
     attention: null,
     queue: [],
+    prompts: 0,
+    intensity: 1,
   };
 }
 

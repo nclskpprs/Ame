@@ -124,6 +124,8 @@ impl PtyManager {
             state: AgentState::Starting,
             attention: None,
             queue: Vec::new(),
+            prompts: 0,
+            intensity: 1,
         };
         let weak = Arc::downgrade(&self.inner);
         let session = Session::start(

@@ -4,13 +4,14 @@
   import { settings } from '$lib/stores/settings.svelte';
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
-  import { combinedState } from '$lib/agents/state';
+  import { combinedRain, combinedState } from '$lib/agents/state';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import ProjectList from './ProjectList.svelte';
   import StatusDot from './StatusDot.svelte';
   import ThemeSwitcher from './ThemeSwitcher.svelte';
 
   const overall = $derived(combinedState(sessions.list));
+  const rain = $derived(combinedRain(sessions.list));
 </script>
 
 <nav class="sidebar" aria-label={t('sidebar.label')}>
@@ -41,7 +42,7 @@
       <path d="M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5h-4.5zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5h-4.5z" />
     </svg>
     <span class="label">{t('sidebar.dashboard')}</span>
-    {#if overall}<StatusDot state={overall} />{/if}
+    {#if overall}<StatusDot state={overall} intensity={rain.intensity} />{/if}
   </button>
 
   <div class="projects">

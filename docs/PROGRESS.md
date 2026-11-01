@@ -19,6 +19,24 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-01 — Test release 0.1.0-1 for macOS testing
+
+**Done**
+
+- PR #2 (M1–M6) merged into `main` by the maintainer. The single-branch
+  process ends; work continues on short branches from `main`.
+- Version `0.1.0-1` and tag `v0.1.0-1`: the first run of the release
+  workflow, so the maintainer can test the universal `.dmg` on a Mac. A
+  numeric pre-release because the Windows `.msi` (WiX) rejects `-rc.1`.
+- macOS builds are ad-hoc signed (`signingIdentity: "-"`), so Gatekeeper
+  offers "Open Anyway" instead of calling the app damaged.
+
+**Open**
+
+- Real signing: Apple Developer ID + notarization (paid account), Windows
+  signing (e.g. SignPath for open source, or Azure Trusted Signing).
+  Decision by the maintainer before the public 0.1.
+
 ### 2026-11-01 — CI: Windows, macOS and the benchmark
 
 **Done**

@@ -42,8 +42,12 @@ the normal config directory.
 
 ## Not yet
 
-- **Code signing:** builds are unsigned. macOS shows a Gatekeeper warning
-  (open with right-click → _Open_), Windows a SmartScreen warning.
+- **Code signing:** macOS builds are only ad-hoc signed
+  (`bundle.macOS.signingIdentity: "-"`), not with a Developer ID and not
+  notarized. On first start macOS blocks the app: allow it under _System
+  Settings → Privacy & Security → Open Anyway_, or run
+  `xattr -dr com.apple.quarantine /Applications/Ame.app`. Windows builds
+  are unsigned and show a SmartScreen warning (_More info → Run anyway_).
 - **In-app updates:** need the updater signing key. The maintainer creates
   it with `pnpm tauri signer generate -w ~/.tauri/ame.key`, stores the
   private key and its password as the repository secrets

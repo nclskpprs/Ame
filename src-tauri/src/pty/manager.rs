@@ -408,6 +408,7 @@ mod tests {
         }
     }
 
+    #[cfg(unix)]
     fn wait_until(mut condition: impl FnMut() -> bool) {
         let start = std::time::Instant::now();
         while !condition() {

@@ -98,7 +98,8 @@ stick without installing anything.
 - [Node.js](https://nodejs.org/) 24 or newer and [pnpm](https://pnpm.io/)
 - The Tauri 2 system dependencies for your platform, see
   [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/).
-  On Debian/Ubuntu:
+  On macOS the Xcode Command Line Tools are enough
+  (`xcode-select --install`). On Debian/Ubuntu:
 
   ```sh
   sudo apt-get install build-essential pkg-config curl wget file \

@@ -5,19 +5,85 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestone:** M2 is complete (the daemon was replaced by running in the
-  background, ADR 0020). M3 — Status and dashboard is complete. M4 —
-  checkpoints done; review mode skipped for now (extra). M5 — scripts:
-  detection and runner done; dev server detection and `.ame.json` skipped
-  for now (extras). M5b — project groups for agents done. Next: M6. M4 —
-  Git: checkpoints and review mode open.
-- **Process (maintainer decision, 2026-10-31):** all further milestones go
-  on the branch `feat/m1-project-shell`, one commit per task. The
-  per-feature acceptance test is paused; the maintainer reviews everything
-  at the end. The projects feature passed its acceptance test (10/10).
-- **Next steps:** 2. M4: checkpoints before every prompt, review mode. 3. M5: scripts; M5b: project groups for agents.
+- **Milestones:** M0–M5b are complete (extras skipped for now: review mode
+  in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
+  icon, UX review, release workflow and README are done; **in-app updates**
+  are open.
+- **Branches:** PR #2 (M1–M6) is merged into `main`. Work goes on short
+  branches from `main` (`feat/…`, `fix/…`, `chore/…`), one Conventional
+  Commit per task, never directly on `main`.
+- **Test release `v0.1.0-1`:** draft release with the macOS `.dmg` and the
+  Windows builds (Linux failed: `.rpm` rejects the `-`, so use plain
+  versions from now on). The maintainer tests it on a Mac; the feedback
+  comes as a German summary from a local checklist. The tag stays on its
+  own commit; `main` keeps version `0.0.0` until the 0.1.0 release.
+- **Acceptance:** the per-feature acceptance test is paused; the
+  maintainer reviews everything at the end. The M1 checklists for file
+  tree, editor, search and palette are still unreviewed (local `abnahme/`
+  folder, not in git).
+- **Signing:** ad-hoc on macOS is enough for now (maintainer decision);
+  no Apple Developer ID, Windows stays unsigned.
+- **CI:** green on macOS, Linux and Windows. The benchmark runs under
+  `dbus-run-session`; startup in CI is ~920 ms against a 1 s budget.
+- **Development machines:** Linux (WSL) so far, macOS from now on. Locally
+  only the own platform is checked; Windows-only (`cfg(windows)`) code is
+  first compiled in CI, so watch the Windows job after such changes.
+  Read CI logs with `gh run view` / `gh api …/actions/jobs/<id>/logs`
+  (logs need a login even though the repo is public).
+
+## Next steps
+
+1. **Act on the macOS test feedback** from the maintainer.
+2. **M6: in-app updates.** Done by the maintainer: signing key
+   (`~/.tauri/ame.key` on the Linux machine, key ID `66F7B297F3DF034F`) and
+   the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
+   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Public key for
+   `plugins.updater.pubkey`:
+   `dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RjdCMjk3RjNERjAzNEYKUldSUEE5L3psN0wzWmhvVzZNZEZWSHkzMlBnRTdXS2ttd2Q5eDl1QXlaNUxKTzRzSkw5YW1yTWoK`.
+   Plan:
+   - Add `tauri-plugin-updater` (Cargo.toml, `lib.rs`); specta-typed
+     commands for check and install in a new backend module, registered
+     in `ipc::builder()`.
+   - `tauri.conf.json`: `bundle.createUpdaterArtifacts: true`;
+     `plugins.updater` with the public key and the endpoint
+     `https://github.com/nclskpprs/Ame/releases/latest/download/latest.json`.
+   - `release.yml`: pass both signing secrets to the `tauri-action` step
+     so it signs the artifacts and uploads `latest.json`.
+   - Frontend: a setting to check on start and periodically, a "Check for
+     Updates" command, an inline notice and an OS notification, and
+     "Install and restart". The portable Windows build
+     (`AppPaths::is_portable()`) gets a download link instead.
+   - Then: ADR, `docs/ARCHITECTURE.md`, `docs/RELEASING.md` ("Not yet"),
+     ROADMAP, PROGRESS and CHANGELOG.
+3. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
+   the first publication.
 
 ## Log
+
+### 2026-11-01 — Test release 0.1.0-1 for macOS testing
+
+**Done**
+
+- PR #2 (M1–M6) merged into `main` by the maintainer. The single-branch
+  process ends; work continues on short branches from `main`.
+- Version `0.1.0-1` and tag `v0.1.0-1`: the first run of the release
+  workflow, so the maintainer can test the universal `.dmg` on a Mac. A
+  numeric pre-release because the Windows `.msi` (WiX) rejects `-rc.1`.
+- Release run 41334053874: macOS (universal `.dmg`) and Windows built and
+  are attached to the draft; Linux failed because `.rpm` rejects the `-`
+  in `0.1.0-1`. Rule added to `docs/RELEASING.md`: plain versions only.
+- macOS builds are ad-hoc signed (`signingIdentity: "-"`), so Gatekeeper
+  offers "Open Anyway" instead of calling the app damaged.
+- The release branch is merged into `main` for its docs and the ad-hoc
+  signing setting; the version goes back to `0.0.0` there, since
+  `0.1.0-1` was only for the test tag.
+
+**Decided**
+
+- Signing (maintainer, 2026-11-01): ad-hoc signing on macOS is enough for
+  now; an Apple Developer ID and notarization are not needed while the app
+  can be opened on macOS. Windows signing (e.g. SignPath for open source)
+  stays optional.
 
 ### 2026-11-01 — CI: Windows, macOS and the benchmark
 

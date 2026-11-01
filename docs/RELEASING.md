@@ -8,6 +8,12 @@ How a version of Ame gets built and published. The workflow is
 1. On `main`, set the new version in **both** places:
    - `Cargo.toml` → `[workspace.package] version`
    - `package.json` → `version`
+
+   Use plain `MAJOR.MINOR.PATCH` versions. Pre-release suffixes break a
+   bundle: the Windows `.msi` (WiX) accepts only a numeric one, and the
+   Linux `.rpm` rejects any `-` (`0.1.0-1` failed). A test build is simply
+   a draft release that is not published.
+
 2. In `CHANGELOG.md`, rename _Unreleased_ to the version and date and add a
    new empty _Unreleased_ section.
 3. Commit (`chore(release): 0.1.0`), then tag and push:
@@ -42,8 +48,12 @@ the normal config directory.
 
 ## Not yet
 
-- **Code signing:** builds are unsigned. macOS shows a Gatekeeper warning
-  (open with right-click → _Open_), Windows a SmartScreen warning.
+- **Code signing:** macOS builds are only ad-hoc signed
+  (`bundle.macOS.signingIdentity: "-"`), not with a Developer ID and not
+  notarized. On first start macOS blocks the app: allow it under _System
+  Settings → Privacy & Security → Open Anyway_, or run
+  `xattr -dr com.apple.quarantine /Applications/Ame.app`. Windows builds
+  are unsigned and show a SmartScreen warning (_More info → Run anyway_).
 - **In-app updates:** need the updater signing key. The maintainer creates
   it with `pnpm tauri signer generate -w ~/.tauri/ame.key`, stores the
   private key and its password as the repository secrets

@@ -14,6 +14,7 @@ import {
   systemPrefersDark,
   systemPrefersReducedMotion,
 } from '$lib/theme/theme';
+import { applyZoom } from '$lib/theme/zoom';
 
 forwardErrorsToLog();
 await Promise.all([settings.load(), workspace.load()]);
@@ -25,6 +26,8 @@ applyAppearance(document.documentElement, {
   density: settings.value.density,
   rainEffects: resolveRainEffects(settings.value.rainEffects, systemPrefersReducedMotion()),
 });
+
+applyZoom(settings.value.zoom);
 
 const target = document.getElementById('app');
 if (!target) throw new Error('missing #app element');

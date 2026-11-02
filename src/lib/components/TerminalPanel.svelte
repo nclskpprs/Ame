@@ -13,7 +13,10 @@
   import type { SessionInfo } from '$lib/ipc/types';
   import type { TerminalGroup } from '$lib/project/terminals.svelte';
   import { isRunning } from '$lib/terminal/sessions.svelte';
+  import { unread } from '$lib/agents/unread.svelte';
+  import { contextMenu } from '$lib/menu/context-menu.svelte';
   import PromptQueue from './PromptQueue.svelte';
+  import UnreadMark from './UnreadMark.svelte';
   import CraneIcon from './CraneIcon.svelte';
   import StatusDot from './StatusDot.svelte';
   import Terminal from './Terminal.svelte';
@@ -42,6 +45,23 @@
       : t('terminal.exited', { code: session.status.exitCode });
   }
 
+  function showMenu(event: MouseEvent, session: SessionInfo) {
+    const isUnread = unread.has(session.id);
+    contextMenu.show(event, session.title, [
+      {
+        kind: 'action',
+        label: t(isUnread ? 'unread.markRead' : 'unread.markUnread'),
+        run: () => (isUnread ? unread.markRead(session.id) : unread.markUnread(session.id)),
+      },
+      { kind: 'separator' },
+      {
+        kind: 'action',
+        label: t('terminal.close', { title: session.title }),
+        run: () => group.close(session.id),
+      },
+    ]);
+  }
+
   function onauxclick(event: MouseEvent, id: number) {
     if (event.button === 1) void group.close(id);
   }
@@ -51,7 +71,11 @@
   <div class="bar">
     <div class="tabs" role="tablist" aria-label={t('terminal.sessions')}>
       {#each group.sessions as session (session.id)}
-        <div class="tab" class:active={session.id === active?.id}>
+        <div
+          class="tab"
+          class:active={session.id === active?.id}
+          class:unread={unread.has(session.id)}
+        >
           <button
             class="label"
             role="tab"
@@ -61,6 +85,7 @@
               : exitText(session)}
             onclick={() => group.activate(session.id)}
             onauxclick={(event) => onauxclick(event, session.id)}
+            oncontextmenu={(event) => showMenu(event, session)}
           >
             <StatusDot
               state={session.state}
@@ -68,6 +93,7 @@
               prompts={session.prompts}
             />
             {session.title}
+            {#if unread.has(session.id)}<UnreadMark />{/if}
           </button>
           <button
             class="icon close"
@@ -116,6 +142,16 @@
         <CraneIcon size={14} />
       </button>
     {/if}
+    <button
+      class="icon"
+      aria-label={t('terminal.newShell')}
+      title={t('terminal.newShell')}
+      onclick={() => void group.startShell()}
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M3 4.5l3 3-3 3M8 11.5h5" />
+      </svg>
+    </button>
     <button
       class="icon"
       aria-label={t('terminal.startAgent')}
@@ -275,6 +311,11 @@
     height: 8px;
     border: 1px solid var(--ame-text-muted);
     border-radius: 50%;
+  }
+
+  .tab.unread .label {
+    color: var(--ame-text);
+    font-weight: 600;
   }
 
   .tab.previous .label {

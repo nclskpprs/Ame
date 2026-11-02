@@ -32,13 +32,23 @@ export const commands = {
 	/**  Sets the group of a project; `null` or a blank name removes it. */
 	setProjectGroup: (project: string, group: string | null) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_group", { project, group })),
 	setProjectLayout: (project: string, layout: ProjectLayout_Deserialize) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_layout", { project, layout })),
-	/**  Lists a directory of an open project (`""` for the root). */
-	readDir: (project: string, path: string) => typedError<DirEntry[], AppError>(__TAURI_INVOKE("read_dir", { project, path })),
+	/**
+	 *  Lists a directory of an open project (`""` for the root); with
+	 *  `show_ignored`, entries excluded by `.gitignore` are listed too.
+	 */
+	readDir: (project: string, path: string, showIgnored: boolean) => typedError<DirEntry[], AppError>(__TAURI_INVOKE("read_dir", { project, path, showIgnored })),
+	/**  Creates an empty file or a folder in an open project. */
+	createEntry: (project: string, path: string, kind: EntryKind) => typedError<null, AppError>(__TAURI_INVOKE("create_entry", { project, path, kind })),
+	/**  Moves or renames a file or folder inside an open project. */
+	moveEntry: (project: string, from: string, to: string) => typedError<null, AppError>(__TAURI_INVOKE("move_entry", { project, from, to })),
+	/**  Moves a file or folder of an open project to the trash. */
+	trashEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("trash_entry", { project, path })),
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**
-	 *  Sets the directories of a project whose changes the UI wants to hear
-	 *  about (non-recursive). Replaces the previous set.
+	 *  Sets the directories of a project the UI shows (expanded folders, folders
+	 *  of open files). Replaces the previous set; see `FsWatcher` for what is
+	 *  watched on each platform.
 	 */
 	watchDirs: (project: string, dirs: string[]) => typedError<null, AppError>(__TAURI_INVOKE("watch_dirs", { project, dirs })),
 	/**  Fuzzy-matches the files of a project for quick open. */
@@ -283,7 +293,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "alreadyExists"; message: string } | { kind: "notFound"; message: string } | { kind: "invalidMove"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -378,6 +388,11 @@ export type DirEntry = {
 	/**  Project-relative path with `/` separators. */
 	path: string,
 	kind: EntryKind,
+	/**
+	 *  Excluded by the ignore rules; only listed when ignored files are
+	 *  shown.
+	 */
+	ignored: boolean,
 };
 
 export type EntryKind = "file" | "dir";
@@ -406,7 +421,10 @@ export type FileResults = {
 /**  Files or directories that changed on disk. */
 export type FsChanged = {
 	project: string,
-	/**  Project-relative paths of the changed entries. */
+	/**
+	 *  Project-relative paths of the changed entries. Paths inside `.git`
+	 *  only signal a change of the git state.
+	 */
 	paths: string[],
 };
 
@@ -523,6 +541,11 @@ export type ProjectLayout_Deserialize = {
 	terminalHeight?: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions?: SavedSession_Deserialize[],
+	/**
+	 *  Index in `sessions` of the session that was shown last, so the
+	 *  terminal panel comes back to it.
+	 */
+	activeSession?: number | null,
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow?: boolean,
 };
@@ -541,6 +564,11 @@ export type ProjectLayout_Serialize = {
 	terminalHeight: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions: SavedSession_Serialize[],
+	/**
+	 *  Index in `sessions` of the session that was shown last, so the
+	 *  terminal panel comes back to it.
+	 */
+	activeSession: number | null,
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow: boolean,
 };
@@ -752,8 +780,12 @@ export type Settings_Deserialize = {
 	rainEffects?: RainEffects,
 	/**  Spacing of the UI. */
 	density?: Density,
+	/**  Zoom of the whole UI in percent (100 = actual size). */
+	zoom?: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen?: FileOpen,
+	/**  List files excluded by `.gitignore` in the file tree (dimmed). */
+	showIgnored?: boolean,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons?: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */
@@ -793,8 +825,12 @@ export type Settings_Serialize = {
 	rainEffects: RainEffects,
 	/**  Spacing of the UI. */
 	density: Density,
+	/**  Zoom of the whole UI in percent (100 = actual size). */
+	zoom: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen: FileOpen,
+	/**  List files excluded by `.gitignore` in the file tree (dimmed). */
+	showIgnored: boolean,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */

@@ -53,6 +53,10 @@
       "doubleClick": "Double click",
       "singleClick": "Single click"
     },
+    "showIgnored": {
+      "label": "Ignored files",
+      "description": "Files excluded by .gitignore, such as .env or node_modules, appear dimmed in the file tree."
+    },
     "fileIcons": {
       "label": "File icons",
       "on": "Show",
@@ -140,6 +144,16 @@
     "themeLight": "Theme: Light",
     "densityComfortable": "Density: Comfortable",
     "densityCompact": "Density: Compact",
+    "toggleIgnored": "Show or Hide Ignored Files",
+    "nextUnread": "Go to Next Unread Agent Result",
+    "markUnread": "Mark Agent Result as Unread",
+    "newFile": "New File",
+    "newFolder": "New Folder",
+    "moveEntry": "Rename or Move File",
+    "trashEntry": "Move File to Trash",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "zoomReset": "Reset Zoom",
     "rainOn": "Rain Effects: On",
     "rainSubtle": "Rain Effects: Subtle",
     "rainOff": "Rain Effects: Off",
@@ -182,11 +196,33 @@
     "changes": "Changes",
     "scripts": "Scripts"
   },
+  "unread": {
+    "label": "Unread result",
+    "markUnread": "Mark as Unread",
+    "markRead": "Mark as Read",
+    "none": "No unread agent results"
+  },
   "fileTree": {
     "label": "Files",
     "empty": "This folder is empty",
     "loadFailed": "Could not read folder: {message}",
-    "unsaved": "Unsaved changes"
+    "unsaved": "Unsaved changes",
+    "menu": "File actions",
+    "newFile": "New File…",
+    "newFolder": "New Folder…",
+    "move": "Rename or Move…",
+    "trash": "Move to Trash",
+    "newFilePrompt": "New file",
+    "newFolderPrompt": "New folder",
+    "movePrompt": "Rename or move {name}",
+    "pathHint": "Path in the project; Enter to confirm, Escape to cancel",
+    "trashPrompt": "Move {name} to the trash?",
+    "trashFolderPrompt": "Move the folder {name} and everything in it to the trash?",
+    "confirm": "OK",
+    "cancel": "Cancel",
+    "createFailed": "Could not create it: {message}",
+    "moveFailed": "Could not move it: {message}",
+    "trashFailed": "Could not move it to the trash: {message}"
   },
   "editor": {
     "tabs": "Open files",
@@ -251,6 +287,7 @@
     "sessions": "Terminal sessions",
     "label": "Terminal: {title}",
     "newShell": "New shell",
+    "show": "Show terminal panel",
     "startAgent": "Start agent…",
     "hide": "Hide terminal panel",
     "resize": "Resize terminal panel",

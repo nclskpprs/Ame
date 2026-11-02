@@ -6,23 +6,61 @@ use tauri::State;
 use tauri::ipc::Channel;
 
 use super::file::{self, FileContent};
+use super::ops;
 use super::path::resolve;
 use super::quick_open::{FileMatch, QuickOpen};
 use super::search::{self, FileResults, SearchControl, SearchOptions, SearchSummary};
-use super::tree::{self, DirEntry};
+use super::tree::{self, DirEntry, EntryKind};
 use super::watcher::FsWatcher;
 use crate::error::Result;
 use crate::workspace::projects::WorkspaceStore;
 
-/// Lists a directory of an open project (`""` for the root).
+/// Lists a directory of an open project (`""` for the root); with
+/// `show_ignored`, entries excluded by `.gitignore` are listed too.
 #[tauri::command]
 #[specta::specta]
 pub async fn read_dir(
     store: State<'_, WorkspaceStore>,
     project: String,
     path: String,
+    show_ignored: bool,
 ) -> Result<Vec<DirEntry>> {
-    tree::read_dir(&store.root(&project)?, &path)
+    tree::read_dir(&store.root(&project)?, &path, show_ignored)
+}
+
+/// Creates an empty file or a folder in an open project.
+#[tauri::command]
+#[specta::specta]
+pub async fn create_entry(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    path: String,
+    kind: EntryKind,
+) -> Result<()> {
+    ops::create_entry(&store.root(&project)?, &path, kind)
+}
+
+/// Moves or renames a file or folder inside an open project.
+#[tauri::command]
+#[specta::specta]
+pub async fn move_entry(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    from: String,
+    to: String,
+) -> Result<()> {
+    ops::move_entry(&store.root(&project)?, &from, &to)
+}
+
+/// Moves a file or folder of an open project to the trash.
+#[tauri::command]
+#[specta::specta]
+pub async fn trash_entry(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    path: String,
+) -> Result<()> {
+    ops::trash_entry(&store.root(&project)?, &path)
 }
 
 #[tauri::command]
@@ -46,8 +84,9 @@ pub async fn write_file(
     file::write_file(&store.root(&project)?, &path, &text)
 }
 
-/// Sets the directories of a project whose changes the UI wants to hear
-/// about (non-recursive). Replaces the previous set.
+/// Sets the directories of a project the UI shows (expanded folders, folders
+/// of open files). Replaces the previous set; see `FsWatcher` for what is
+/// watched on each platform.
 #[tauri::command]
 #[specta::specta]
 pub async fn watch_dirs(
@@ -61,7 +100,7 @@ pub async fn watch_dirs(
         .iter()
         .map(|dir| resolve(&root, dir))
         .collect::<Result<HashSet<_>>>()?;
-    watcher.set_watched(&project, dirs);
+    watcher.set_watched(&project, &root, dirs);
     Ok(())
 }
 

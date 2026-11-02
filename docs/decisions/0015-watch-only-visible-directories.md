@@ -1,6 +1,6 @@
 # 0015. Watch only visible directories
 
-- **Status:** Accepted
+- **Status:** Replaced by [0024](0024-watch-whole-projects-where-it-is-cheap.md)
 - **Date:** 2026-10-31
 
 ## Context

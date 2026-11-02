@@ -1,6 +1,5 @@
 //! Tauri commands for projects, settings and app information.
 
-use std::collections::HashSet;
 use std::path::PathBuf;
 
 use serde::Serialize;
@@ -84,7 +83,7 @@ pub async fn remove_project(
     pty: State<'_, PtyManager>,
     project: String,
 ) -> Result<WorkspaceState> {
-    watcher.set_watched(&project, HashSet::new());
+    watcher.unwatch_project(&project);
     pty.close_project(&project);
     store.remove(&project)
 }

@@ -92,6 +92,45 @@ describe('TerminalGroup restoring', () => {
   });
 });
 
+describe('TerminalGroup history', () => {
+  it('stays on the session used last and returns to it after closing', async () => {
+    backend = [];
+    await sessions.load();
+    const group = new TerminalGroup('/h');
+    await group.start('claude');
+    const agent = group.active?.id ?? 0;
+    await group.start('shell');
+    const shell = group.active?.id ?? 0;
+    group.activate(agent);
+    await group.start('codex');
+    const codex = group.active?.id ?? 0;
+    // Closing the newest goes back to the one used before, not a neighbor.
+    await group.close(codex, true);
+    expect(group.active?.id).toBe(agent);
+    // Closing a session in the background keeps the shown one.
+    await group.close(shell, true);
+    expect(group.active?.id).toBe(agent);
+  });
+
+  it('remembers which session was shown for the next start', async () => {
+    backend = [];
+    await sessions.load();
+    const group = new TerminalGroup('/r', saved, 1);
+    expect(group.selectedRestorable?.profile).toBe('shell');
+    expect(group.savedActive()).toBe(1);
+  });
+
+  it('shows the remembered session after a reload of the web view', async () => {
+    backend = [info(90, '/w', 'claude'), info(91, '/w', 'shell')];
+    await sessions.load();
+    // `sessions.initial` is set once per test file, so restorable sessions
+    // cannot be hidden here; a group without them behaves the same.
+    const group = new TerminalGroup('/w', [], 0);
+    expect(group.active?.id).toBe(90);
+    expect(group.savedActive()).toBe(0);
+  });
+});
+
 describe('TerminalGroup scripts', () => {
   it('runs a script once, shows it while it runs and does not restore it', async () => {
     backend = [];

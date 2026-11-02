@@ -35,8 +35,12 @@ pub struct Settings {
     pub rain_effects: RainEffects,
     /// Spacing of the UI.
     pub density: Density,
+    /// Zoom of the whole UI in percent (100 = actual size).
+    pub zoom: u32,
     /// How a click in the file tree opens a file.
     pub file_open: FileOpen,
+    /// List files excluded by `.gitignore` in the file tree (dimmed).
+    pub show_ignored: bool,
     /// Show file type icons in the file tree and the editor tabs.
     pub file_icons: bool,
     /// OS notifications when an agent needs input, is done or fails.
@@ -76,7 +80,9 @@ impl Default for Settings {
             locale: "en".to_owned(),
             rain_effects: RainEffects::default(),
             density: Density::default(),
+            zoom: 100,
             file_open: FileOpen::default(),
+            show_ignored: false,
             file_icons: true,
             notifications: true,
             close_action: CloseAction::default(),

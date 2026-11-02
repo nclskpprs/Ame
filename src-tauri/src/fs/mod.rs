@@ -6,6 +6,7 @@
 
 pub mod commands;
 pub mod file;
+pub mod ops;
 pub mod path;
 pub mod quick_open;
 pub mod search;

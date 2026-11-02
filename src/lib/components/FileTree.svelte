@@ -1,10 +1,14 @@
 <script lang="ts">
   import { t } from '$lib/i18n';
-  import type { FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
+  import type { FileOps, FileTreeState, TreeRow } from '$lib/project/file-tree.svelte';
   import { treeClick } from '$lib/project/tree-click';
   import { iconName, iconUrl } from '$lib/fs/file-icons';
   import { markLetters, type GitMark } from '$lib/git/marks';
   import { currentTheme } from '$lib/theme/current.svelte';
+  import { basename, cleanPath, dirname, isWithin } from '$lib/fs/paths';
+  import { contextMenu } from '$lib/menu/context-menu.svelte';
+  import type { MenuEntry } from '$lib/menu/menu';
+  import { isMac } from '$lib/commands/shortcuts';
 
   let {
     tree,
@@ -13,6 +17,7 @@
     recent = new Set(),
     icons = true,
     singleClick = false,
+    ops,
     onopen,
   }: {
     tree: FileTreeState;
@@ -26,6 +31,8 @@
     icons?: boolean;
     /** Open files with a single click instead of a double click. */
     singleClick?: boolean;
+    /** Create, move and trash; without it the tree is read-only. */
+    ops?: FileOps;
     /** Called when a file is activated (click or Enter, see `singleClick`). */
     onopen: (path: string) => void;
   } = $props();
@@ -33,6 +40,26 @@
   const rows = $derived(tree.rows());
   const root = $derived(tree.children.get(''));
   let container: HTMLElement | undefined = $state();
+
+  function editLabel(): string {
+    if (!edit) return '';
+    switch (edit.kind) {
+      case 'newFile':
+        return t('fileTree.newFilePrompt');
+      case 'newFolder':
+        return t('fileTree.newFolderPrompt');
+      case 'move':
+        return t('fileTree.movePrompt', { name: basename(edit.path) });
+      case 'trash':
+        return t(edit.isDir ? 'fileTree.trashFolderPrompt' : 'fileTree.trashPrompt', {
+          name: basename(edit.path),
+        });
+    }
+  }
+
+  function focusButton(node: HTMLButtonElement) {
+    node.focus();
+  }
 
   function activate(row: TreeRow) {
     tree.selected = row.entry.path;
@@ -54,6 +81,123 @@
     queueMicrotask(() =>
       container?.querySelector<HTMLElement>(`[data-path="${CSS.escape(row.entry.path)}"]`)?.focus(),
     );
+  }
+
+  const edit = $derived(tree.edit);
+  let busy = $state(false);
+  /** Path of the entry being dragged, and the folder it would land in. */
+  let dragging: string | null = null;
+  let dropTarget = $state<string | null>(null);
+
+  function focusInput(node: HTMLInputElement) {
+    node.focus();
+    // Select the name, so typing renames and the folder stays.
+    const start = node.value.endsWith('/') ? node.value.length : node.value.lastIndexOf('/') + 1;
+    const dot = node.value.lastIndexOf('.');
+    node.setSelectionRange(start, dot > start ? dot : node.value.length);
+  }
+
+  async function submit() {
+    if (!edit || !ops || busy) return;
+    busy = true;
+    let done = false;
+    if (edit.kind === 'trash') {
+      done = await ops.trashEntry(edit.path);
+    } else {
+      const path = cleanPath(edit.value);
+      if (path && edit.kind === 'move') done = await ops.moveEntry(edit.path, path);
+      else if (path) done = await ops.createEntry(path, edit.kind === 'newFile' ? 'file' : 'dir');
+    }
+    busy = false;
+    if (done) {
+      tree.edit = null;
+      if (edit.kind !== 'newFile') focusSelected();
+    }
+  }
+
+  function cancel() {
+    tree.edit = null;
+    focusSelected();
+  }
+
+  function oneditkeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') void submit();
+    else if (event.key === 'Escape') cancel();
+    else return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function focusSelected() {
+    queueMicrotask(() => {
+      const path = tree.selected;
+      const row = path
+        ? container?.querySelector<HTMLElement>(`[data-path="${CSS.escape(path)}"]`)
+        : null;
+      (row ?? container)?.focus();
+    });
+  }
+
+  function menuFor(row: TreeRow | null): MenuEntry[] {
+    const items: MenuEntry[] = [
+      { kind: 'action', label: t('fileTree.newFile'), run: () => tree.startNew('newFile') },
+      { kind: 'action', label: t('fileTree.newFolder'), run: () => tree.startNew('newFolder') },
+    ];
+    if (row) {
+      const path = row.entry.path;
+      items.push(
+        { kind: 'separator' },
+        { kind: 'action', label: t('fileTree.move'), run: () => tree.startMove(path) },
+        { kind: 'action', label: t('fileTree.trash'), run: () => tree.startTrash(path) },
+      );
+    }
+    return items;
+  }
+
+  function oncontextmenu(event: MouseEvent, row: TreeRow | null) {
+    if (!ops) return;
+    event.stopPropagation();
+    tree.selected = row?.entry.path ?? null;
+    contextMenu.show(event, row?.entry.name ?? t('fileTree.label'), menuFor(row));
+  }
+
+  /** The folder a dragged entry would be dropped into, if it may go there. */
+  function dropDir(row: TreeRow | null): string | null {
+    if (!dragging) return null;
+    const dir = row ? (row.entry.kind === 'dir' ? row.entry.path : dirname(row.entry.path)) : '';
+    if (isWithin(dir, dragging) && dir !== '') return null;
+    return dir === dirname(dragging) ? null : dir;
+  }
+
+  function ondragstart(event: DragEvent, row: TreeRow) {
+    if (!ops || !event.dataTransfer) return;
+    dragging = row.entry.path;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', row.entry.path);
+  }
+
+  function ondragover(event: DragEvent, row: TreeRow | null) {
+    const dir = dropDir(row);
+    if (dir === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropTarget = dir;
+  }
+
+  function ondrop(event: DragEvent, row: TreeRow | null) {
+    const dir = dropDir(row);
+    const from = dragging;
+    ondragend();
+    if (dir === null || from === null || !ops) return;
+    event.preventDefault();
+    event.stopPropagation();
+    void ops.moveEntry(from, dir ? `${dir}/${basename(from)}` : basename(from));
+  }
+
+  function ondragend() {
+    dragging = null;
+    dropTarget = null;
   }
 
   function onkeydown(event: KeyboardEvent) {
@@ -93,6 +237,15 @@
       case ' ':
         if (row) activate(row);
         break;
+      case 'F2':
+        if (row && ops) tree.startMove(row.entry.path);
+        break;
+      case 'Delete':
+      case 'Backspace':
+        // Backspace alone types in other places; it needs Cmd on macOS.
+        if (event.key === 'Backspace' && !(isMac && event.metaKey)) return;
+        if (row && ops) tree.startTrash(row.entry.path);
+        break;
       default:
         return;
     }
@@ -107,7 +260,44 @@
   aria-label={t('fileTree.label')}
   bind:this={container}
   {onkeydown}
+  oncontextmenu={(event) => oncontextmenu(event, null)}
+  ondragover={(event) => ondragover(event, null)}
+  ondrop={(event) => ondrop(event, null)}
+  class:drop-root={dropTarget === ''}
 >
+  {#if edit}
+    <div
+      class="edit"
+      role={edit.kind === 'trash' ? 'alertdialog' : 'group'}
+      aria-label={editLabel()}
+    >
+      {#if edit.kind === 'trash'}
+        <span>{editLabel()}</span>
+        <div class="buttons">
+          <button class="primary" disabled={busy} onclick={() => void submit()} use:focusButton>
+            {t('fileTree.trash')}
+          </button>
+          <button onclick={cancel}>{t('fileTree.cancel')}</button>
+        </div>
+      {:else}
+        <label for="file-tree-edit">{editLabel()}</label>
+        <input
+          id="file-tree-edit"
+          type="text"
+          spellcheck="false"
+          autocomplete="off"
+          title={t('fileTree.pathHint')}
+          bind:value={edit.value}
+          disabled={busy}
+          use:focusInput
+          onkeydown={oneditkeydown}
+          onblur={() => {
+            if (!busy) tree.edit = null;
+          }}
+        />
+      {/if}
+    </div>
+  {/if}
   {#if root?.status === 'error'}
     <p class="message">{t('fileTree.loadFailed', { message: root.message })}</p>
   {:else if root?.status === 'loaded' && rows.length === 0}
@@ -119,6 +309,7 @@
       class="row {mark ? `git-${mark}` : ''}"
       class:selected={row.entry.path === tree.selected}
       class:recent={recent.has(row.entry.path)}
+      class:ignored={row.ignored}
       role="treeitem"
       aria-level={row.depth + 1}
       aria-expanded={row.entry.kind === 'dir' ? row.expanded : undefined}
@@ -129,7 +320,14 @@
       data-path={row.entry.path}
       style:padding-left="calc({row.depth} * var(--ame-tree-indent) + var(--ame-space-2))"
       title={row.entry.path}
+      draggable={ops ? 'true' : 'false'}
+      class:drop={dropTarget !== null && dropTarget !== '' && row.entry.path === dropTarget}
       onclick={(event) => onclick(event, row)}
+      oncontextmenu={(event) => oncontextmenu(event, row)}
+      ondragstart={(event) => ondragstart(event, row)}
+      ondragover={(event) => ondragover(event, row)}
+      ondrop={(event) => ondrop(event, row)}
+      {ondragend}
       onkeydown={() => {}}
     >
       {#if row.entry.kind === 'dir'}
@@ -192,6 +390,63 @@
   /* Changed by an agent a moment ago. */
   .row.recent {
     box-shadow: inset 2px 0 0 var(--ame-accent);
+  }
+
+  /* Excluded by .gitignore, listed only when ignored files are shown. */
+  .row.ignored .name {
+    opacity: 0.6;
+  }
+
+  .row.drop,
+  .file-tree.drop-root {
+    background: var(--ame-bg);
+    outline: 1px dashed var(--ame-accent);
+    outline-offset: -1px;
+  }
+
+  .edit {
+    display: grid;
+    gap: var(--ame-space-1);
+    margin: 0 var(--ame-space-2) var(--ame-space-2);
+    padding: var(--ame-space-2);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+    background: var(--ame-bg);
+    font-size: var(--ame-font-size-small);
+    color: var(--ame-text-muted);
+  }
+
+  .edit[role='alertdialog'] {
+    border-color: var(--ame-needs-input);
+  }
+
+  .edit input {
+    min-width: 0;
+    padding: 2px var(--ame-space-1);
+    border: 1px solid var(--ame-accent);
+    border-radius: var(--ame-radius);
+    background: var(--ame-surface);
+    color: var(--ame-text);
+    font: inherit;
+    font-family: var(--ame-font-code);
+  }
+
+  .edit .buttons {
+    display: flex;
+    gap: var(--ame-space-2);
+  }
+
+  .edit button {
+    padding: 2px var(--ame-space-3);
+    border: 1px solid var(--ame-border);
+    border-radius: var(--ame-radius);
+    background: var(--ame-surface);
+    color: var(--ame-text);
+    font: inherit;
+  }
+
+  .edit button.primary {
+    border-color: var(--ame-accent);
   }
 
   .row.selected {

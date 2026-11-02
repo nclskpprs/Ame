@@ -25,7 +25,10 @@ export interface Restorable extends SavedSession {
 /** The terminal sessions of one project and its terminal panel. */
 export class TerminalGroup {
   readonly project: string;
-  #activeId = $state<number | null>(null);
+  /** Session ids, most recently shown first. */
+  #history = $state<number[]>([]);
+  /** Index in `saved()` of the session shown when the app last ran. */
+  readonly #savedActive: number | null;
   #restorable = $state<Restorable[]>([]);
   #selectedRestorable = $state<number | null>(null);
   /** The visible terminal should take the focus once it is ready. */
@@ -39,10 +42,18 @@ export class TerminalGroup {
   /** Size of the terminal view, used for new sessions. */
   size = { ...DEFAULT_SIZE };
 
-  /** `saved` are the sessions that were open when the app last ran. */
-  constructor(project: string, saved: readonly SavedSession[] = []) {
+  /**
+   * `saved` are the sessions that were open when the app last ran,
+   * `savedActive` the index of the one that was shown.
+   */
+  constructor(
+    project: string,
+    saved: readonly SavedSession[] = [],
+    savedActive: number | null = null,
+  ) {
     this.project = project;
     this.#restorable = saved.map((session, index) => ({ ...session, key: index + 1 }));
+    this.#savedActive = savedActive;
   }
 
   get sessions(): SessionInfo[] {
@@ -65,14 +76,37 @@ export class TerminalGroup {
     const list = this.restorable;
     const selected = list.find((r) => r.key === this.#selectedRestorable);
     if (selected) return selected;
-    return this.sessions.length === 0 ? (list[0] ?? null) : null;
+    if (this.sessions.length > 0) return null;
+    return list.find((r) => r.key === (this.#savedActive ?? 0) + 1) ?? list[0] ?? null;
   }
 
-  /** The session shown in the panel: the chosen one, else the newest. */
+  /**
+   * The session shown in the panel: the one used last, else the one shown
+   * when the app last ran (after a reload of the web view), else the newest.
+   */
   get active(): SessionInfo | null {
     if (this.selectedRestorable) return null;
     const list = this.sessions;
-    return list.find((s) => s.id === this.#activeId) ?? list.at(-1) ?? null;
+    for (const id of this.#history) {
+      const session = list.find((s) => s.id === id);
+      if (session) return session;
+    }
+    if (this.#savedActive !== null && this.restorable.length === 0) {
+      const remembered = list.filter((s) => !isScript(s.profile))[this.#savedActive];
+      if (remembered) return remembered;
+    }
+    return list.at(-1) ?? null;
+  }
+
+  /** Index in `saved()` of the shown session or previous session. */
+  savedActive(): number | null {
+    const restorable = this.restorable;
+    const selected = this.selectedRestorable;
+    if (selected) return restorable.indexOf(selected);
+    const active = this.active;
+    if (!active || isScript(active.profile)) return null;
+    const index = this.sessions.filter((s) => !isScript(s.profile)).indexOf(active);
+    return index < 0 ? null : restorable.length + index;
   }
 
   /**
@@ -110,7 +144,7 @@ export class TerminalGroup {
   }
 
   activate(id: number): void {
-    this.#activeId = id;
+    this.#remember(id);
     this.#selectedRestorable = null;
     this.focusPending = true;
   }
@@ -162,7 +196,7 @@ export class TerminalGroup {
     if (!session) return;
     if (isRunning(session) && !force) {
       this.pendingClose = id;
-      this.#activeId = id;
+      this.#remember(id);
       return;
     }
     if (this.pendingClose === id) this.pendingClose = null;
@@ -172,12 +206,19 @@ export class TerminalGroup {
     if (result.status === 'error' && result.error.kind !== 'unknownSession') {
       notices.push(describeError(result.error));
     }
+    const wasActive = this.active?.id === id;
+    this.#history = this.#history.filter((other) => other !== id);
     sessions.remove(id);
-    if (this.#activeId === id || this.active === null) {
-      const next = list[index + 1] ?? list[index - 1];
-      if (next) this.activate(next.id);
-      else this.#activeId = null;
-    }
+    if (!wasActive && this.active !== null) return;
+    // Back to the session used before, else a neighbor.
+    const remaining = this.sessions;
+    const previous = this.#history.find((other) => remaining.some((s) => s.id === other));
+    const next = previous ?? list[index + 1]?.id ?? list[index - 1]?.id;
+    if (next !== undefined) this.activate(next);
+  }
+
+  #remember(id: number): void {
+    this.#history = [id, ...this.#history.filter((other) => other !== id)];
   }
 
   /**

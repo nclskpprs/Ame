@@ -12,6 +12,7 @@
   import ScriptsPanel from './ScriptsPanel.svelte';
   import SearchPanel from './SearchPanel.svelte';
   import TerminalPanel from './TerminalPanel.svelte';
+  import TerminalStrip from './TerminalStrip.svelte';
   import type { SidePanel } from '$lib/ipc/bindings';
   import { untrack } from 'svelte';
   import { agents } from '$lib/agents/agents.svelte';
@@ -85,6 +86,7 @@
           recent={session.git.recentMarks}
           icons={settings.value.fileIcons}
           singleClick={settings.value.fileOpen === 'singleClick'}
+          ops={session}
           onopen={(path) => void session.editors.open(path)}
         />
       {/if}
@@ -118,6 +120,8 @@
       <div class="terminal" style:--terminal-height="{project.layout.terminalHeight}px">
         <TerminalPanel group={session.terminals} />
       </div>
+    {:else}
+      <TerminalStrip group={session.terminals} />
     {/if}
   </section>
 </div>

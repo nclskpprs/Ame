@@ -456,9 +456,17 @@ Example agent profile:
   hidden, directories first). `read_file` returns text or flags binary /
   non-UTF-8 / too large (> 10 MB). `write_file` writes in place to keep
   permissions, symlinks and hard links.
-- `FsWatcher` watches only visible directories, non-recursively, and emits
-  debounced `fs-changed` events (see
-  [ADR 0015](decisions/0015-watch-only-visible-directories.md)).
+- `read_dir` with `show_ignored` also lists entries excluded by the ignore
+  rules, marked `ignored` (setting _Ignored files_).
+- `create_entry`, `move_entry` and `trash_entry` (`fs/ops.rs`) create,
+  move/rename and trash entries (OS trash via the `trash` crate; on macOS
+  through `NSFileManager`, so no Finder automation prompt). They never
+  replace an existing entry or touch the project root.
+- `FsWatcher` watches each project root recursively on macOS and Windows
+  (ignored paths dropped unless shown) and only the visible directories on
+  Linux; `.git` state changes (`HEAD`, `index`, `refs/heads`) are reported
+  everywhere. Events are debounced `fs-changed` batches (see
+  [ADR 0024](decisions/0024-watch-whole-projects-where-it-is-cheap.md)).
 
 ## File icons — implemented
 
@@ -513,8 +521,9 @@ Module: `src-tauri/src/git/` (git CLI, ADR 0008).
   before the first commit) and `git_commit` (hooks run; their output is the
   error message). Paths are checked to stay inside the project.
 - Frontend: `GitState` per project (`lib/project/git.svelte.ts`) refreshes
-  on file events, window focus and every 3 s while an agent of the project
-  is busy (`pollGit`), because the watcher only sees visible folders.
+  on file events (including `.git` state changes), window focus and every
+  3 s while an agent of the project is busy (`pollGit`), which matters on
+  Linux, where the watcher only sees visible folders.
   `lib/git/marks.ts` turns files into tree marks (folders take the strongest
   mark inside); colors are the `git*` tokens.
 - Changes panel (`ChangesPanel.svelte`), a side panel tab shown only in git

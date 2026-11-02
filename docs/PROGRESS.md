@@ -36,7 +36,8 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Act on the macOS test feedback** from the maintainer.
+1. **Maintainer review of M6b** (branch `fix/macos-test-feedback`): test
+   the eight feedback items on the Mac, ideally from a preview build.
 2. **M6: in-app updates.** Done by the maintainer: signing key
    (`~/.tauri/ame.key` on the Linux machine, key ID `66F7B297F3DF034F`) and
    the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
@@ -62,6 +63,51 @@ is open, what comes next.
    the first publication.
 
 ## Log
+
+### 2026-11-02 — macOS test feedback (M6b)
+
+The maintainer listed what they noticed while working with Ame for a day.
+All on branch `fix/macos-test-feedback`, one commit per item.
+
+**Done**
+
+- Terminal: Shift+Enter sends `ESC CR` (like Alt+Enter), which agents
+  treat as a line break (`src/lib/terminal/keys.ts`).
+- App zoom: `zoom` setting (percent), commands with Mod+Plus / Mod+Minus /
+  Mod+0 through `webview.setZoom`; `Plus`/`Minus` shortcut keys match by
+  character, so they work on US and German layouts.
+- Terminal panel: a history of shown sessions instead of "newest wins";
+  closing returns to the one used before; `layout.activeSession` brings
+  the shown session (or previous session) back after a restart.
+- Terminal strip below the editor while the panel is hidden (show panel,
+  new shell, start agent) and a "New shell" button in the panel.
+- Ignored files: the tree already showed dotfiles; what was missing were
+  files excluded by `.gitignore` (`.env`, `node_modules`). Setting
+  _Ignored files_ and a command list them dimmed (`read_dir` with
+  `show_ignored`).
+- File operations: `fs/ops.rs` (`create_entry`, `move_entry`,
+  `trash_entry`, OS trash via the `trash` crate, `NSFileManager` on macOS);
+  tree context menu, F2, Delete / Cmd+Backspace, drag and drop (native
+  file drop of the window is off so HTML drag and drop works on Windows),
+  palette commands. Open tabs follow moves.
+- Unread results (`src/lib/agents/unread.svelte.ts`): a session becomes
+  unread when it finishes working, needs input or fails while not shown;
+  read once shown in the terminal panel with the window focused. Marks in
+  tabs, sidebar and dashboard; "Mark as Unread/Read" in their context
+  menus; "Go to Next Unread Agent Result" (Mod+Shift+U). In memory only.
+- No manual reload (ADR 0024, replaces 0015): recursive root watch on
+  macOS/Windows with ignored paths dropped in the backend; `.git` state
+  changes (`HEAD`, `index`, `refs/heads`) reported everywhere and only
+  refresh git; canonical root mapping (projects under a symlinked path got
+  no events on macOS before).
+- Kanban board idea added to the roadmap under _Later_.
+
+**Open**
+
+- Linux still sees changes in collapsed folders only via `pollGit` and the
+  window focus (inotify cost, ADR 0024).
+- Unread state is not persisted across restarts (sessions do not survive
+  a restart either).
 
 ### 2026-11-01 — Preview workflow
 

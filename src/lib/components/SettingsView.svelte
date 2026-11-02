@@ -117,6 +117,22 @@
           onchange={(value) => void settings.update({ fileIcons: value === 'on' })}
         />
       </div>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.showIgnored.label')}</span>
+          <span class="description">{t('settings.showIgnored.description')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-show-ignored"
+          label={t('settings.showIgnored.label')}
+          options={[
+            { value: 'on', label: t('settings.fileIcons.on') },
+            { value: 'off', label: t('settings.fileIcons.off') },
+          ]}
+          value={settings.value.showIgnored ? 'on' : 'off'}
+          onchange={(value) => void settings.update({ showIgnored: value === 'on' })}
+        />
+      </div>
     </section>
 
     <section class="group" aria-labelledby="settings-agents">

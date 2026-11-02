@@ -139,9 +139,36 @@ and this project adheres to
 - Start an agent with each project: choose your preferred agent in the
   settings, and it starts as soon as a project without terminal sessions is
   opened.
+- Terminal: Shift+Enter inserts a line break in agent prompts instead of
+  submitting them.
+- Zoom the whole app with Cmd/Ctrl+Plus and Cmd/Ctrl+Minus; Cmd/Ctrl+0
+  resets it. The zoom is remembered.
+- Start a shell or an agent with the mouse: while the terminal panel is
+  hidden, a slim bar below the editor shows it again or starts a shell or
+  an agent; the panel itself got a "New shell" button.
+- File tree: show files excluded by `.gitignore` (e.g. `.env`,
+  `node_modules`), dimmed, with a setting or the "Show or Hide Ignored
+  Files" command.
+- File tree: create files and folders, rename or move them (also by drag
+  and drop) and move them to the trash, from the context menu, the command
+  palette or with F2 and Delete (Cmd+Backspace on macOS). Deleting asks
+  inline first; open tabs follow moved files.
+- Unread agent results: when an agent finishes, asks something or fails
+  while you look elsewhere, its terminal tab, dashboard card and project
+  stay marked (bold with a dot) until you open that terminal, even hours
+  later. Mark a result as unread again from the context menu, and jump to
+  the next unread one with Cmd/Ctrl+Shift+U.
 
 ### Fixed
 
+- Terminal panel: it stays on the terminal you used last. Closing a
+  terminal goes back to the one used before, and the shown terminal is
+  remembered across restarts, instead of jumping to the newest one.
+- The file tree and the changes panel follow every change on disk without
+  a reload: on macOS and Windows the whole project is watched (ignored
+  folders such as `node_modules` excepted), and commits, checkouts and
+  staging are noticed on every platform. Projects opened through a
+  symlinked path get change events again on macOS.
 - Release builds: the editor shows line numbers beside the code and
   syntax highlighting again; the content security policy blocked the
   editor's styles.

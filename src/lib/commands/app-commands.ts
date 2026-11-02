@@ -11,6 +11,8 @@ import {
 } from '$lib/agents/group';
 import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { sendSelectionToAgent } from '$lib/agents/send';
+import { showSession } from '$lib/agents/show';
+import { nextUnread, unread } from '$lib/agents/unread.svelte';
 import { currentRainMode } from '$lib/rain/canvas';
 import { paper } from '$lib/rain/paper.svelte';
 import { notices } from '$lib/stores/notices.svelte';
@@ -19,7 +21,9 @@ import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
 import { closeGuard } from '$lib/project/close-guard.svelte';
 import { activeSession } from '$lib/project/session';
+import type { FileTreeState } from '$lib/project/file-tree.svelte';
 import { settings } from '$lib/stores/settings.svelte';
+import { DEFAULT_ZOOM, nextZoom } from '$lib/theme/zoom';
 import { view } from '$lib/stores/view.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { orderedProjects } from '$lib/workspace/sections';
@@ -36,6 +40,22 @@ const hasProject = () => workspace.active !== null;
 const activeFile = () => activeSession()?.editors.active ?? null;
 const hasSeveralProjects = () => workspace.projects.length > 1;
 const hasSeveralSessions = () => (activeSession()?.terminals.sessions.length ?? 0) > 1;
+
+/** The entry file commands act on: the tree selection, else the open file. */
+function treeTarget(): string | null {
+  const session = activeSession();
+  return session?.tree.selected ?? session?.editors.activePath ?? null;
+}
+
+/** Shows the files panel and starts a file operation in its tree. */
+function startTreeEdit(start: (tree: FileTreeState, path: string | null) => unknown): void {
+  const session = activeSession();
+  if (!session) return;
+  workspace.updateLayout(session.path, { sidePanel: 'files' });
+  const path = treeTarget();
+  if (path && session.tree.selected === null) void session.tree.reveal(path);
+  start(session.tree, path);
+}
 
 /** Commands that are always available. Returns a cleanup function. */
 export function registerAppCommands(): () => void {
@@ -422,6 +442,76 @@ export function registerAppCommands(): () => void {
       id: 'density.compact',
       title: 'commands.densityCompact',
       run: () => settings.update({ density: 'compact' }),
+    },
+    {
+      id: 'agents.nextUnread',
+      title: 'commands.nextUnread',
+      shortcut: 'Mod+Shift+U',
+      terminal: true,
+      run: () => {
+        const next = nextUnread(terminalSessions.list, activeSession()?.terminals.active?.id);
+        if (next) showSession(next.project, next.id);
+        else notices.push(t('unread.none'));
+      },
+    },
+    {
+      id: 'agents.markUnread',
+      title: 'commands.markUnread',
+      when: () => activeSession()?.terminals.active != null,
+      run: () => {
+        const id = activeSession()?.terminals.active?.id;
+        if (id !== undefined) unread.markUnread(id);
+      },
+    },
+    {
+      id: 'fileTree.newFile',
+      title: 'commands.newFile',
+      when: hasProject,
+      run: () => startTreeEdit((tree) => tree.startNew('newFile')),
+    },
+    {
+      id: 'fileTree.newFolder',
+      title: 'commands.newFolder',
+      when: hasProject,
+      run: () => startTreeEdit((tree) => tree.startNew('newFolder')),
+    },
+    {
+      id: 'fileTree.move',
+      title: 'commands.moveEntry',
+      when: () => treeTarget() !== null,
+      run: () => startTreeEdit((tree, path) => path && tree.startMove(path)),
+    },
+    {
+      id: 'fileTree.trash',
+      title: 'commands.trashEntry',
+      when: () => treeTarget() !== null,
+      run: () => startTreeEdit((tree, path) => path && tree.startTrash(path)),
+    },
+    {
+      id: 'fileTree.toggleIgnored',
+      title: 'commands.toggleIgnored',
+      run: () => settings.update({ showIgnored: !settings.value.showIgnored }),
+    },
+    {
+      id: 'zoom.in',
+      title: 'commands.zoomIn',
+      shortcut: 'Mod+Plus',
+      terminal: true,
+      run: () => settings.update({ zoom: nextZoom(settings.value.zoom, 1) }),
+    },
+    {
+      id: 'zoom.out',
+      title: 'commands.zoomOut',
+      shortcut: 'Mod+Minus',
+      terminal: true,
+      run: () => settings.update({ zoom: nextZoom(settings.value.zoom, -1) }),
+    },
+    {
+      id: 'zoom.reset',
+      title: 'commands.zoomReset',
+      shortcut: 'Mod+0',
+      terminal: true,
+      run: () => settings.update({ zoom: DEFAULT_ZOOM }),
     },
     { id: 'rain.on', title: 'commands.rainOn', run: () => settings.update({ rainEffects: 'on' }) },
     {

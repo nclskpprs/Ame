@@ -6,6 +6,7 @@ import type { FitAddon } from '@xterm/addon-fit';
 import { isMac } from '$lib/commands/shortcuts';
 import { commands } from '$lib/ipc/bindings';
 import { InputQueue } from './input-queue';
+import { isNewlineKey, NEWLINE_SEQUENCE } from './keys';
 
 /** Resizes are sent to the program after the size settled for this long. */
 const RESIZE_DELAY_MS = 50;
@@ -144,10 +145,19 @@ export class TerminalView {
   }
 
   /**
-   * Copy and paste with Ctrl+Shift+C/V on Linux and Windows (plain Ctrl+C
-   * and Ctrl+V belong to the program). macOS uses the native Cmd+C/V.
+   * Shift+Enter inserts a line break instead of submitting (see
+   * {@link isNewlineKey}). Copy and paste with Ctrl+Shift+C/V on Linux and
+   * Windows (plain Ctrl+C and Ctrl+V belong to the program). macOS uses the
+   * native Cmd+C/V.
    */
   #onKey(event: KeyboardEvent): boolean {
+    if (isNewlineKey(event)) {
+      // xterm.js sees keydown, keypress and keyup; all must be swallowed,
+      // or it sends a plain Enter as well.
+      if (event.type === 'keydown') this.#queue.push(NEWLINE_SEQUENCE);
+      event.preventDefault();
+      return false;
+    }
     if (isMac || event.type !== 'keydown' || !event.ctrlKey || !event.shiftKey) return true;
     const term = this.#term;
     if (event.code === 'KeyC' && term?.hasSelection()) {

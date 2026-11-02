@@ -139,6 +139,8 @@ and this project adheres to
 - Start an agent with each project: choose your preferred agent in the
   settings, and it starts as soon as a project without terminal sessions is
   opened.
+- Terminal: Shift+Enter inserts a line break in agent prompts instead of
+  submitting them.
 
 ### Fixed
 

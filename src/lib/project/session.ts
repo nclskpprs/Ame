@@ -39,7 +39,7 @@ export class ProjectSession {
       this.syncWatches();
     });
     this.search = new SearchState(path);
-    this.terminals = new TerminalGroup(path, layout?.sessions ?? []);
+    this.terminals = new TerminalGroup(path, layout?.sessions ?? [], layout?.activeSession ?? null);
     this.git = new GitState(path);
     this.git.ignore = (file) => this.editors.savedRecently(file);
     this.git.onChange = (paths) => this.#follow(paths);
@@ -113,9 +113,14 @@ const sessions = new Map<string, ProjectSession>();
 export function persistTerminalSessions(): void {
   for (const session of sessions.values()) {
     const saved = session.terminals.saved();
+    const activeSession = session.terminals.savedActive();
     const layout = workspace.projects.find((p) => p.path === session.path)?.layout;
-    if (layout && JSON.stringify(layout.sessions) !== JSON.stringify(saved)) {
-      workspace.updateLayout(session.path, { sessions: saved });
+    if (
+      layout &&
+      (JSON.stringify(layout.sessions) !== JSON.stringify(saved) ||
+        (layout.activeSession ?? null) !== activeSession)
+    ) {
+      workspace.updateLayout(session.path, { sessions: saved, activeSession });
     }
   }
 }

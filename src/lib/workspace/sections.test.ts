@@ -18,6 +18,7 @@ function project(name: string, extra: Partial<Project> = {}): Project {
       terminalOpen: false,
       terminalHeight: 300,
       sessions: [],
+      activeSession: null,
       follow: false,
     },
     ...extra,

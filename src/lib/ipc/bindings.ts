@@ -523,6 +523,11 @@ export type ProjectLayout_Deserialize = {
 	terminalHeight?: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions?: SavedSession_Deserialize[],
+	/**
+	 *  Index in `sessions` of the session that was shown last, so the
+	 *  terminal panel comes back to it.
+	 */
+	activeSession?: number | null,
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow?: boolean,
 };
@@ -541,6 +546,11 @@ export type ProjectLayout_Serialize = {
 	terminalHeight: number,
 	/**  Terminal sessions that were open, offered to resume after a restart. */
 	sessions: SavedSession_Serialize[],
+	/**
+	 *  Index in `sessions` of the session that was shown last, so the
+	 *  terminal panel comes back to it.
+	 */
+	activeSession: number | null,
 	/**  Follow mode: files an agent changes open in the editor as a diff. */
 	follow: boolean,
 };

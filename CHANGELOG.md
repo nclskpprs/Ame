@@ -146,6 +146,9 @@ and this project adheres to
 
 ### Fixed
 
+- Terminal panel: it stays on the terminal you used last. Closing a
+  terminal goes back to the one used before, and the shown terminal is
+  remembered across restarts, instead of jumping to the newest one.
 - Release builds: the editor shows line numbers beside the code and
   syntax highlighting again; the content security policy blocked the
   editor's styles.

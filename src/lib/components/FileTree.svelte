@@ -119,6 +119,7 @@
       class="row {mark ? `git-${mark}` : ''}"
       class:selected={row.entry.path === tree.selected}
       class:recent={recent.has(row.entry.path)}
+      class:ignored={row.ignored}
       role="treeitem"
       aria-level={row.depth + 1}
       aria-expanded={row.entry.kind === 'dir' ? row.expanded : undefined}
@@ -192,6 +193,11 @@
   /* Changed by an agent a moment ago. */
   .row.recent {
     box-shadow: inset 2px 0 0 var(--ame-accent);
+  }
+
+  /* Excluded by .gitignore, listed only when ignored files are shown. */
+  .row.ignored .name {
+    opacity: 0.6;
   }
 
   .row.selected {

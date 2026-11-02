@@ -39,6 +39,8 @@ pub struct Settings {
     pub zoom: u32,
     /// How a click in the file tree opens a file.
     pub file_open: FileOpen,
+    /// List files excluded by `.gitignore` in the file tree (dimmed).
+    pub show_ignored: bool,
     /// Show file type icons in the file tree and the editor tabs.
     pub file_icons: bool,
     /// OS notifications when an agent needs input, is done or fails.
@@ -80,6 +82,7 @@ impl Default for Settings {
             density: Density::default(),
             zoom: 100,
             file_open: FileOpen::default(),
+            show_ignored: false,
             file_icons: true,
             notifications: true,
             close_action: CloseAction::default(),

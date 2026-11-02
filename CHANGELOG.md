@@ -146,6 +146,9 @@ and this project adheres to
 - Start a shell or an agent with the mouse: while the terminal panel is
   hidden, a slim bar below the editor shows it again or starts a shell or
   an agent; the panel itself got a "New shell" button.
+- File tree: show files excluded by `.gitignore` (e.g. `.env`,
+  `node_modules`), dimmed, with a setting or the "Show or Hide Ignored
+  Files" command.
 
 ### Fixed
 

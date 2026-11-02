@@ -14,15 +14,17 @@ use super::watcher::FsWatcher;
 use crate::error::Result;
 use crate::workspace::projects::WorkspaceStore;
 
-/// Lists a directory of an open project (`""` for the root).
+/// Lists a directory of an open project (`""` for the root); with
+/// `show_ignored`, entries excluded by `.gitignore` are listed too.
 #[tauri::command]
 #[specta::specta]
 pub async fn read_dir(
     store: State<'_, WorkspaceStore>,
     project: String,
     path: String,
+    show_ignored: bool,
 ) -> Result<Vec<DirEntry>> {
-    tree::read_dir(&store.root(&project)?, &path)
+    tree::read_dir(&store.root(&project)?, &path, show_ignored)
 }
 
 #[tauri::command]

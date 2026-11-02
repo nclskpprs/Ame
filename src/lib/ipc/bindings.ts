@@ -32,8 +32,11 @@ export const commands = {
 	/**  Sets the group of a project; `null` or a blank name removes it. */
 	setProjectGroup: (project: string, group: string | null) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_group", { project, group })),
 	setProjectLayout: (project: string, layout: ProjectLayout_Deserialize) => typedError<WorkspaceState_Serialize, AppError>(__TAURI_INVOKE("set_project_layout", { project, layout })),
-	/**  Lists a directory of an open project (`""` for the root). */
-	readDir: (project: string, path: string) => typedError<DirEntry[], AppError>(__TAURI_INVOKE("read_dir", { project, path })),
+	/**
+	 *  Lists a directory of an open project (`""` for the root); with
+	 *  `show_ignored`, entries excluded by `.gitignore` are listed too.
+	 */
+	readDir: (project: string, path: string, showIgnored: boolean) => typedError<DirEntry[], AppError>(__TAURI_INVOKE("read_dir", { project, path, showIgnored })),
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**
@@ -378,6 +381,11 @@ export type DirEntry = {
 	/**  Project-relative path with `/` separators. */
 	path: string,
 	kind: EntryKind,
+	/**
+	 *  Excluded by the ignore rules; only listed when ignored files are
+	 *  shown.
+	 */
+	ignored: boolean,
 };
 
 export type EntryKind = "file" | "dir";
@@ -766,6 +774,8 @@ export type Settings_Deserialize = {
 	zoom?: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen?: FileOpen,
+	/**  List files excluded by `.gitignore` in the file tree (dimmed). */
+	showIgnored?: boolean,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons?: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */
@@ -809,6 +819,8 @@ export type Settings_Serialize = {
 	zoom: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen: FileOpen,
+	/**  List files excluded by `.gitignore` in the file tree (dimmed). */
+	showIgnored: boolean,
 	/**  Show file type icons in the file tree and the editor tabs. */
 	fileIcons: boolean,
 	/**  OS notifications when an agent needs input, is done or fails. */

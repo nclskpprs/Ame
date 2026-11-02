@@ -19,6 +19,7 @@
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import {
     activeSession,
+    allSessions,
     existingSession,
     listenToCheckpoints,
     listenToFileChanges,
@@ -234,6 +235,14 @@
   });
 
   $effect(() => applyZoom(settings.value.zoom));
+
+  // The file trees list ignored files or not; read them again on a change.
+  let showIgnored = untrack(() => settings.value.showIgnored);
+  $effect(() => {
+    if (settings.value.showIgnored === showIgnored) return;
+    showIgnored = settings.value.showIgnored;
+    untrack(() => allSessions().forEach((session) => void session.tree.reloadAll()));
+  });
 
   $effect(() => {
     const project = workspace.active;

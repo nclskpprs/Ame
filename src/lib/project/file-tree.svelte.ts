@@ -12,6 +12,8 @@ export interface TreeRow {
   entry: DirEntry;
   depth: number;
   expanded: boolean;
+  /** Excluded by `.gitignore`, itself or through a parent folder. */
+  ignored: boolean;
 }
 
 /**
@@ -24,12 +26,27 @@ export class FileTreeState {
   readonly expanded: SvelteSet<string>;
   selected = $state<string | null>(null);
   #onChange: () => void;
+  #showIgnored: () => boolean;
 
-  /** `onChange` is called when the expanded directories change. */
-  constructor(project: string, expanded: readonly string[], onChange: () => void) {
+  /**
+   * `onChange` is called when the expanded directories change;
+   * `showIgnored` tells whether files excluded by `.gitignore` are listed.
+   */
+  constructor(
+    project: string,
+    expanded: readonly string[],
+    onChange: () => void,
+    showIgnored: () => boolean = () => false,
+  ) {
     this.project = project;
     this.expanded = new SvelteSet(expanded);
     this.#onChange = onChange;
+    this.#showIgnored = showIgnored;
+  }
+
+  /** Lists every loaded directory again, e.g. after a setting changed. */
+  async reloadAll(): Promise<void> {
+    await Promise.all([...this.children.keys()].map((dir) => this.load(dir)));
   }
 
   /** Loads the root and the restored expanded directories. */
@@ -39,7 +56,7 @@ export class FileTreeState {
 
   async load(dir: string): Promise<void> {
     if (!this.children.has(dir)) this.children.set(dir, { status: 'loading' });
-    const result = await commands.readDir(this.project, dir);
+    const result = await commands.readDir(this.project, dir, this.#showIgnored());
     if (result.status === 'ok') {
       this.children.set(dir, { status: 'loaded', entries: result.data });
     } else if (dir !== '' && this.expanded.has(dir)) {
@@ -95,16 +112,17 @@ export class FileTreeState {
   /** Visible rows in display order. */
   rows(): TreeRow[] {
     const rows: TreeRow[] = [];
-    const visit = (dir: string, depth: number) => {
+    const visit = (dir: string, depth: number, parentIgnored: boolean) => {
       const children = this.children.get(dir);
       if (children?.status !== 'loaded') return;
       for (const entry of children.entries) {
         const expanded = entry.kind === 'dir' && this.expanded.has(entry.path);
-        rows.push({ entry, depth, expanded });
-        if (expanded) visit(entry.path, depth + 1);
+        const ignored = parentIgnored || entry.ignored;
+        rows.push({ entry, depth, expanded, ignored });
+        if (expanded) visit(entry.path, depth + 1, ignored);
       }
     };
-    visit('', 0);
+    visit('', 0, false);
     return rows;
   }
 }

@@ -1,6 +1,7 @@
 import { commands, events } from '$lib/ipc/bindings';
 import { describeError } from '$lib/ipc/types';
 import { notices } from '$lib/stores/notices.svelte';
+import { settings } from '$lib/stores/settings.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { EditorGroup } from './editors.svelte';
@@ -30,10 +31,15 @@ export class ProjectSession {
   constructor(path: string) {
     this.path = path;
     const layout = workspace.projects.find((p) => p.path === path)?.layout;
-    this.tree = new FileTreeState(path, layout?.expandedDirs ?? [], () => {
-      workspace.updateLayout(path, { expandedDirs: [...this.tree.expanded] });
-      this.syncWatches();
-    });
+    this.tree = new FileTreeState(
+      path,
+      layout?.expandedDirs ?? [],
+      () => {
+        workspace.updateLayout(path, { expandedDirs: [...this.tree.expanded] });
+        this.syncWatches();
+      },
+      () => settings.value.showIgnored,
+    );
     this.editors = new EditorGroup(path, layout, () => {
       workspace.updateLayout(path, this.editors.layout());
       this.syncWatches();

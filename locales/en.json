@@ -53,6 +53,10 @@
       "doubleClick": "Double click",
       "singleClick": "Single click"
     },
+    "showIgnored": {
+      "label": "Ignored files",
+      "description": "Files excluded by .gitignore, such as .env or node_modules, appear dimmed in the file tree."
+    },
     "fileIcons": {
       "label": "File icons",
       "on": "Show",
@@ -140,6 +144,7 @@
     "themeLight": "Theme: Light",
     "densityComfortable": "Density: Comfortable",
     "densityCompact": "Density: Compact",
+    "toggleIgnored": "Show or Hide Ignored Files",
     "zoomIn": "Zoom In",
     "zoomOut": "Zoom Out",
     "zoomReset": "Reset Zoom",

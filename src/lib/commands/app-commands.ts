@@ -425,6 +425,11 @@ export function registerAppCommands(): () => void {
       run: () => settings.update({ density: 'compact' }),
     },
     {
+      id: 'fileTree.toggleIgnored',
+      title: 'commands.toggleIgnored',
+      run: () => settings.update({ showIgnored: !settings.value.showIgnored }),
+    },
+    {
       id: 'zoom.in',
       title: 'commands.zoomIn',
       shortcut: 'Mod+Plus',

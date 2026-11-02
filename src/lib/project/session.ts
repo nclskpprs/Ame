@@ -151,11 +151,17 @@ export class ProjectSession {
     });
   }
 
+  /**
+   * Changes on disk (ADR 0024). Paths inside `.git` only mean that the git
+   * state changed (a commit, checkout or staging).
+   */
   onFsChanged(paths: readonly string[]): void {
-    void this.tree.refresh(paths);
-    void this.editors.onFsChanged(paths);
     this.git.refreshSoon();
-    if (touchesManifest(paths)) void this.scripts.refresh();
+    const files = paths.filter((path) => path !== '.git' && !path.startsWith('.git/'));
+    if (files.length === 0) return;
+    void this.tree.refresh(files);
+    void this.editors.onFsChanged(files);
+    if (touchesManifest(files)) void this.scripts.refresh();
   }
 }
 
@@ -216,8 +222,9 @@ const gitStates = new Map<string, string>();
 
 /**
  * Refreshes the git status of projects whose agents are busy or just
- * changed state. The file watcher only sees visible folders (ADR 0015), so
- * agent changes elsewhere are picked up this way. Call periodically.
+ * changed state. On Linux the file watcher only sees visible folders
+ * (ADR 0024), so agent changes elsewhere are picked up this way. Call
+ * periodically.
  */
 export function pollGit(): void {
   for (const session of sessions.values()) {

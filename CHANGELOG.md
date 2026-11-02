@@ -164,6 +164,11 @@ and this project adheres to
 - Terminal panel: it stays on the terminal you used last. Closing a
   terminal goes back to the one used before, and the shown terminal is
   remembered across restarts, instead of jumping to the newest one.
+- The file tree and the changes panel follow every change on disk without
+  a reload: on macOS and Windows the whole project is watched (ignored
+  folders such as `node_modules` excepted), and commits, checkouts and
+  staging are noticed on every platform. Projects opened through a
+  symlinked path get change events again on macOS.
 - Release builds: the editor shows line numbers beside the code and
   syntax highlighting again; the content security policy blocked the
   editor's styles.

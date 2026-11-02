@@ -46,8 +46,9 @@ export const commands = {
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**
-	 *  Sets the directories of a project whose changes the UI wants to hear
-	 *  about (non-recursive). Replaces the previous set.
+	 *  Sets the directories of a project the UI shows (expanded folders, folders
+	 *  of open files). Replaces the previous set; see `FsWatcher` for what is
+	 *  watched on each platform.
 	 */
 	watchDirs: (project: string, dirs: string[]) => typedError<null, AppError>(__TAURI_INVOKE("watch_dirs", { project, dirs })),
 	/**  Fuzzy-matches the files of a project for quick open. */
@@ -420,7 +421,10 @@ export type FileResults = {
 /**  Files or directories that changed on disk. */
 export type FsChanged = {
 	project: string,
-	/**  Project-relative paths of the changed entries. */
+	/**
+	 *  Project-relative paths of the changed entries. Paths inside `.git`
+	 *  only signal a change of the git state.
+	 */
 	paths: string[],
 };
 

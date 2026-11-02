@@ -12,6 +12,7 @@
   import ScriptsPanel from './ScriptsPanel.svelte';
   import SearchPanel from './SearchPanel.svelte';
   import TerminalPanel from './TerminalPanel.svelte';
+  import TerminalStrip from './TerminalStrip.svelte';
   import type { SidePanel } from '$lib/ipc/bindings';
   import { untrack } from 'svelte';
   import { agents } from '$lib/agents/agents.svelte';
@@ -118,6 +119,8 @@
       <div class="terminal" style:--terminal-height="{project.layout.terminalHeight}px">
         <TerminalPanel group={session.terminals} />
       </div>
+    {:else}
+      <TerminalStrip group={session.terminals} />
     {/if}
   </section>
 </div>

@@ -143,6 +143,9 @@ and this project adheres to
   submitting them.
 - Zoom the whole app with Cmd/Ctrl+Plus and Cmd/Ctrl+Minus; Cmd/Ctrl+0
   resets it. The zoom is remembered.
+- Start a shell or an agent with the mouse: while the terminal panel is
+  hidden, a slim bar below the editor shows it again or starts a shell or
+  an agent; the panel itself got a "New shell" button.
 
 ### Fixed
 

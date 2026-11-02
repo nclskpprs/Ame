@@ -118,6 +118,16 @@
     {/if}
     <button
       class="icon"
+      aria-label={t('terminal.newShell')}
+      title={t('terminal.newShell')}
+      onclick={() => void group.startShell()}
+    >
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <path d="M3 4.5l3 3-3 3M8 11.5h5" />
+      </svg>
+    </button>
+    <button
+      class="icon"
       aria-label={t('terminal.startAgent')}
       title={t('terminal.startAgent')}
       onclick={() => openAgentPicker(group)}

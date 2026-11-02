@@ -254,6 +254,7 @@
     "sessions": "Terminal sessions",
     "label": "Terminal: {title}",
     "newShell": "New shell",
+    "show": "Show terminal panel",
     "startAgent": "Start agent…",
     "hide": "Hide terminal panel",
     "resize": "Resize terminal panel",

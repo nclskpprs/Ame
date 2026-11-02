@@ -35,6 +35,7 @@
   import { countBadge, notifier } from '$lib/notify/notifier';
   import { showSession } from '$lib/agents/show';
   import { usage } from '$lib/agents/usage.svelte';
+  import { unread } from '$lib/agents/unread.svelte';
   import { closeDecision } from '$lib/background/close';
   import { trayModel } from '$lib/background/tray';
   import { shortcutOf } from '$lib/commands/registry';
@@ -93,11 +94,15 @@
     };
   });
 
+  /** The window is shown and has the focus. */
+  let windowActive = $state(true);
+
   // Rain animations pause while the window is hidden or not focused.
   $effect(() => {
     const root = document.documentElement;
     const update = () => {
-      root.dataset.windowActive = String(document.hasFocus() && !document.hidden);
+      windowActive = document.hasFocus() && !document.hidden;
+      root.dataset.windowActive = String(windowActive);
     };
     update();
     window.addEventListener('focus', update);
@@ -112,6 +117,18 @@
 
   $effect(() => {
     if (sessions.initial !== null) persistTerminalSessions();
+  });
+
+  // A result is read once its session is shown with the window focused.
+  $effect(() => {
+    const list = sessions.list;
+    const project = workspace.activePath;
+    const terminals = project ? existingSession(project)?.terminals : undefined;
+    const shown =
+      windowActive && view.overlay === null && terminals?.open
+        ? (terminals.active?.id ?? null)
+        : null;
+    untrack(() => unread.update(list, shown));
   });
 
   $effect(() => {

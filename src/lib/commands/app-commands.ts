@@ -11,6 +11,8 @@ import {
 } from '$lib/agents/group';
 import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { sendSelectionToAgent } from '$lib/agents/send';
+import { showSession } from '$lib/agents/show';
+import { nextUnread, unread } from '$lib/agents/unread.svelte';
 import { currentRainMode } from '$lib/rain/canvas';
 import { paper } from '$lib/rain/paper.svelte';
 import { notices } from '$lib/stores/notices.svelte';
@@ -440,6 +442,26 @@ export function registerAppCommands(): () => void {
       id: 'density.compact',
       title: 'commands.densityCompact',
       run: () => settings.update({ density: 'compact' }),
+    },
+    {
+      id: 'agents.nextUnread',
+      title: 'commands.nextUnread',
+      shortcut: 'Mod+Shift+U',
+      terminal: true,
+      run: () => {
+        const next = nextUnread(terminalSessions.list, activeSession()?.terminals.active?.id);
+        if (next) showSession(next.project, next.id);
+        else notices.push(t('unread.none'));
+      },
+    },
+    {
+      id: 'agents.markUnread',
+      title: 'commands.markUnread',
+      when: () => activeSession()?.terminals.active != null,
+      run: () => {
+        const id = activeSession()?.terminals.active?.id;
+        if (id !== undefined) unread.markUnread(id);
+      },
     },
     {
       id: 'fileTree.newFile',

@@ -153,6 +153,11 @@ and this project adheres to
   and drop) and move them to the trash, from the context menu, the command
   palette or with F2 and Delete (Cmd+Backspace on macOS). Deleting asks
   inline first; open tabs follow moved files.
+- Unread agent results: when an agent finishes, asks something or fails
+  while you look elsewhere, its terminal tab, dashboard card and project
+  stay marked (bold with a dot) until you open that terminal, even hours
+  later. Mark a result as unread again from the context menu, and jump to
+  the next unread one with Cmd/Ctrl+Shift+U.
 
 ### Fixed
 

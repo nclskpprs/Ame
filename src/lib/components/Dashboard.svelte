@@ -18,6 +18,9 @@
   import DropMark from './DropMark.svelte';
   import RainSky from './RainSky.svelte';
   import StatusDot from './StatusDot.svelte';
+  import UnreadMark from './UnreadMark.svelte';
+  import { unread } from '$lib/agents/unread.svelte';
+  import { contextMenu } from '$lib/menu/context-menu.svelte';
 
   /** Last output lines are polled while the dashboard is visible. */
   const PREVIEW_INTERVAL_MS = 1000;
@@ -66,6 +69,17 @@
 
   function open(session: SessionInfo) {
     showSession(session.project, session.id);
+  }
+
+  function showMenu(event: MouseEvent, session: SessionInfo) {
+    const isUnread = unread.has(session.id);
+    contextMenu.show(event, session.title, [
+      {
+        kind: 'action',
+        label: t(isUnread ? 'unread.markRead' : 'unread.markUnread'),
+        run: () => (isUnread ? unread.markRead(session.id) : unread.markUnread(session.id)),
+      },
+    ]);
   }
 
   function onkeydown(event: KeyboardEvent) {
@@ -128,7 +142,9 @@
               <button
                 class="card"
                 class:waiting={session.state === 'needsInput'}
+                class:unread={unread.has(session.id)}
                 onclick={() => open(session)}
+                oncontextmenu={(event) => showMenu(event, session)}
               >
                 <span class="top">
                   <StatusDot
@@ -137,6 +153,7 @@
                     prompts={session.prompts}
                   />
                   <span class="title">{session.title}</span>
+                  {#if unread.has(session.id)}<UnreadMark />{/if}
                   <span class="project">{projectName(session.project)}</span>
                 </span>
                 <span class="state">

@@ -10,6 +10,8 @@
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import StatusDot from './StatusDot.svelte';
+  import UnreadMark from './UnreadMark.svelte';
+  import { unread } from '$lib/agents/unread.svelte';
   import { describeUsage, formatMemory } from '$lib/agents/usage';
   import { usage } from '$lib/agents/usage.svelte';
   import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
@@ -42,6 +44,11 @@
     new Map(sections.flatMap((s) => s.projects).map((p, i) => [p.path, i] as const)),
   );
 
+  /** Projects with an agent result the user has not looked at yet. */
+  const unreadProjects = $derived(
+    new Set(unread.among(sessions.list).map((session) => session.project)),
+  );
+
   let editingGroupOf = $state<string | null>(null);
 
   function sectionTitle(section: ProjectSection): string {
@@ -58,7 +65,18 @@
 
   function showMenu(event: MouseEvent, project: Project) {
     const otherGroups = groupNames(workspace.projects).filter((g) => g !== project.group);
+    const unreadSessions = unread.among(sessions.forProject(project.path));
     contextMenu.show(event, project.name, [
+      ...(unreadSessions.length
+        ? [
+            {
+              kind: 'action' as const,
+              label: t('unread.markRead'),
+              run: () => unreadSessions.forEach((session) => unread.markRead(session.id)),
+            },
+            { kind: 'separator' as const },
+          ]
+        : []),
       {
         kind: 'action',
         label: t(project.pinned ? 'projectMenu.unpin' : 'projectMenu.pin'),
@@ -138,7 +156,8 @@
             onclick={() => void workspace.activate(project.path)}
             oncontextmenu={(event) => showMenu(event, project)}
           >
-            <span class="name">{project.name}</span>
+            <span class="name" class:unread={unreadProjects.has(project.path)}>{project.name}</span>
+            {#if unreadProjects.has(project.path)}<UnreadMark />{/if}
             <kbd class="hint">{hint(project)}</kbd>
             {#if usages.get(project.path)}
               {@const projectUsage = usages.get(project.path) ?? { cpu: 0, memory: 0 }}
@@ -238,6 +257,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .name.unread {
+    color: var(--ame-text);
+    font-weight: 600;
   }
 
   .hint {

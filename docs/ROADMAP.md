@@ -130,12 +130,29 @@ milestones and marked with 💡.
 - [ ] Docs, screenshots, first publication — README and screenshots
       updated; publication waits for the first release
 
+## M6b — macOS test feedback (maintainer, 2026-11-02)
+
+- [x] Shift+Enter inserts a line break in agent prompts
+- [x] Show files excluded by `.gitignore` (setting + command), dimmed
+- [x] File operations in the tree: new file/folder, rename/move (also by
+      drag and drop), move to the trash with inline confirmation
+- [x] App zoom with Mod+Plus / Mod+Minus, reset with Mod+0
+- [x] Unread agent results (sidebar, tabs, dashboard), "Mark as Unread",
+      jump to the next unread result (Mod+Shift+U)
+- [x] No manual reload: recursive watching on macOS/Windows, `.git` state
+      changes everywhere (ADR 0024)
+- [x] The terminal panel stays on the session used last (also after
+      closing a tab and across restarts)
+- [x] Buttons to show the terminal panel and start a shell or an agent
+      without the keyboard
+
 ## Later
 
 - 💡 Background daemon: PTY sessions live in a small Rust process and
   survive a crash of the app (like tmux); replaced for 0.1 by ADR 0020
 
-- File operations in the tree: new file/folder, rename, delete
+- 💡 Kanban board (maintainer idea): work packages with title, ticket and
+  description that agents work through one after another
 - Virtualized rendering for very large directories and search results
 - Git worktrees for parallel agents in the same repo
 - More UI languages (German first)

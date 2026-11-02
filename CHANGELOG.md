@@ -141,6 +141,8 @@ and this project adheres to
   opened.
 - Terminal: Shift+Enter inserts a line break in agent prompts instead of
   submitting them.
+- Zoom the whole app with Cmd/Ctrl+Plus and Cmd/Ctrl+Minus; Cmd/Ctrl+0
+  resets it. The zoom is remembered.
 
 ### Fixed
 

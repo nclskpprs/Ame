@@ -29,6 +29,7 @@
   import { settings } from '$lib/stores/settings.svelte';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { currentTheme } from '$lib/theme/current.svelte';
+  import { applyZoom } from '$lib/theme/zoom';
   import { waitingCount } from '$lib/agents/state';
   import { countBadge, notifier } from '$lib/notify/notifier';
   import { showSession } from '$lib/agents/show';
@@ -231,6 +232,8 @@
       rainEffects: resolveRainEffects(settings.value.rainEffects, reducedMotion),
     });
   });
+
+  $effect(() => applyZoom(settings.value.zoom));
 
   $effect(() => {
     const project = workspace.active;

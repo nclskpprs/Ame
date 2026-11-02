@@ -20,6 +20,7 @@ import { everythingSource, fileSource } from '$lib/palette/sources';
 import { closeGuard } from '$lib/project/close-guard.svelte';
 import { activeSession } from '$lib/project/session';
 import { settings } from '$lib/stores/settings.svelte';
+import { DEFAULT_ZOOM, nextZoom } from '$lib/theme/zoom';
 import { view } from '$lib/stores/view.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
 import { orderedProjects } from '$lib/workspace/sections';
@@ -422,6 +423,27 @@ export function registerAppCommands(): () => void {
       id: 'density.compact',
       title: 'commands.densityCompact',
       run: () => settings.update({ density: 'compact' }),
+    },
+    {
+      id: 'zoom.in',
+      title: 'commands.zoomIn',
+      shortcut: 'Mod+Plus',
+      terminal: true,
+      run: () => settings.update({ zoom: nextZoom(settings.value.zoom, 1) }),
+    },
+    {
+      id: 'zoom.out',
+      title: 'commands.zoomOut',
+      shortcut: 'Mod+Minus',
+      terminal: true,
+      run: () => settings.update({ zoom: nextZoom(settings.value.zoom, -1) }),
+    },
+    {
+      id: 'zoom.reset',
+      title: 'commands.zoomReset',
+      shortcut: 'Mod+0',
+      terminal: true,
+      run: () => settings.update({ zoom: DEFAULT_ZOOM }),
     },
     { id: 'rain.on', title: 'commands.rainOn', run: () => settings.update({ rainEffects: 'on' }) },
     {

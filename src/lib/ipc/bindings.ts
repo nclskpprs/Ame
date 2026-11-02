@@ -752,6 +752,8 @@ export type Settings_Deserialize = {
 	rainEffects?: RainEffects,
 	/**  Spacing of the UI. */
 	density?: Density,
+	/**  Zoom of the whole UI in percent (100 = actual size). */
+	zoom?: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen?: FileOpen,
 	/**  Show file type icons in the file tree and the editor tabs. */
@@ -793,6 +795,8 @@ export type Settings_Serialize = {
 	rainEffects: RainEffects,
 	/**  Spacing of the UI. */
 	density: Density,
+	/**  Zoom of the whole UI in percent (100 = actual size). */
+	zoom: number,
 	/**  How a click in the file tree opens a file. */
 	fileOpen: FileOpen,
 	/**  Show file type icons in the file tree and the editor tabs. */

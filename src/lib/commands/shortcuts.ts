@@ -37,10 +37,26 @@ type KeyEventLike = Pick<
   'key' | 'code' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey'
 >;
 
+/**
+ * Keys that sit on different places (and need Shift or not) depending on the
+ * keyboard layout, e.g. `+` is Shift+= on US keyboards and its own key on
+ * German ones. They match by character (or the number pad key), ignoring
+ * Shift.
+ */
+const LAYOUT_KEYS: Readonly<Record<string, { keys: string[]; codes: string[] }>> = {
+  Plus: { keys: ['+', '='], codes: ['NumpadAdd'] },
+  Minus: { keys: ['-', '_'], codes: ['NumpadSubtract'] },
+};
+
 export function matchesShortcut(event: KeyEventLike, shortcut: Shortcut, mac = isMac): boolean {
   const mod = mac ? event.metaKey : event.ctrlKey;
   const otherMod = mac ? event.ctrlKey : event.metaKey;
   if (mod !== shortcut.mod || otherMod) return false;
+  const layoutKey = LAYOUT_KEYS[shortcut.key];
+  if (layoutKey) {
+    if (event.altKey !== shortcut.alt) return false;
+    return layoutKey.keys.includes(event.key) || layoutKey.codes.includes(event.code);
+  }
   if (event.shiftKey !== shortcut.shift || event.altKey !== shortcut.alt) return false;
   const code = codeFor(shortcut.key);
   return code ? event.code === code : event.key.toLowerCase() === shortcut.key.toLowerCase();
@@ -53,6 +69,8 @@ const KEY_SYMBOLS: Readonly<Record<string, string>> = {
   ArrowDown: '↓',
   ArrowLeft: '←',
   ArrowRight: '→',
+  Plus: '+',
+  Minus: '−',
 };
 
 export function formatShortcut(shortcut: Shortcut, mac = isMac): string {

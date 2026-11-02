@@ -13,6 +13,7 @@
     "opener:default",
     "notification:default",
     "core:window:allow-set-badge-count",
-    "core:window:allow-set-overlay-icon"
+    "core:window:allow-set-overlay-icon",
+    "core:webview:allow-set-webview-zoom"
   ]
 }

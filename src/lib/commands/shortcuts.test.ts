@@ -58,6 +58,20 @@ describe('matchesShortcut', () => {
     ).toBe(true);
   });
 
+  it('matches Plus and Minus on any keyboard layout', () => {
+    const zoomIn = parseShortcut('Mod+Plus');
+    const zoomOut = parseShortcut('Mod+Minus');
+    // US: Shift+= gives "+", plain "=" counts too; German: its own "+" key.
+    expect(matchesShortcut(key('Equal', '=', { metaKey: true }), zoomIn, true)).toBe(true);
+    expect(
+      matchesShortcut(key('Equal', '+', { metaKey: true, shiftKey: true }), zoomIn, true),
+    ).toBe(true);
+    expect(matchesShortcut(key('BracketRight', '+', { metaKey: true }), zoomIn, true)).toBe(true);
+    expect(matchesShortcut(key('Slash', '-', { metaKey: true }), zoomOut, true)).toBe(true);
+    expect(matchesShortcut(key('Slash', '/', { metaKey: true }), zoomOut, true)).toBe(false);
+    expect(matchesShortcut(key('Minus', '-', {}), zoomOut, true)).toBe(false);
+  });
+
   it('matches named keys by key', () => {
     expect(matchesShortcut(key('Escape', 'Escape'), parseShortcut('Escape'), false)).toBe(true);
   });

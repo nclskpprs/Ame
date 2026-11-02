@@ -9,7 +9,7 @@ import { EditorView, type ViewUpdate } from '@codemirror/view';
 import { minimalChange } from '$lib/editor/diff';
 import { loadLanguage } from '$lib/editor/languages';
 import { baseExtensions, lineSeparatorFor } from '$lib/editor/setup';
-import { basename, dirname } from '$lib/fs/paths';
+import { basename, dirname, movedPath } from '$lib/fs/paths';
 import { t } from '$lib/i18n';
 import { commands } from '$lib/ipc/bindings';
 import { describeError, type ProjectLayout } from '$lib/ipc/types';
@@ -173,6 +173,27 @@ export class EditorGroup {
       this.activePath = null;
       if (next) void this.activate(next.path);
     }
+    this.#onChange();
+  }
+
+  /**
+   * Follows a file or folder that was moved in the file tree: tabs without
+   * unsaved edits show the file at its new place. Tabs with unsaved edits
+   * stay and report the file as deleted, so nothing is lost.
+   */
+  moved(from: string, to: string): void {
+    let changed = false;
+    this.files = this.files.map((file) => {
+      const next = movedPath(file.path, from, to);
+      if (next === null || file.dirty) return file;
+      changed = true;
+      if (this.activePath === file.path) this.activePath = next;
+      return new OpenFile(next);
+    });
+    if (!changed) return;
+    const active = this.active;
+    this.activePath = null;
+    if (active) void this.activate(active.path);
     this.#onChange();
   }
 

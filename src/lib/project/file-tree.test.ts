@@ -49,4 +49,26 @@ describe('FileTreeState', () => {
       ['src/main.ts', false],
     ]);
   });
+
+  it('keeps expanded folders and the selection after a move', async () => {
+    const tree = new FileTreeState('/p', ['src'], () => {});
+    await tree.init();
+    tree.selected = 'src/main.ts';
+    tree.moved('src', 'lib');
+    expect([...tree.expanded]).toEqual(['lib']);
+    expect(tree.selected).toBe('lib/main.ts');
+  });
+
+  it('puts new entries into the selected folder', async () => {
+    const tree = new FileTreeState('/p', ['src'], () => {});
+    await tree.init();
+    tree.selected = 'src/main.ts';
+    tree.startNew('newFile');
+    expect(tree.edit).toEqual({ kind: 'newFile', value: 'src/' });
+    tree.selected = 'src';
+    tree.startNew('newFolder');
+    expect(tree.edit).toEqual({ kind: 'newFolder', value: 'src/' });
+    tree.startTrash('src');
+    expect(tree.edit).toEqual({ kind: 'trash', path: 'src', isDir: true });
+  });
 });

@@ -39,3 +39,22 @@ export function withAncestors(paths: Iterable<string>): Set<string> {
   }
   return result;
 }
+
+/**
+ * Where `path` ends up when `from` is moved to `to`: `to` itself, the same
+ * place below `to` for paths inside a moved folder, else `null`.
+ */
+export function movedPath(path: string, from: string, to: string): string | null {
+  if (path === from) return to;
+  return path.startsWith(`${from}/`) ? to + path.slice(from.length) : null;
+}
+
+/** A path typed by the user, cleaned: `/` separators, no empty parts. */
+export function cleanPath(input: string): string {
+  return input
+    .replaceAll('\\', '/')
+    .split('/')
+    .map((part) => part.trim())
+    .filter((part) => part !== '' && part !== '.')
+    .join('/');
+}

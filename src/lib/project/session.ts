@@ -10,6 +10,8 @@ import { CheckpointState } from './checkpoints.svelte';
 import { GitState } from './git.svelte';
 import { ScriptState, touchesManifest } from './scripts.svelte';
 import { newest } from '$lib/git/recent';
+import { ancestors, isWithin } from '$lib/fs/paths';
+import { t } from '$lib/i18n';
 import { SearchState } from './search.svelte';
 import { TerminalGroup } from './terminals.svelte';
 import { WatchSet } from './watch-set';
@@ -90,6 +92,54 @@ export class ProjectSession {
   /** Opens a file and selects a range on a line (columns in UTF-16 units). */
   async openLocation(path: string, line: number, from: number, to: number): Promise<void> {
     await this.editors.reveal(path, line, from, to);
+  }
+
+  /** Creates an empty file (and opens it) or a folder; returns success. */
+  async createEntry(path: string, kind: 'file' | 'dir'): Promise<boolean> {
+    const result = await commands.createEntry(this.path, path, kind);
+    if (result.status === 'error') {
+      notices.push(t('fileTree.createFailed', { message: describeError(result.error) }));
+      return false;
+    }
+    await this.tree.refresh([path, ...ancestors(path).slice(1)]);
+    if (kind === 'file') await this.openFile(path);
+    else await this.tree.reveal(path);
+    return true;
+  }
+
+  /** Moves or renames a file or folder; returns success. */
+  async moveEntry(from: string, to: string): Promise<boolean> {
+    if (from === to) return true;
+    const result = await commands.moveEntry(this.path, from, to);
+    if (result.status === 'error') {
+      notices.push(t('fileTree.moveFailed', { message: describeError(result.error) }));
+      return false;
+    }
+    this.tree.moved(from, to);
+    this.editors.moved(from, to);
+    await this.tree.refresh([from, to, ...ancestors(to).slice(1)]);
+    await this.tree.reveal(to);
+    this.syncWatches();
+    this.git.refreshSoon();
+    return true;
+  }
+
+  /** Moves a file or folder to the trash; returns success. */
+  async trashEntry(path: string): Promise<boolean> {
+    const result = await commands.trashEntry(this.path, path);
+    if (result.status === 'error') {
+      notices.push(t('fileTree.trashFailed', { message: describeError(result.error) }));
+      return false;
+    }
+    if (this.tree.selected !== null && isWithin(this.tree.selected, path)) {
+      this.tree.selected = null;
+    }
+    await this.tree.refresh([path]);
+    void this.editors.onFsChanged(
+      this.editors.files.map((f) => f.path).filter((f) => isWithin(f, path)),
+    );
+    this.git.refreshSoon();
+    return true;
   }
 
   /** Tells the backend which directories to watch, if the set changed. */

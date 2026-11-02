@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use super::path::{relative, resolve};
@@ -22,7 +22,7 @@ pub struct DirEntry {
     pub ignored: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub enum EntryKind {
     File,

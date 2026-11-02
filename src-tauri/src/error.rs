@@ -23,6 +23,12 @@ pub enum Error {
     UnknownProject(String),
     #[error("path is outside of the project: {0}")]
     PathOutsideProject(String),
+    #[error("already exists: {0}")]
+    AlreadyExists(String),
+    #[error("not found: {0}")]
+    NotFound(String),
+    #[error("cannot move a folder into itself: {0}")]
+    InvalidMove(String),
     #[error("invalid search: {0}")]
     InvalidSearch(String),
     #[error("terminal error: {0}")]

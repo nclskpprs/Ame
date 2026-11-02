@@ -37,6 +37,12 @@ export const commands = {
 	 *  `show_ignored`, entries excluded by `.gitignore` are listed too.
 	 */
 	readDir: (project: string, path: string, showIgnored: boolean) => typedError<DirEntry[], AppError>(__TAURI_INVOKE("read_dir", { project, path, showIgnored })),
+	/**  Creates an empty file or a folder in an open project. */
+	createEntry: (project: string, path: string, kind: EntryKind) => typedError<null, AppError>(__TAURI_INVOKE("create_entry", { project, path, kind })),
+	/**  Moves or renames a file or folder inside an open project. */
+	moveEntry: (project: string, from: string, to: string) => typedError<null, AppError>(__TAURI_INVOKE("move_entry", { project, from, to })),
+	/**  Moves a file or folder of an open project to the trash. */
+	trashEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("trash_entry", { project, path })),
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**
@@ -286,7 +292,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "alreadyExists"; message: string } | { kind: "notFound"; message: string } | { kind: "invalidMove"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
 
 /**  Static information about the running app. */
 export type AppInfo = {

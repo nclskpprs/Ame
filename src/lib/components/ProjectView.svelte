@@ -86,6 +86,7 @@
           recent={session.git.recentMarks}
           icons={settings.value.fileIcons}
           singleClick={settings.value.fileOpen === 'singleClick'}
+          ops={session}
           onopen={(path) => void session.editors.open(path)}
         />
       {/if}

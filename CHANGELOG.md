@@ -149,6 +149,10 @@ and this project adheres to
 - File tree: show files excluded by `.gitignore` (e.g. `.env`,
   `node_modules`), dimmed, with a setting or the "Show or Hide Ignored
   Files" command.
+- File tree: create files and folders, rename or move them (also by drag
+  and drop) and move them to the trash, from the context menu, the command
+  palette or with F2 and Delete (Cmd+Backspace on macOS). Deleting asks
+  inline first; open tabs follow moved files.
 
 ### Fixed
 

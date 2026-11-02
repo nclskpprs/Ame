@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { ancestors, basename, dirname, extension, isWithin, withAncestors } from './paths';
+import {
+  ancestors,
+  basename,
+  dirname,
+  extension,
+  isWithin,
+  withAncestors,
+  cleanPath,
+  movedPath,
+} from './paths';
 
 describe('paths', () => {
   it('splits paths', () => {
@@ -36,5 +45,21 @@ describe('paths', () => {
       'src/lib/a.ts',
     ]);
     expect(withAncestors([]).size).toBe(0);
+  });
+});
+
+describe('movedPath', () => {
+  it('maps the moved entry and everything inside it', () => {
+    expect(movedPath('src/lib', 'src/lib', 'core/lib')).toBe('core/lib');
+    expect(movedPath('src/lib/a.ts', 'src/lib', 'core/lib')).toBe('core/lib/a.ts');
+    expect(movedPath('src/library.ts', 'src/lib', 'core/lib')).toBeNull();
+  });
+});
+
+describe('cleanPath', () => {
+  it('normalizes typed paths', () => {
+    expect(cleanPath(' src//new.ts ')).toBe('src/new.ts');
+    expect(cleanPath('./a\\b/')).toBe('a/b');
+    expect(cleanPath('/')).toBe('');
   });
 });

@@ -36,9 +36,11 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Maintainer review of M6b** (branch `fix/macos-test-feedback`): test
-   the eight feedback items on the Mac, ideally from a preview build.
-2. **M6: in-app updates.** Done by the maintainer: signing key
+1. **Maintainer review of M6b and M6c** (branch `feat/m6c-feedback`):
+   test the items on the Mac, ideally from a preview build.
+2. **Board** (M6c): work packages for the agents; open design questions
+   go to the maintainer first.
+3. **M6: in-app updates.** Done by the maintainer: signing key
    (`~/.tauri/ame.key` on the Linux machine, key ID `66F7B297F3DF034F`) and
    the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
    `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Public key for
@@ -59,10 +61,39 @@ is open, what comes next.
      (`AppPaths::is_portable()`) gets a download link instead.
    - Then: ADR, `docs/ARCHITECTURE.md`, `docs/RELEASING.md` ("Not yet"),
      ROADMAP, PROGRESS and CHANGELOG.
-3. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
+4. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
    the first publication.
 
 ## Log
+
+### 2026-11-03 — Working-day feedback (M6c)
+
+The maintainer listed what they noticed while working with Ame. Branch
+`feat/m6c-feedback`, one commit per item.
+
+**Done**
+
+- Script runs are skipped by the unread tracking (`isScript` in
+  `unread.svelte.ts`). OS notifications for scripts are unchanged.
+- Reveal and copy path: backend commands `reveal_entry` and `native_path`
+  (`fs/ops.rs`) take project-relative paths like every other file command;
+  `""` is the project root, which opens the folder itself instead of
+  selecting it in its parent. `tauri-plugin-opener` does the reveal.
+  Frontend helpers in `src/lib/fs/reveal.ts`; labels follow the platform
+  (Finder / Explorer / file manager). Entries in the tree menu (also on
+  the empty tree area for the project), the sidebar project menu and five
+  palette commands.
+- Sidebar groups: group sections get a border and a light background;
+  projects are draggable onto sections (`sectionDrop` in
+  `workspace/sections.ts` decides pin / unpin / group). While dragging, an
+  empty "Projects" section appears when there is none, so a project can
+  always leave its group.
+
+**Open**
+
+- Not checked by hand in the running app yet (drag and drop, the reveal
+  on Windows and Linux).
+- Board and in-app updates before 0.1.0.
 
 ### 2026-11-02 — macOS test feedback (M6b)
 

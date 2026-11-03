@@ -146,13 +146,26 @@ milestones and marked with 💡.
 - [x] Buttons to show the terminal panel and start a shell or an agent
       without the keyboard
 
+## M6c — Working-day feedback (maintainer, 2026-11-03)
+
+- [x] Reveal files, folders and projects in Finder / Explorer / the file
+      manager (context menus and palette)
+- [x] Copy the absolute (and for files the relative) path from the
+      context menus and the palette
+- [x] Script runs never become unread; unread marks are for agents and
+      shells only
+- [x] Groups are framed in the sidebar; drag and drop projects into, out
+      of and between groups (and onto the pinned list)
+- [ ] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
+      with title, ticket and description prepared for the agents, which
+      work through them one after another
+- Then: in-app updates (M6) and the 0.1.0 release
+
 ## Later
 
 - 💡 Background daemon: PTY sessions live in a small Rust process and
   survive a crash of the app (like tmux); replaced for 0.1 by ADR 0020
 
-- 💡 Kanban board (maintainer idea): work packages with title, ticket and
-  description that agents work through one after another
 - Virtualized rendering for very large directories and search results
 - Git worktrees for parallel agents in the same repo
 - More UI languages (German first)

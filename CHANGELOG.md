@@ -158,6 +158,17 @@ and this project adheres to
   stay marked (bold with a dot) until you open that terminal, even hours
   later. Mark a result as unread again from the context menu, and jump to
   the next unread one with Cmd/Ctrl+Shift+U.
+- Reveal in Finder / Explorer / file manager and Copy Path for files,
+  folders and projects, from the context menus of the file tree and the
+  sidebar and from the command palette; files also offer Copy Relative
+  Path.
+- Project groups are framed in the sidebar, and projects move between
+  groups, out of a group, onto the pinned list or off it by drag and drop.
+
+### Changed
+
+- Script runs no longer count as unread results; only agents and shells
+  do.
 
 ### Fixed
 

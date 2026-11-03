@@ -186,7 +186,16 @@
     "switchBranch": "Switch Branch…",
     "cleanUpBranches": "Ask Agent to Clean Up Branches",
     "cleanUpBranchesGroup": "Ask Project Group's Agents to Clean Up Branches",
-    "sendPrompt": "Send Prompt…"
+    "sendPrompt": "Send Prompt…",
+    "revealEntryFinder": "Reveal File in Finder",
+    "revealEntryExplorer": "Reveal File in Explorer",
+    "revealEntryFileManager": "Reveal File in File Manager",
+    "revealProjectFinder": "Open Project in Finder",
+    "revealProjectExplorer": "Open Project in Explorer",
+    "revealProjectFileManager": "Open Project in File Manager",
+    "copyEntryPath": "Copy Path of File",
+    "copyEntryRelativePath": "Copy Relative Path of File",
+    "copyProjectPath": "Copy Project Path"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -470,5 +479,18 @@
     "queued": "“{name}” is queued (agents: {count}).",
     "saved": "Saved “{name}” to the prompt library.",
     "saveToLibrary": "Save to library"
+  },
+  "reveal": {
+    "finder": "Reveal in Finder",
+    "explorer": "Reveal in Explorer",
+    "fileManager": "Reveal in File Manager",
+    "projectFinder": "Open in Finder",
+    "projectExplorer": "Open in Explorer",
+    "projectFileManager": "Open in File Manager",
+    "copyPath": "Copy Path",
+    "copyRelativePath": "Copy Relative Path",
+    "copied": "Copied {path}",
+    "failed": "Could not open it: {message}",
+    "copyFailed": "Could not copy the path: {message}"
   }
 }

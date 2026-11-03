@@ -43,6 +43,16 @@ export const commands = {
 	moveEntry: (project: string, from: string, to: string) => typedError<null, AppError>(__TAURI_INVOKE("move_entry", { project, from, to })),
 	/**  Moves a file or folder of an open project to the trash. */
 	trashEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("trash_entry", { project, path })),
+	/**
+	 *  Shows a file or folder of an open project in the system file manager;
+	 *  `""` opens the project folder.
+	 */
+	revealEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("reveal_entry", { project, path })),
+	/**
+	 *  The absolute path of a file or folder of an open project (`""` for the
+	 *  project folder), with the separators of the operating system.
+	 */
+	nativePath: (project: string, path: string) => typedError<string, AppError>(__TAURI_INVOKE("native_path", { project, path })),
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**

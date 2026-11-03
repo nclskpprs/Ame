@@ -6,6 +6,7 @@
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
+  import { copyPath, revealEntry, revealLabel } from '$lib/fs/reveal';
   import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
@@ -113,6 +114,9 @@
             : []),
         ],
       },
+      { kind: 'separator' },
+      { kind: 'action', label: revealLabel(''), run: () => revealEntry(project.path, '') },
+      { kind: 'action', label: t('reveal.copyPath'), run: () => copyPath(project.path, '') },
       { kind: 'separator' },
       {
         kind: 'action',

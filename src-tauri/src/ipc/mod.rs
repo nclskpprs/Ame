@@ -51,6 +51,8 @@ pub fn builder() -> Builder<Wry> {
             fs::create_entry,
             fs::move_entry,
             fs::trash_entry,
+            fs::reveal_entry,
+            fs::native_path,
             fs::read_file,
             fs::write_file,
             fs::watch_dirs,

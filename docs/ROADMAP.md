@@ -158,7 +158,7 @@ milestones and marked with 💡.
 - [x] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
       per project, prepared from configurable templates, started by hand
       with a picked agent (ADR 0025)
-- [ ] The 0.1.0 release (version set; tag and publication open)
+- [x] The 0.1.0 release (published 2026-11-03; updater tested from 0.0.0 to 0.1.0)
 
 ## Later
 

@@ -8,7 +8,7 @@ is open, what comes next.
 - **Milestones:** M0–M5b, M6b and M6c are complete (maintainer-tested) (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
   icon, UX review, release workflow, README and in-app updates are done;
-  the 0.1.0 release is open.
+  0.1.0 is released.
 - **Branches:** PR #2 (M1–M6) is merged into `main`. Work goes on short
   branches from `main` (`feat/…`, `fix/…`, `chore/…`), one Conventional
   Commit per task, never directly on `main`.
@@ -40,13 +40,17 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Release 0.1.0:** merge `chore/release-0.1.0`, push the tag `v0.1.0`
-   (maintainer), check the draft and publish it as a full release (see
-   `docs/RELEASING.md`).
-2. **First updater test:** the installed preview (version `0.0.0`) should
-   offer 0.1.0 and install it once 0.1.0 is published.
+1. Collect feedback on 0.1.0 and plan the next milestone with the
+   maintainer.
 
 ## Log
+
+### 2026-11-03 — Release 0.1.0 published
+
+- **Done:** tag `v0.1.0` pushed, the Release workflow built and signed all
+  bundles (`latest.json` with every platform), the maintainer published
+  it as a full release. First end-to-end updater test passed: the
+  installed preview (`0.0.0`) offered 0.1.0, installed it and restarted.
 
 ### 2026-11-03 — Release 0.1.0 prepared
 

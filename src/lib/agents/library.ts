@@ -26,7 +26,8 @@ export function entryName(entry: PromptEntry): string {
   return entry.nameKey ? t(entry.nameKey) : entry.name;
 }
 
-async function contextFor(project: string): Promise<PromptContext> {
+/** Values for the placeholders of a prompt sent to an agent of `project`. */
+export async function contextFor(project: string): Promise<PromptContext> {
   const name = workspace.projects.find((p) => p.path === project)?.name ?? basename(project);
   const result = await commands.gitBranches(project);
   const branches = result.status === 'ok' ? result.data : null;

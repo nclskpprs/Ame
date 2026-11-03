@@ -5,10 +5,10 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestones:** M0–M5b are complete (extras skipped for now: review mode
+- **Milestones:** M0–M5b, M6b and M6c are complete (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
-  icon, UX review, release workflow and README are done; **in-app updates**
-  are open.
+  icon, UX review, release workflow, README and in-app updates are done;
+  the 0.1.0 release is open.
 - **Branches:** PR #2 (M1–M6) is merged into `main`. Work goes on short
   branches from `main` (`feat/…`, `fix/…`, `chore/…`), one Conventional
   Commit per task, never directly on `main`.
@@ -36,33 +36,77 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Maintainer review of M6b** (branch `fix/macos-test-feedback`): test
-   the eight feedback items on the Mac, ideally from a preview build.
-2. **M6: in-app updates.** Done by the maintainer: signing key
-   (`~/.tauri/ame.key` on the Linux machine, key ID `66F7B297F3DF034F`) and
-   the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
-   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Public key for
-   `plugins.updater.pubkey`:
-   `dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY2RjdCMjk3RjNERjAzNEYKUldSUEE5L3psN0wzWmhvVzZNZEZWSHkzMlBnRTdXS2ttd2Q5eDl1QXlaNUxKTzRzSkw5YW1yTWoK`.
-   Plan:
-   - Add `tauri-plugin-updater` (Cargo.toml, `lib.rs`); specta-typed
-     commands for check and install in a new backend module, registered
-     in `ipc::builder()`.
-   - `tauri.conf.json`: `bundle.createUpdaterArtifacts: true`;
-     `plugins.updater` with the public key and the endpoint
-     `https://github.com/nclskpprs/Ame/releases/latest/download/latest.json`.
-   - `release.yml`: pass both signing secrets to the `tauri-action` step
-     so it signs the artifacts and uploads `latest.json`.
-   - Frontend: a setting to check on start and periodically, a "Check for
-     Updates" command, an inline notice and an OS notification, and
-     "Install and restart". The portable Windows build
-     (`AppPaths::is_portable()`) gets a download link instead.
-   - Then: ADR, `docs/ARCHITECTURE.md`, `docs/RELEASING.md` ("Not yet"),
-     ROADMAP, PROGRESS and CHANGELOG.
-3. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
+1. **Maintainer review of M6b and M6c** (branch `feat/m6c-feedback`):
+   test the items on the Mac, ideally from a preview build.
+2. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
    the first publication.
 
 ## Log
+
+### 2026-11-03 — In-app updates (M6)
+
+**Done**
+
+- ADR 0026. Backend `update/` (`update_support`, `check_update`,
+  `install_update` with a progress channel; sessions end before the
+  restart, on Windows via `on_before_exit`). `tauri.conf.json`:
+  `createUpdaterArtifacts`, `plugins.updater` (public key, endpoint,
+  passive Windows install). Setting `updateCheck` (default on).
+- Frontend `lib/update/update.svelte.ts` (checks 10 s after start and every
+  6 h, one OS notification per version), `UpdateNotice.svelte` in the
+  sidebar with inline confirmation when sessions run, palette commands,
+  an _Updates_ section in the settings with "Check now".
+- Workflows: release and preview pass the signing secrets; release uses
+  `updaterJsonPreferNsis`, and **only `-` versions are pre-releases now**,
+  because `releases/latest` (the updater endpoint) skips pre-releases.
+
+**Open**
+
+- Not tried end to end: that needs two published releases (e.g. 0.1.0 and
+  0.1.1). The first real test is the update from 0.1.0 to the next
+  version. Check after the 0.1.0 release that `latest.json` lists
+  `darwin-aarch64`, `darwin-x86_64`, `linux-x86_64` and `windows-x86_64`.
+- Local bundled release builds now need the signing key (see RELEASING).
+
+### 2026-11-03 — Working-day feedback (M6c)
+
+The maintainer listed what they noticed while working with Ame. Branch
+`feat/m6c-feedback`, one commit per item.
+
+**Done**
+
+- Script runs are skipped by the unread tracking (`isScript` in
+  `unread.svelte.ts`). OS notifications for scripts are unchanged.
+- Reveal and copy path: backend commands `reveal_entry` and `native_path`
+  (`fs/ops.rs`) take project-relative paths like every other file command;
+  `""` is the project root, which opens the folder itself instead of
+  selecting it in its parent. `tauri-plugin-opener` does the reveal.
+  Frontend helpers in `src/lib/fs/reveal.ts`; labels follow the platform
+  (Finder / Explorer / file manager). Entries in the tree menu (also on
+  the empty tree area for the project), the sidebar project menu and five
+  palette commands.
+- Sidebar groups: group sections get a border and a light background;
+  projects are draggable onto sections (`sectionDrop` in
+  `workspace/sections.ts` decides pin / unpin / group). While dragging, an
+  empty "Projects" section appears when there is none, so a project can
+  always leave its group.
+
+- Board (ADR 0025), after the maintainer's answers: local only (in
+  `board.json` in the config directory), packages are one-time prompt
+  preparations from configurable templates, started by hand with a picked
+  agent, one board per project. Backend `board/`; frontend
+  `lib/board/` (templates, rendering, store), `Board.svelte` (overlay,
+  Mod+Shift+B, three columns, inline form, context menu) and
+  `TemplateSettings.svelte`. `TerminalGroup.start` now returns the new
+  session.
+
+**Open**
+
+- Not checked by hand in the running app yet: drag and drop in the
+  sidebar, the board UI, reveal on Windows and Linux. A dev run started
+  fine, but screenshots stayed black (no screen recording permission while
+  the maintainer was remote).
+- In-app updates before 0.1.0.
 
 ### 2026-11-02 — macOS test feedback (M6b)
 

@@ -1,5 +1,5 @@
 /** A view that replaces the active project in the main area. */
-export type Overlay = 'settings' | 'dashboard';
+export type Overlay = 'settings' | 'dashboard' | 'board';
 
 /** Which view fills the main area: the active project, the settings or the dashboard. */
 class ViewState {

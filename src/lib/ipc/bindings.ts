@@ -43,6 +43,16 @@ export const commands = {
 	moveEntry: (project: string, from: string, to: string) => typedError<null, AppError>(__TAURI_INVOKE("move_entry", { project, from, to })),
 	/**  Moves a file or folder of an open project to the trash. */
 	trashEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("trash_entry", { project, path })),
+	/**
+	 *  Shows a file or folder of an open project in the system file manager;
+	 *  `""` opens the project folder.
+	 */
+	revealEntry: (project: string, path: string) => typedError<null, AppError>(__TAURI_INVOKE("reveal_entry", { project, path })),
+	/**
+	 *  The absolute path of a file or folder of an open project (`""` for the
+	 *  project folder), with the separators of the operating system.
+	 */
+	nativePath: (project: string, path: string) => typedError<string, AppError>(__TAURI_INVOKE("native_path", { project, path })),
 	readFile: (project: string, path: string) => typedError<FileContent, AppError>(__TAURI_INVOKE("read_file", { project, path })),
 	writeFile: (project: string, path: string, text: string) => typedError<null, AppError>(__TAURI_INVOKE("write_file", { project, path, text })),
 	/**
@@ -83,6 +93,24 @@ export const commands = {
 	listScripts: (project: string) => typedError<Script[], AppError>(__TAURI_INVOKE("list_scripts", { project })),
 	/**  Runs a script in a new terminal session of the project. */
 	runScript: (project: string, id: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("run_script", { project, id, cols, rows })),
+	/**  The work packages of a project. */
+	listPackages: (project: string) => __TAURI_INVOKE<Package_Serialize[]>("list_packages", { project }),
+	/**  Adds or updates a work package of an open project. */
+	savePackage: (entry: Package_Deserialize) => typedError<null, AppError>(__TAURI_INVOKE("save_package", { entry })),
+	/**  Deletes a work package. */
+	deletePackage: (id: string) => typedError<null, AppError>(__TAURI_INVOKE("delete_package", { id })),
+	/**  Whether this build can install updates itself. */
+	updateSupport: () => __TAURI_INVOKE<UpdateSupport>("update_support"),
+	/**
+	 *  Asks the release server for a newer version and remembers it for
+	 *  `install_update`. `None` means Ame is up to date.
+	 */
+	checkUpdate: () => typedError<UpdateInfo_Serialize | null, AppError>(__TAURI_INVOKE("check_update")),
+	/**
+	 *  Downloads and installs the update found by the last check, then
+	 *  restarts Ame. Running sessions end with the restart.
+	 */
+	installUpdate: (progress: Channel<UpdateProgress_Deserialize>) => typedError<null, AppError>(__TAURI_INVOKE("install_update", { progress })),
 	/**  The local branches and the main branch, `None` outside a repository. */
 	gitBranches: (project: string) => typedError<Branches_Serialize | null, AppError>(__TAURI_INVOKE("git_branches", { project })),
 	/**  Switches to a local branch (`git switch`); uncommitted changes stay. */
@@ -293,7 +321,7 @@ export type AgentState =
  *  Serialized as `{ kind, message }` so the frontend can match on `kind`.
  *  Exported as `AppError` to avoid shadowing the JavaScript `Error` class.
  */
-export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "alreadyExists"; message: string } | { kind: "notFound"; message: string } | { kind: "invalidMove"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string };
+export type AppError = { kind: "io"; message: string } | { kind: "serialization"; message: string } | { kind: "noConfigDir" } | { kind: "notADirectory"; message: string } | { kind: "unknownProject"; message: string } | { kind: "pathOutsideProject"; message: string } | { kind: "alreadyExists"; message: string } | { kind: "notFound"; message: string } | { kind: "invalidMove"; message: string } | { kind: "invalidSearch"; message: string } | { kind: "pty"; message: string } | { kind: "unknownSession"; message: number } | { kind: "sessionExited"; message: number } | { kind: "promptRejected"; message: string } | { kind: "unknownScript"; message: string } | { kind: "noFolderOption"; message: string } | { kind: "unknownProfile"; message: string } | { kind: "gitMissing" } | { kind: "git"; message: string } | { kind: "update"; message: string } | { kind: "noPendingUpdate" };
 
 /**  Static information about the running app. */
 export type AppInfo = {
@@ -519,6 +547,98 @@ export type LineMatch = {
 export type MatchRange = {
 	start: number,
 	end: number,
+};
+
+/**  A work package: a prompt prepared from a template. */
+export type Package = Package_Serialize | Package_Deserialize;
+
+/**  Where a package is on the board. */
+export type PackageState = 
+/**  Prepared, not sent yet. */
+"open" | 
+/**  Sent to an agent. */
+"started" | 
+/**  Marked as done by the user. */
+"done";
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate = PackageTemplate_Serialize | PackageTemplate_Deserialize;
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate_Deserialize = {
+	/**  Stable id, unique among the templates. */
+	id?: string,
+	name?: string,
+	/**  Fields besides the title, in the order they are shown. */
+	fields?: TemplateField_Deserialize[],
+	/**
+	 *  The prompt; `{title}`, `{<field label>}`, `{project}`, `{branch}` and
+	 *  `{main}` are filled in by the frontend.
+	 */
+	prompt?: string,
+};
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate_Serialize = {
+	/**  Stable id, unique among the templates. */
+	id: string,
+	name: string,
+	/**  Fields besides the title, in the order they are shown. */
+	fields: TemplateField_Serialize[],
+	/**
+	 *  The prompt; `{title}`, `{<field label>}`, `{project}`, `{branch}` and
+	 *  `{main}` are filled in by the frontend.
+	 */
+	prompt: string,
+};
+
+/**  A work package: a prompt prepared from a template. */
+export type Package_Deserialize = {
+	/**  Stable id, unique on the board. */
+	id?: string,
+	/**  Path of the project the package belongs to. */
+	project?: string,
+	/**  Id of the template it was made from (see `settings.templates`). */
+	template?: string,
+	title?: string,
+	/**  Values of the template fields by field id. */
+	fields?: { [key in string]: string },
+	state?: PackageState,
+	/**  Creation time in milliseconds since the Unix epoch. */
+	createdAt?: number | null,
+	/**  When it was sent to an agent. */
+	startedAt?: number | null,
+	/**  Name of the agent it was sent to. */
+	agent?: string | null,
+};
+
+/**  A work package: a prompt prepared from a template. */
+export type Package_Serialize = {
+	/**  Stable id, unique on the board. */
+	id: string,
+	/**  Path of the project the package belongs to. */
+	project: string,
+	/**  Id of the template it was made from (see `settings.templates`). */
+	template: string,
+	title: string,
+	/**  Values of the template fields by field id. */
+	fields: { [key in string]: string },
+	state: PackageState,
+	/**  Creation time in milliseconds since the Unix epoch. */
+	createdAt: number | null,
+	/**  When it was sent to an agent. */
+	startedAt: number | null,
+	/**  Name of the agent it was sent to. */
+	agent: string | null,
 };
 
 /**  An open project folder. */
@@ -799,6 +919,8 @@ export type Settings_Deserialize = {
 	 *  has no sessions; empty for none.
 	 */
 	startAgent?: string,
+	/**  Look for a new version of Ame on start and every few hours. */
+	updateCheck?: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown?: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
@@ -808,6 +930,11 @@ export type Settings_Deserialize = {
 	 *  frontend when a prompt is sent).
 	 */
 	prompts?: LibraryPrompt_Deserialize[],
+	/**
+	 *  Templates for board work packages; empty means the built-in "Task"
+	 *  template of the frontend.
+	 */
+	templates?: PackageTemplate_Deserialize[],
 };
 
 /**
@@ -844,6 +971,8 @@ export type Settings_Serialize = {
 	 *  has no sessions; empty for none.
 	 */
 	startAgent: string,
+	/**  Look for a new version of Ame on start and every few hours. */
+	updateCheck: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown: boolean,
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
@@ -853,6 +982,11 @@ export type Settings_Serialize = {
 	 *  frontend when a prompt is sent).
 	 */
 	prompts: LibraryPrompt_Serialize[],
+	/**
+	 *  Templates for board work packages; empty means the built-in "Task"
+	 *  template of the frontend.
+	 */
+	templates: PackageTemplate_Serialize[],
 };
 
 export type SidePanel = "files" | "search" | 
@@ -860,6 +994,29 @@ export type SidePanel = "files" | "search" |
 "changes" | 
 /**  `package.json` / `composer.json` scripts; only offered when there are some. */
 "scripts";
+
+/**  A field of a package template. */
+export type TemplateField = TemplateField_Serialize | TemplateField_Deserialize;
+
+/**  A field of a package template. */
+export type TemplateField_Deserialize = {
+	/**  Stable id; package values are stored under it. */
+	id?: string,
+	/**  Shown in the form and used as placeholder, e.g. `{Ticket}`. */
+	label?: string,
+	/**  A text area instead of a single line. */
+	multiline?: boolean,
+};
+
+/**  A field of a package template. */
+export type TemplateField_Serialize = {
+	/**  Stable id; package values are stored under it. */
+	id: string,
+	/**  Shown in the form and used as placeholder, e.g. `{Ticket}`. */
+	label: string,
+	/**  A text area instead of a single line. */
+	multiline: boolean,
+};
 
 export type ThemePreference = 
 /**  Follow the operating system. */
@@ -916,6 +1073,52 @@ export type TrayModel_Serialize = {
 	/**  A status icon (RGBA); `None` shows the app icon. */
 	icon: TrayImage | null,
 };
+
+/**  A newer version that is available. */
+export type UpdateInfo = UpdateInfo_Serialize | UpdateInfo_Deserialize;
+
+/**  A newer version that is available. */
+export type UpdateInfo_Deserialize = {
+	version: string,
+	currentVersion: string,
+	/**  Release notes, if the release has any. */
+	notes?: string | null,
+};
+
+/**  A newer version that is available. */
+export type UpdateInfo_Serialize = {
+	version: string,
+	currentVersion: string,
+	/**  Release notes, if the release has any. */
+	notes: string | null,
+};
+
+/**  Download progress of an update, in bytes. */
+export type UpdateProgress = UpdateProgress_Serialize | UpdateProgress_Deserialize;
+
+/**  Download progress of an update, in bytes. */
+export type UpdateProgress_Deserialize = {
+	downloaded: number | null,
+	/**  Size of the download, if the server tells it. */
+	total?: number | null,
+};
+
+/**  Download progress of an update, in bytes. */
+export type UpdateProgress_Serialize = {
+	downloaded: number | null,
+	/**  Size of the download, if the server tells it. */
+	total: number | null,
+};
+
+/**  How this build gets a new version. */
+export type UpdateSupport = 
+/**  Downloaded, installed and restarted from inside Ame. */
+"inApp" | 
+/**
+ *  Only a link to the release page: the portable Windows build, Linux
+ *  packages other than the AppImage, and debug builds.
+ */
+"download";
 
 /**  Snapshot of the open projects sent to the frontend. */
 export type WorkspaceState = WorkspaceState_Serialize | WorkspaceState_Deserialize;

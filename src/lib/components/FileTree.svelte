@@ -8,6 +8,7 @@
   import { basename, cleanPath, dirname, isWithin } from '$lib/fs/paths';
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
+  import { copyPath, revealEntry, revealLabel } from '$lib/fs/reveal';
   import { isMac } from '$lib/commands/shortcuts';
 
   let {
@@ -143,9 +144,20 @@
       { kind: 'action', label: t('fileTree.newFile'), run: () => tree.startNew('newFile') },
       { kind: 'action', label: t('fileTree.newFolder'), run: () => tree.startNew('newFolder') },
     ];
+    const path = row?.entry.path ?? '';
+    const project = tree.project;
+    items.push(
+      { kind: 'separator' },
+      { kind: 'action', label: revealLabel(path), run: () => revealEntry(project, path) },
+      { kind: 'action', label: t('reveal.copyPath'), run: () => copyPath(project, path) },
+    );
     if (row) {
-      const path = row.entry.path;
       items.push(
+        {
+          kind: 'action',
+          label: t('reveal.copyRelativePath'),
+          run: () => copyPath(project, path, true),
+        },
         { kind: 'separator' },
         { kind: 'action', label: t('fileTree.move'), run: () => tree.startMove(path) },
         { kind: 'action', label: t('fileTree.trash'), run: () => tree.startTrash(path) },

@@ -3,11 +3,11 @@ import type { AgentState } from '$lib/ipc/bindings';
 import type { SessionInfo } from '$lib/ipc/types';
 import { hasNewResult, nextUnread, unread } from './unread.svelte';
 
-function session(id: number, state: AgentState): SessionInfo {
+function session(id: number, state: AgentState, profile = 'claude'): SessionInfo {
   return {
     id,
     project: '/p',
-    profile: 'claude',
+    profile,
     title: 'Claude Code',
     pid: null,
     startedAt: 0,
@@ -32,6 +32,12 @@ describe('hasNewResult', () => {
 });
 
 describe('unread', () => {
+  it('ignores script runs', () => {
+    unread.update([session(9, 'working', 'script:build')], null);
+    unread.update([session(9, 'exited', 'script:build')], null);
+    expect(unread.has(9)).toBe(false);
+  });
+
   it('marks results the user does not look at, until they do', () => {
     unread.update([session(1, 'working'), session(2, 'working')], 2);
     unread.update([session(1, 'idle'), session(2, 'idle')], 2);

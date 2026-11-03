@@ -79,12 +79,19 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Signs the updater artifacts; tauri-action also uploads the
+          # `latest.json` the in-app updater reads (ADR 0026).
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ env.TAG }}
           releaseName: Ame ${{ env.TAG }}
           releaseBody: See CHANGELOG.md for the changes in this version.
           releaseDraft: true
-          prerelease: ${{ startsWith(env.TAG, 'v0.') }}
+          # The updater only sees the latest full release, so plain versions
+          # (also 0.x) are full releases; only `-` versions are pre-releases.
+          prerelease: ${{ contains(env.TAG, '-') }}
+          updaterJsonPreferNsis: true
           args: ${{ matrix.args }}
       - name: Attach the portable Windows build
         if: runner.os == 'Windows'

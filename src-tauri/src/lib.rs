@@ -6,6 +6,7 @@
 pub mod agents;
 pub mod background;
 pub mod bench;
+pub mod board;
 pub mod error;
 pub mod fs;
 pub mod git;
@@ -13,6 +14,7 @@ pub mod ipc;
 pub mod notify;
 pub mod pty;
 pub mod scripts;
+pub mod update;
 pub mod workspace;
 
 use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
@@ -64,6 +66,8 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(update::PendingUpdate::default())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             if cfg!(debug_assertions) {
@@ -83,6 +87,7 @@ pub fn run() {
             );
             app.manage(SettingsStore::load(&paths.config_dir));
             app.manage(WorkspaceStore::load(&paths.config_dir));
+            app.manage(board::BoardStore::load(&paths.config_dir));
             app.manage(FsWatcher::new(app.handle().clone())?);
             app.manage(QuickOpen::default());
             app.manage(Tray::default());

@@ -49,6 +49,10 @@ pub enum Error {
     GitMissing,
     #[error("git: {0}")]
     Git(String),
+    #[error("update: {0}")]
+    Update(String),
+    #[error("no update is pending; check for updates first")]
+    NoPendingUpdate,
 }
 
 impl From<std::io::Error> for Error {

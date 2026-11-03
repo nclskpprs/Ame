@@ -158,6 +158,27 @@ and this project adheres to
   stay marked (bold with a dot) until you open that terminal, even hours
   later. Mark a result as unread again from the context menu, and jump to
   the next unread one with Cmd/Ctrl+Shift+U.
+- Reveal in Finder / Explorer / file manager and Copy Path for files,
+  folders and projects, from the context menus of the file tree and the
+  sidebar and from the command palette; files also offer Copy Relative
+  Path.
+- Project groups are framed in the sidebar, and projects move between
+  groups, out of a group, onto the pinned list or off it by drag and drop.
+- Board (Cmd/Ctrl+Shift+B): prepare work packages per project — a title
+  plus fields like ticket and description — and send each to an agent you
+  pick, running or newly started, when you are ready. Packages move from
+  Open to Started to Done. Templates with your own fields and prompt are
+  set up in the settings. Packages stay on your machine.
+- In-app updates: Ame looks for a new version on start and every six hours
+  (can be turned off in the settings), tells you in the sidebar and with a
+  notification, and installs it with "Install and restart". The portable
+  Windows build and Linux `.deb`/`.rpm` installs link to the download page
+  instead.
+
+### Changed
+
+- Script runs no longer count as unread results; only agents and shells
+  do.
 
 ### Fixed
 

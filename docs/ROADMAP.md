@@ -121,12 +121,11 @@ milestones and marked with 💡.
       auto-update follows with the in-app updates
 - [x] Preview workflow: rolling pre-release "Ame Preview" built by hand
       from a branch, no version bump (`docs/RELEASING.md`)
-- [ ] In-app updates (maintainer request): check on start and periodically
-      (setting + "Check for Updates" command), inline notice and OS
-      notification when an update exists, "Install and restart" with
-      `tauri-plugin-updater` and signed GitHub release artifacts; the
-      portable `.exe` gets a download link instead. The maintainer creates
-      the signing key and stores it as a GitHub secret.
+- [x] In-app updates (maintainer request): check on start and every 6 h
+      (setting + "Check for Updates" command), sidebar notice and OS
+      notification, "Install and restart" with `tauri-plugin-updater` and
+      signed GitHub release artifacts; portable, `.deb`/`.rpm` and debug
+      builds get a download link (ADR 0026)
 - [ ] Docs, screenshots, first publication — README and screenshots
       updated; publication waits for the first release
 
@@ -146,13 +145,26 @@ milestones and marked with 💡.
 - [x] Buttons to show the terminal panel and start a shell or an agent
       without the keyboard
 
+## M6c — Working-day feedback (maintainer, 2026-11-03)
+
+- [x] Reveal files, folders and projects in Finder / Explorer / the file
+      manager (context menus and palette)
+- [x] Copy the absolute (and for files the relative) path from the
+      context menus and the palette
+- [x] Script runs never become unread; unread marks are for agents and
+      shells only
+- [x] Groups are framed in the sidebar; drag and drop projects into, out
+      of and between groups (and onto the pinned list)
+- [x] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
+      per project, prepared from configurable templates, started by hand
+      with a picked agent (ADR 0025)
+- Then: the 0.1.0 release
+
 ## Later
 
 - 💡 Background daemon: PTY sessions live in a small Rust process and
   survive a crash of the app (like tmux); replaced for 0.1 by ADR 0020
 
-- 💡 Kanban board (maintainer idea): work packages with title, ticket and
-  description that agents work through one after another
 - Virtualized rendering for very large directories and search results
 - Git worktrees for parallel agents in the same repo
 - More UI languages (German first)

@@ -6,6 +6,7 @@
   import { contextMenu } from '$lib/menu/context-menu.svelte';
   import { closeGuard } from '$lib/project/close-guard.svelte';
   import type { MenuEntry } from '$lib/menu/menu';
+  import { copyPath, revealEntry, revealLabel } from '$lib/fs/reveal';
   import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
@@ -14,7 +15,12 @@
   import { unread } from '$lib/agents/unread.svelte';
   import { describeUsage, formatMemory } from '$lib/agents/usage';
   import { usage } from '$lib/agents/usage.svelte';
-  import { groupNames, projectSections, type ProjectSection } from '$lib/workspace/sections';
+  import {
+    groupNames,
+    projectSections,
+    sectionDrop,
+    type ProjectSection,
+  } from '$lib/workspace/sections';
 
   const sections = $derived(projectSections(workspace.projects));
   /** The most urgent agent state per project with sessions. */
@@ -50,6 +56,59 @@
   );
 
   let editingGroupOf = $state<string | null>(null);
+
+  /** Path of the project being dragged, and the section it hovers. */
+  let dragging = $state<string | null>(null);
+  let dropKey = $state<string | null>(null);
+  const draggedProject = $derived(workspace.projects.find((p) => p.path === dragging) ?? null);
+  /** While dragging, an empty "Projects" section to take a project out of its group. */
+  const shownSections = $derived(
+    draggedProject && !sections.some((s) => s.kind === 'projects')
+      ? [...sections, { kind: 'projects' as const, projects: [] }]
+      : sections,
+  );
+
+  function sectionKey(section: Pick<ProjectSection, 'kind' | 'title'>): string {
+    return section.kind + (section.title ?? '');
+  }
+
+  function ondragstart(event: DragEvent, project: Project) {
+    if (!event.dataTransfer) return;
+    dragging = project.path;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', project.name);
+  }
+
+  function ondragover(event: DragEvent, section: ProjectSection) {
+    if (!draggedProject || !sectionDrop(draggedProject, section)) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    dropKey = sectionKey(section);
+  }
+
+  function ondragleave(event: DragEvent, section: ProjectSection) {
+    const next = event.relatedTarget;
+    const node = event.currentTarget as HTMLElement;
+    if (next instanceof Node && node.contains(next)) return;
+    if (dropKey === sectionKey(section)) dropKey = null;
+  }
+
+  function ondrop(event: DragEvent, section: ProjectSection) {
+    const project = draggedProject;
+    ondragend();
+    const change = project ? sectionDrop(project, section) : null;
+    if (!project || !change) return;
+    event.preventDefault();
+    void (async () => {
+      if (change.pinned !== undefined) await workspace.setPinned(project.path, change.pinned);
+      if (change.group !== undefined) await workspace.setGroup(project.path, change.group);
+    })();
+  }
+
+  function ondragend() {
+    dragging = null;
+    dropKey = null;
+  }
 
   function sectionTitle(section: ProjectSection): string {
     if (section.kind === 'pinned') return t('sidebar.pinned');
@@ -114,6 +173,9 @@
         ],
       },
       { kind: 'separator' },
+      { kind: 'action', label: revealLabel(''), run: () => revealEntry(project.path, '') },
+      { kind: 'action', label: t('reveal.copyPath'), run: () => copyPath(project.path, '') },
+      { kind: 'separator' },
       {
         kind: 'action',
         label: t('projectMenu.close'),
@@ -142,9 +204,20 @@
   <p class="muted">{t('sidebar.empty')}</p>
 {/if}
 
-{#each sections as section (section.kind + (section.title ?? ''))}
-  <section class="section">
+{#each shownSections as section (sectionKey(section))}
+  <section
+    class="section"
+    class:group={section.kind === 'group'}
+    class:drop={dropKey === sectionKey(section)}
+    aria-label={sectionTitle(section)}
+    ondragover={(event) => ondragover(event, section)}
+    ondragleave={(event) => ondragleave(event, section)}
+    ondrop={(event) => ondrop(event, section)}
+  >
     <h2 class="section-label">{sectionTitle(section)}</h2>
+    {#if section.projects.length === 0}
+      <p class="drop-hint">{t('sidebar.dropToUngroup')}</p>
+    {/if}
     <ul>
       {#each section.projects as project (project.path)}
         <li>
@@ -152,7 +225,11 @@
             class="project"
             class:active={project.path === workspace.activePath}
             aria-current={project.path === workspace.activePath ? 'page' : undefined}
+            class:dragging={dragging === project.path}
             title={project.path}
+            draggable="true"
+            ondragstart={(event) => ondragstart(event, project)}
+            {ondragend}
             onclick={() => void workspace.activate(project.path)}
             oncontextmenu={(event) => showMenu(event, project)}
           >
@@ -206,8 +283,40 @@
     color: var(--ame-text-muted);
   }
 
+  .section {
+    border: 1px solid transparent;
+    border-radius: var(--ame-radius);
+  }
+
   .section + .section {
     margin-top: var(--ame-space-3);
+  }
+
+  /* Groups get a frame, so it is clear where one ends and the next begins. */
+  .section.group {
+    padding: var(--ame-space-1);
+    border-color: var(--ame-border);
+    background: color-mix(in srgb, var(--ame-bg) 35%, transparent);
+  }
+
+  .section.group .section-label {
+    color: var(--ame-text);
+  }
+
+  .section.drop {
+    border-color: var(--ame-accent);
+    border-style: dashed;
+  }
+
+  .drop-hint {
+    margin: 0;
+    padding: var(--ame-space-1) var(--ame-space-2);
+    color: var(--ame-text-muted);
+    font-size: var(--ame-font-size-small);
+  }
+
+  .project.dragging {
+    opacity: 0.5;
   }
 
   .section-label {

@@ -12,6 +12,7 @@ use crate::agents::commands as agents;
 use crate::background::TrayAction;
 use crate::background::commands as background;
 use crate::bench;
+use crate::board::commands as board;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::git::commands as git;
@@ -19,6 +20,7 @@ use crate::git::commands::CheckpointsChanged;
 use crate::pty::commands as pty;
 use crate::pty::commands::SessionsChanged;
 use crate::scripts::commands as scripts;
+use crate::update::commands as update;
 use crate::workspace::commands;
 
 /// Path of the generated TypeScript bindings.
@@ -51,6 +53,8 @@ pub fn builder() -> Builder<Wry> {
             fs::create_entry,
             fs::move_entry,
             fs::trash_entry,
+            fs::reveal_entry,
+            fs::native_path,
             fs::read_file,
             fs::write_file,
             fs::watch_dirs,
@@ -64,6 +68,12 @@ pub fn builder() -> Builder<Wry> {
             git::git_commit,
             scripts::list_scripts,
             scripts::run_script,
+            board::list_packages,
+            board::save_package,
+            board::delete_package,
+            update::update_support,
+            update::check_update,
+            update::install_update,
             git::git_branches,
             git::git_switch,
             git::list_checkpoints,

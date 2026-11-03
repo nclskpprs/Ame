@@ -60,6 +60,8 @@ src-tauri/            Rust backend
     agents/           profiles, status detection, adapters/
     git/              status, diff, worktrees
     scripts/          package.json / composer.json discovery + runner
+    board/            work packages for agents (board.json)
+    update/           in-app updates (tauri-plugin-updater)
     notify/           OS notifications, dock/taskbar badge
     ipc/              Tauri commands + events (typed)
 src/                  Svelte frontend
@@ -241,6 +243,33 @@ Module: `src-tauri/src/pty/` (see
 - Built-in "clean up branches": only `git branch -d`, protects the main
   branches, asks before touching unmerged work; also reachable as its own
   commands for the project and the group.
+
+## Board — implemented (M6c)
+
+- Work packages prepared for agents, one board per project
+  ([ADR 0025](decisions/0025-board-packages-in-the-config-directory.md)).
+  `BoardStore` (`src-tauri/src/board/`) keeps all packages in `board.json`
+  in the config directory; `list_packages`, `save_package`,
+  `delete_package`.
+- Templates in `settings.templates` (`TemplateSettings.svelte`); the
+  built-in "Task" template and the prompt rendering are in
+  `lib/board/templates.ts`.
+- `lib/board/board.svelte.ts` holds the active project's packages, saves
+  optimistically and sends a package through the prompt queue to a running
+  agent or to a new one picked in the palette. `Board.svelte` is an
+  overlay like the dashboard (Mod+Shift+B, "New Work Package").
+
+## In-app updates — implemented (M6)
+
+- `tauri-plugin-updater` against `latest.json` of the latest full GitHub
+  release ([ADR 0026](decisions/0026-in-app-updates-from-github-releases.md)).
+  `update/commands.rs`: `update_support` (in-app or download link),
+  `check_update`, `install_update` (progress channel, ends all sessions,
+  restarts).
+- `lib/update/update.svelte.ts` schedules checks (setting `updateCheck`),
+  `UpdateNotice.svelte` in the sidebar footer installs or links to the
+  downloads; "Check for Updates" and "Install Update and Restart" in the
+  palette.
 
 ## Checkpoints — implemented (M4)
 
@@ -458,6 +487,9 @@ Example agent profile:
   permissions, symlinks and hard links.
 - `read_dir` with `show_ignored` also lists entries excluded by the ignore
   rules, marked `ignored` (setting _Ignored files_).
+- `reveal_entry` shows an entry in Finder / Explorer / the file manager
+  (`""` opens the project folder) and `native_path` returns its absolute
+  path with OS separators for "Copy Path" (`lib/fs/reveal.ts`).
 - `create_entry`, `move_entry` and `trash_entry` (`fs/ops.rs`) create,
   move/rename and trash entries (OS trash via the `trash` crate; on macOS
   through `NSFileManager`, so no Finder automation prompt). They never

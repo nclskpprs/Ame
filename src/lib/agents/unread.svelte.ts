@@ -1,6 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import type { AgentState } from '$lib/ipc/bindings';
 import type { SessionInfo } from '$lib/ipc/types';
+import { isScript } from '$lib/project/terminals.svelte';
 
 /**
  * Whether a state change means the agent has a result for the user: it
@@ -16,7 +17,9 @@ export function hasNewResult(previous: AgentState, state: AgentState): boolean {
  * Sessions with a result the user has not looked at yet. A result is read
  * once its session is shown in the terminal panel while the window has the
  * focus. It stays unread for hours if nobody looks, and can be marked
- * unread again by hand.
+ * unread again by hand. Script runs never become unread on their own: their
+ * status is shown in the scripts panel, and only agents and shells report
+ * results.
  */
 class UnreadState {
   readonly #ids = new SvelteSet<number>();
@@ -49,6 +52,7 @@ class UnreadState {
     for (const session of list) {
       states[session.id] = session.state;
       const previous = this.#states[session.id];
+      if (isScript(session.profile)) continue;
       if (previous !== undefined && hasNewResult(previous, session.state)) {
         this.#ids.add(session.id);
       }

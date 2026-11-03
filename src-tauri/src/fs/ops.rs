@@ -72,6 +72,29 @@ pub fn trash_entry(root: &Path, rel: &str) -> Result<()> {
         .map_err(|err| Error::Io(err.to_string()))
 }
 
+/// Shows a file or folder in the file manager of the operating system
+/// (Finder, Explorer, …). The project root (`""`) opens the project folder
+/// itself; any other entry is selected in its parent folder.
+pub fn reveal_entry(root: &Path, rel: &str) -> Result<()> {
+    let path = native_path(root, rel)?;
+    let result = if path == root {
+        tauri_plugin_opener::open_path(&path, None::<&str>)
+    } else {
+        tauri_plugin_opener::reveal_item_in_dir(&path)
+    };
+    result.map_err(|err| Error::Io(err.to_string()))
+}
+
+/// The absolute path of an existing entry (or the root for `""`) with the
+/// separators of the operating system, e.g. to copy it.
+pub fn native_path(root: &Path, rel: &str) -> Result<std::path::PathBuf> {
+    let path = resolve(root, rel)?;
+    if fs::symlink_metadata(&path).is_err() {
+        return Err(Error::NotFound(rel.to_owned()));
+    }
+    Ok(path)
+}
+
 /// Resolves a path below the project root; the root itself is not an entry.
 fn resolve_entry(root: &Path, rel: &str) -> Result<std::path::PathBuf> {
     let path = resolve(root, rel)?;
@@ -97,6 +120,27 @@ mod tests {
         assert!(matches!(
             create_entry(root, "a/b/new.txt", EntryKind::File),
             Err(Error::AlreadyExists(_))
+        ));
+    }
+
+    #[test]
+    fn native_paths_stay_inside_the_project() {
+        let dir = TempDir::new().unwrap();
+        let root = dir.path();
+        fs::create_dir_all(root.join("src")).unwrap();
+        fs::write(root.join("src/a.rs"), "a").unwrap();
+        assert_eq!(
+            native_path(root, "src/a.rs").unwrap(),
+            root.join("src").join("a.rs")
+        );
+        assert_eq!(native_path(root, "").unwrap(), root);
+        assert!(matches!(
+            native_path(root, "missing"),
+            Err(Error::NotFound(_))
+        ));
+        assert!(matches!(
+            native_path(root, "../x"),
+            Err(Error::PathOutsideProject(_))
         ));
     }
 

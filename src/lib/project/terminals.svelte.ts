@@ -174,20 +174,22 @@ export class TerminalGroup {
   /**
    * Starts an agent profile (`resume` continues its last conversation;
    * `dirs` are other projects it gets, for a group) or, for a `script:`
-   * profile, runs that script.
+   * profile, runs that script. Returns the new session, or `null` if it
+   * could not be started (the user was told why).
    */
-  async start(profile: string, resume = false, dirs: string[] = []): Promise<void> {
+  async start(profile: string, resume = false, dirs: string[] = []): Promise<SessionInfo | null> {
     const { cols, rows } = this.size;
     const result = isScript(profile)
       ? await commands.runScript(this.project, profile.slice(SCRIPT_PREFIX.length), cols, rows)
       : await commands.startSession(this.project, profile, resume, dirs, cols, rows);
     if (result.status === 'error') {
       notices.push(t('terminal.startFailed', { message: describeError(result.error) }));
-      return;
+      return null;
     }
     sessions.upsert(result.data);
     this.activate(result.data.id);
     this.show();
+    return result.data;
   }
 
   /** Closes a session. A running one asks first unless `force` is set. */
@@ -250,8 +252,8 @@ export class TerminalGroup {
     await this.start(SCRIPT_PREFIX + id);
   }
 
-  startShell(): Promise<void> {
-    return this.start(SHELL_PROFILE);
+  async startShell(): Promise<void> {
+    await this.start(SHELL_PROFILE);
   }
 
   /** Replaces an exited session with a new one of the same profile. */

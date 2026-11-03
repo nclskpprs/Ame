@@ -63,6 +63,31 @@ pub async fn trash_entry(
     ops::trash_entry(&store.root(&project)?, &path)
 }
 
+/// Shows a file or folder of an open project in the system file manager;
+/// `""` opens the project folder.
+#[tauri::command]
+#[specta::specta]
+pub async fn reveal_entry(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    path: String,
+) -> Result<()> {
+    ops::reveal_entry(&store.root(&project)?, &path)
+}
+
+/// The absolute path of a file or folder of an open project (`""` for the
+/// project folder), with the separators of the operating system.
+#[tauri::command]
+#[specta::specta]
+pub async fn native_path(
+    store: State<'_, WorkspaceStore>,
+    project: String,
+    path: String,
+) -> Result<String> {
+    let path = ops::native_path(&store.root(&project)?, &path)?;
+    Ok(path.to_string_lossy().into_owned())
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn read_file(

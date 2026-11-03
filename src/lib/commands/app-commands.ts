@@ -9,13 +9,16 @@ import {
   openBroadcast,
   openGroupAgentPicker,
 } from '$lib/agents/group';
-import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
+import { isRunning, sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { sendSelectionToAgent } from '$lib/agents/send';
 import { showSession } from '$lib/agents/show';
 import { nextUnread, unread } from '$lib/agents/unread.svelte';
 import { currentRainMode } from '$lib/rain/canvas';
 import { paper } from '$lib/rain/paper.svelte';
 import { notices } from '$lib/stores/notices.svelte';
+import { copyPath, revealCommandTitles, revealEntry } from '$lib/fs/reveal';
+import { board } from '$lib/board/board.svelte';
+import { updates } from '$lib/update/update.svelte';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -45,6 +48,13 @@ const hasSeveralSessions = () => (activeSession()?.terminals.sessions.length ?? 
 function treeTarget(): string | null {
   const session = activeSession();
   return session?.tree.selected ?? session?.editors.activePath ?? null;
+}
+
+/** Runs `action` on the tree selection (else the open file) of the active project. */
+function withTreeTarget(action: (project: string, path: string) => unknown): void {
+  const project = workspace.activePath;
+  const path = treeTarget();
+  if (project && path !== null) void action(project, path);
 }
 
 /** Shows the files panel and starts a file operation in its tree. */
@@ -394,6 +404,34 @@ export function registerAppCommands(): () => void {
       run: () => view.toggle('dashboard'),
     },
     {
+      id: 'app.checkForUpdates',
+      title: 'commands.checkForUpdates',
+      run: () => updates.check(true),
+    },
+    {
+      id: 'app.installUpdate',
+      title: 'commands.installUpdate',
+      when: () => updates.available !== null && updates.phase === 'idle',
+      run: () => updates.requestInstall(terminalSessions.list.filter(isRunning).length),
+    },
+    {
+      id: 'board.toggle',
+      title: 'commands.showBoard',
+      shortcut: 'Mod+Shift+B',
+      terminal: true,
+      when: hasProject,
+      run: () => view.toggle('board'),
+    },
+    {
+      id: 'board.newPackage',
+      title: 'commands.newPackage',
+      when: hasProject,
+      run: () => {
+        board.editing = 'new';
+        view.open('board');
+      },
+    },
+    {
       // Easter egg: Ame means rain; the hidden rain village had a paper ninja.
       id: 'fun.paperDance',
       title: 'commands.paperDance',
@@ -486,6 +524,36 @@ export function registerAppCommands(): () => void {
       title: 'commands.trashEntry',
       when: () => treeTarget() !== null,
       run: () => startTreeEdit((tree, path) => path && tree.startTrash(path)),
+    },
+    {
+      id: 'fileTree.reveal',
+      title: revealCommandTitles.entry,
+      when: () => treeTarget() !== null,
+      run: () => withTreeTarget(revealEntry),
+    },
+    {
+      id: 'fileTree.copyPath',
+      title: 'commands.copyEntryPath',
+      when: () => treeTarget() !== null,
+      run: () => withTreeTarget(copyPath),
+    },
+    {
+      id: 'fileTree.copyRelativePath',
+      title: 'commands.copyEntryRelativePath',
+      when: () => treeTarget() !== null,
+      run: () => withTreeTarget((project, path) => copyPath(project, path, true)),
+    },
+    {
+      id: 'workspace.revealProject',
+      title: revealCommandTitles.project,
+      when: hasProject,
+      run: () => workspace.activePath && revealEntry(workspace.activePath, ''),
+    },
+    {
+      id: 'workspace.copyProjectPath',
+      title: 'commands.copyProjectPath',
+      when: hasProject,
+      run: () => workspace.activePath && copyPath(workspace.activePath, ''),
     },
     {
       id: 'fileTree.toggleIgnored',

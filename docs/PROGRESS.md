@@ -5,7 +5,7 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestones:** M0–M5b are complete (extras skipped for now: review mode
+- **Milestones:** M0–M5b, M6b and M6c are complete (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
   icon, UX review, release workflow and README are done; **in-app updates**
   are open.
@@ -38,9 +38,7 @@ is open, what comes next.
 
 1. **Maintainer review of M6b and M6c** (branch `feat/m6c-feedback`):
    test the items on the Mac, ideally from a preview build.
-2. **Board** (M6c): work packages for the agents; open design questions
-   go to the maintainer first.
-3. **M6: in-app updates.** Done by the maintainer: signing key
+2. **M6: in-app updates.** Done by the maintainer: signing key
    (`~/.tauri/ame.key` on the Linux machine, key ID `66F7B297F3DF034F`) and
    the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
    `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Public key for
@@ -61,7 +59,7 @@ is open, what comes next.
      (`AppPaths::is_portable()`) gets a download link instead.
    - Then: ADR, `docs/ARCHITECTURE.md`, `docs/RELEASING.md` ("Not yet"),
      ROADMAP, PROGRESS and CHANGELOG.
-4. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
+3. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
    the first publication.
 
 ## Log
@@ -89,11 +87,22 @@ The maintainer listed what they noticed while working with Ame. Branch
   empty "Projects" section appears when there is none, so a project can
   always leave its group.
 
+- Board (ADR 0025), after the maintainer's answers: local only (in
+  `board.json` in the config directory), packages are one-time prompt
+  preparations from configurable templates, started by hand with a picked
+  agent, one board per project. Backend `board/`; frontend
+  `lib/board/` (templates, rendering, store), `Board.svelte` (overlay,
+  Mod+Shift+B, three columns, inline form, context menu) and
+  `TemplateSettings.svelte`. `TerminalGroup.start` now returns the new
+  session.
+
 **Open**
 
-- Not checked by hand in the running app yet (drag and drop, the reveal
-  on Windows and Linux).
-- Board and in-app updates before 0.1.0.
+- Not checked by hand in the running app yet: drag and drop in the
+  sidebar, the board UI, reveal on Windows and Linux. A dev run started
+  fine, but screenshots stayed black (no screen recording permission while
+  the maintainer was remote).
+- In-app updates before 0.1.0.
 
 ### 2026-11-02 — macOS test feedback (M6b)
 

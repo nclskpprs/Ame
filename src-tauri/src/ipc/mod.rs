@@ -12,6 +12,7 @@ use crate::agents::commands as agents;
 use crate::background::TrayAction;
 use crate::background::commands as background;
 use crate::bench;
+use crate::board::commands as board;
 use crate::fs::commands as fs;
 use crate::fs::watcher::FsChanged;
 use crate::git::commands as git;
@@ -66,6 +67,9 @@ pub fn builder() -> Builder<Wry> {
             git::git_commit,
             scripts::list_scripts,
             scripts::run_script,
+            board::list_packages,
+            board::save_package,
+            board::delete_package,
             git::git_branches,
             git::git_switch,
             git::list_checkpoints,

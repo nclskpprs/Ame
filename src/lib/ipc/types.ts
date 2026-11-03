@@ -7,6 +7,8 @@ import type {
   AppError,
   GitFile_Serialize,
   GitStatus_Serialize,
+  PackageTemplate_Serialize,
+  Package_Serialize,
   ProjectLayout_Serialize,
   Project_Serialize,
   SessionInfo_Serialize,
@@ -22,6 +24,8 @@ export type SessionInfo = SessionInfo_Serialize;
 export type AgentInfo = AgentInfo_Serialize;
 export type GitStatus = GitStatus_Serialize;
 export type GitFile = GitFile_Serialize;
+export type Package = Package_Serialize;
+export type PackageTemplate = PackageTemplate_Serialize;
 
 /** A technical, English description of an IPC error for logs and notices. */
 export function describeError(error: AppError): string {

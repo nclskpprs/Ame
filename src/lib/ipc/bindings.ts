@@ -93,6 +93,12 @@ export const commands = {
 	listScripts: (project: string) => typedError<Script[], AppError>(__TAURI_INVOKE("list_scripts", { project })),
 	/**  Runs a script in a new terminal session of the project. */
 	runScript: (project: string, id: string, cols: number, rows: number) => typedError<SessionInfo_Serialize, AppError>(__TAURI_INVOKE("run_script", { project, id, cols, rows })),
+	/**  The work packages of a project. */
+	listPackages: (project: string) => __TAURI_INVOKE<Package_Serialize[]>("list_packages", { project }),
+	/**  Adds or updates a work package of an open project. */
+	savePackage: (entry: Package_Deserialize) => typedError<null, AppError>(__TAURI_INVOKE("save_package", { entry })),
+	/**  Deletes a work package. */
+	deletePackage: (id: string) => typedError<null, AppError>(__TAURI_INVOKE("delete_package", { id })),
 	/**  The local branches and the main branch, `None` outside a repository. */
 	gitBranches: (project: string) => typedError<Branches_Serialize | null, AppError>(__TAURI_INVOKE("git_branches", { project })),
 	/**  Switches to a local branch (`git switch`); uncommitted changes stay. */
@@ -531,6 +537,98 @@ export type MatchRange = {
 	end: number,
 };
 
+/**  A work package: a prompt prepared from a template. */
+export type Package = Package_Serialize | Package_Deserialize;
+
+/**  Where a package is on the board. */
+export type PackageState = 
+/**  Prepared, not sent yet. */
+"open" | 
+/**  Sent to an agent. */
+"started" | 
+/**  Marked as done by the user. */
+"done";
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate = PackageTemplate_Serialize | PackageTemplate_Deserialize;
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate_Deserialize = {
+	/**  Stable id, unique among the templates. */
+	id?: string,
+	name?: string,
+	/**  Fields besides the title, in the order they are shown. */
+	fields?: TemplateField_Deserialize[],
+	/**
+	 *  The prompt; `{title}`, `{<field label>}`, `{project}`, `{branch}` and
+	 *  `{main}` are filled in by the frontend.
+	 */
+	prompt?: string,
+};
+
+/**
+ *  A template for board work packages: the fields of a package and the
+ *  prompt made from them.
+ */
+export type PackageTemplate_Serialize = {
+	/**  Stable id, unique among the templates. */
+	id: string,
+	name: string,
+	/**  Fields besides the title, in the order they are shown. */
+	fields: TemplateField_Serialize[],
+	/**
+	 *  The prompt; `{title}`, `{<field label>}`, `{project}`, `{branch}` and
+	 *  `{main}` are filled in by the frontend.
+	 */
+	prompt: string,
+};
+
+/**  A work package: a prompt prepared from a template. */
+export type Package_Deserialize = {
+	/**  Stable id, unique on the board. */
+	id?: string,
+	/**  Path of the project the package belongs to. */
+	project?: string,
+	/**  Id of the template it was made from (see `settings.templates`). */
+	template?: string,
+	title?: string,
+	/**  Values of the template fields by field id. */
+	fields?: { [key in string]: string },
+	state?: PackageState,
+	/**  Creation time in milliseconds since the Unix epoch. */
+	createdAt?: number | null,
+	/**  When it was sent to an agent. */
+	startedAt?: number | null,
+	/**  Name of the agent it was sent to. */
+	agent?: string | null,
+};
+
+/**  A work package: a prompt prepared from a template. */
+export type Package_Serialize = {
+	/**  Stable id, unique on the board. */
+	id: string,
+	/**  Path of the project the package belongs to. */
+	project: string,
+	/**  Id of the template it was made from (see `settings.templates`). */
+	template: string,
+	title: string,
+	/**  Values of the template fields by field id. */
+	fields: { [key in string]: string },
+	state: PackageState,
+	/**  Creation time in milliseconds since the Unix epoch. */
+	createdAt: number | null,
+	/**  When it was sent to an agent. */
+	startedAt: number | null,
+	/**  Name of the agent it was sent to. */
+	agent: string | null,
+};
+
 /**  An open project folder. */
 export type Project = Project_Serialize | Project_Deserialize;
 
@@ -818,6 +916,11 @@ export type Settings_Deserialize = {
 	 *  frontend when a prompt is sent).
 	 */
 	prompts?: LibraryPrompt_Deserialize[],
+	/**
+	 *  Templates for board work packages; empty means the built-in "Task"
+	 *  template of the frontend.
+	 */
+	templates?: PackageTemplate_Deserialize[],
 };
 
 /**
@@ -863,6 +966,11 @@ export type Settings_Serialize = {
 	 *  frontend when a prompt is sent).
 	 */
 	prompts: LibraryPrompt_Serialize[],
+	/**
+	 *  Templates for board work packages; empty means the built-in "Task"
+	 *  template of the frontend.
+	 */
+	templates: PackageTemplate_Serialize[],
 };
 
 export type SidePanel = "files" | "search" | 
@@ -870,6 +978,29 @@ export type SidePanel = "files" | "search" |
 "changes" | 
 /**  `package.json` / `composer.json` scripts; only offered when there are some. */
 "scripts";
+
+/**  A field of a package template. */
+export type TemplateField = TemplateField_Serialize | TemplateField_Deserialize;
+
+/**  A field of a package template. */
+export type TemplateField_Deserialize = {
+	/**  Stable id; package values are stored under it. */
+	id?: string,
+	/**  Shown in the form and used as placeholder, e.g. `{Ticket}`. */
+	label?: string,
+	/**  A text area instead of a single line. */
+	multiline?: boolean,
+};
+
+/**  A field of a package template. */
+export type TemplateField_Serialize = {
+	/**  Stable id; package values are stored under it. */
+	id: string,
+	/**  Shown in the form and used as placeholder, e.g. `{Ticket}`. */
+	label: string,
+	/**  A text area instead of a single line. */
+	multiline: boolean,
+};
 
 export type ThemePreference = 
 /**  Follow the operating system. */

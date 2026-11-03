@@ -17,6 +17,7 @@ import { currentRainMode } from '$lib/rain/canvas';
 import { paper } from '$lib/rain/paper.svelte';
 import { notices } from '$lib/stores/notices.svelte';
 import { copyPath, revealCommandTitles, revealEntry } from '$lib/fs/reveal';
+import { board } from '$lib/board/board.svelte';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -400,6 +401,23 @@ export function registerAppCommands(): () => void {
       shortcut: 'Mod+Shift+D',
       terminal: true,
       run: () => view.toggle('dashboard'),
+    },
+    {
+      id: 'board.toggle',
+      title: 'commands.showBoard',
+      shortcut: 'Mod+Shift+B',
+      terminal: true,
+      when: hasProject,
+      run: () => view.toggle('board'),
+    },
+    {
+      id: 'board.newPackage',
+      title: 'commands.newPackage',
+      when: hasProject,
+      run: () => {
+        board.editing = 'new';
+        view.open('board');
+      },
     },
     {
       // Easter egg: Ame means rain; the hidden rain village had a paper ninja.

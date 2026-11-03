@@ -156,9 +156,9 @@ milestones and marked with 💡.
       shells only
 - [x] Groups are framed in the sidebar; drag and drop projects into, out
       of and between groups (and onto the pinned list)
-- [ ] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
-      with title, ticket and description prepared for the agents, which
-      work through them one after another
+- [x] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
+      per project, prepared from configurable templates, started by hand
+      with a picked agent (ADR 0025)
 - Then: in-app updates (M6) and the 0.1.0 release
 
 ## Later

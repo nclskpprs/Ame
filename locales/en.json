@@ -122,6 +122,25 @@
       "label": "Start an agent with each project",
       "description": "When a project is shown for the first time and has no terminal sessions (and none to resume), this agent starts right away.",
       "off": "Off"
+    },
+    "templates": {
+      "title": "Board templates",
+      "description": "The fields of a board package and the prompt made from them. A line whose placeholders are all empty is left out; fields the prompt does not mention are added at the end.",
+      "name": "Name",
+      "fields": "Fields besides the title",
+      "fieldLabel": "Field name",
+      "multiline": "Several lines",
+      "addField": "Add field",
+      "removeField": "Remove",
+      "prompt": "Prompt",
+      "placeholders": "Placeholders: {placeholders}",
+      "invalid": "A template needs a name and a prompt.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete template",
+      "add": "Add template"
     }
   },
   "projectMenu": {
@@ -196,7 +215,9 @@
     "revealProjectFileManager": "Open Project in File Manager",
     "copyEntryPath": "Copy Path of File",
     "copyEntryRelativePath": "Copy Relative Path of File",
-    "copyProjectPath": "Copy Project Path"
+    "copyProjectPath": "Copy Project Path",
+    "showBoard": "Show Board",
+    "newPackage": "New Work Package"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -493,5 +514,44 @@
     "copied": "Copied {path}",
     "failed": "Could not open it: {message}",
     "copyFailed": "Could not copy the path: {message}"
+  },
+  "board": {
+    "title": "Board",
+    "close": "Close board",
+    "summary": "{open} open · {started} started · {done} done",
+    "column": {
+      "open": "Open",
+      "started": "Started",
+      "done": "Done"
+    },
+    "newPackage": "New package",
+    "empty": "Prepare work for your agents: one package per task, sent when you are ready.",
+    "emptyColumn": "Nothing here",
+    "template": "Template",
+    "titleLabel": "Title",
+    "titlePlaceholder": "What should the agent do?",
+    "save": "Save",
+    "cancel": "Cancel",
+    "formHint": "{shortcut} to save, Escape to cancel",
+    "titleRequired": "A package needs a title.",
+    "start": "Start…",
+    "edit": "Edit",
+    "copyPrompt": "Copy Prompt",
+    "markDone": "Mark as Done",
+    "reopen": "Reopen",
+    "delete": "Delete",
+    "deletePrompt": "Delete “{title}”?",
+    "sentTo": "Sent to {agent} · {time} ago",
+    "showAgent": "Show {agent}",
+    "pickerLabel": "Send “{title}” to an agent",
+    "pickerPlaceholder": "Pick a running agent or start one…",
+    "sendTo": "Send to {agent}",
+    "startAgent": "Start {agent}",
+    "sent": "“{title}” was sent to {agent}",
+    "promptCopied": "Prompt copied",
+    "copyFailed": "Could not copy the prompt: {message}",
+    "saveFailed": "Could not save the board: {message}",
+    "sendFailed": "Could not send the package: {message}",
+    "menu": "Package actions"
   }
 }

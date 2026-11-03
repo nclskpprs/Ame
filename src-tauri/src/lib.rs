@@ -6,6 +6,7 @@
 pub mod agents;
 pub mod background;
 pub mod bench;
+pub mod board;
 pub mod error;
 pub mod fs;
 pub mod git;
@@ -83,6 +84,7 @@ pub fn run() {
             );
             app.manage(SettingsStore::load(&paths.config_dir));
             app.manage(WorkspaceStore::load(&paths.config_dir));
+            app.manage(board::BoardStore::load(&paths.config_dir));
             app.manage(FsWatcher::new(app.handle().clone())?);
             app.manage(QuickOpen::default());
             app.manage(Tray::default());

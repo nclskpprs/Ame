@@ -18,6 +18,7 @@
   import { agents } from '$lib/agents/agents.svelte';
   import AgentSettings from './AgentSettings.svelte';
   import PromptSettings from './PromptSettings.svelte';
+  import TemplateSettings from './TemplateSettings.svelte';
   import SegmentedControl from './SegmentedControl.svelte';
 
   let root: HTMLElement | undefined = $state();
@@ -209,6 +210,11 @@
       <h2 id="settings-prompts">{t('settings.prompts.title')}</h2>
       <p class="intro">{t('settings.prompts.description')}</p>
       <PromptSettings />
+    </section>
+    <section class="group" aria-labelledby="settings-templates">
+      <h2 id="settings-templates">{t('settings.templates.title')}</h2>
+      <p class="intro">{t('settings.templates.description')}</p>
+      <TemplateSettings />
     </section>
   </div>
 </section>

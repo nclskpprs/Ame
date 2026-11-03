@@ -59,6 +59,9 @@ pub struct Settings {
     /// The user's own prompt library (placeholders are filled in by the
     /// frontend when a prompt is sent).
     pub prompts: Vec<LibraryPrompt>,
+    /// Templates for board work packages; empty means the built-in "Task"
+    /// template of the frontend.
+    pub templates: Vec<PackageTemplate>,
 }
 
 /// A prompt the user saved to send to agents again.
@@ -70,6 +73,33 @@ pub struct LibraryPrompt {
     pub name: String,
     /// The prompt; may contain `{project}`, `{branch}` and `{main}`.
     pub text: String,
+}
+
+/// A template for board work packages: the fields of a package and the
+/// prompt made from them.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase", default)]
+pub struct PackageTemplate {
+    /// Stable id, unique among the templates.
+    pub id: String,
+    pub name: String,
+    /// Fields besides the title, in the order they are shown.
+    pub fields: Vec<TemplateField>,
+    /// The prompt; `{title}`, `{<field label>}`, `{project}`, `{branch}` and
+    /// `{main}` are filled in by the frontend.
+    pub prompt: String,
+}
+
+/// A field of a package template.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase", default)]
+pub struct TemplateField {
+    /// Stable id; package values are stored under it.
+    pub id: String,
+    /// Shown in the form and used as placeholder, e.g. `{Ticket}`.
+    pub label: String,
+    /// A text area instead of a single line.
+    pub multiline: bool,
 }
 
 impl Default for Settings {
@@ -91,6 +121,7 @@ impl Default for Settings {
             background_hint_shown: false,
             agents: Vec::new(),
             prompts: Vec::new(),
+            templates: Vec::new(),
         }
     }
 }

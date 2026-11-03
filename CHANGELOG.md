@@ -164,6 +164,11 @@ and this project adheres to
   Path.
 - Project groups are framed in the sidebar, and projects move between
   groups, out of a group, onto the pinned list or off it by drag and drop.
+- Board (Cmd/Ctrl+Shift+B): prepare work packages per project — a title
+  plus fields like ticket and description — and send each to an agent you
+  pick, running or newly started, when you are ready. Packages move from
+  Open to Started to Done. Templates with your own fields and prompt are
+  set up in the settings. Packages stay on your machine.
 
 ### Changed
 

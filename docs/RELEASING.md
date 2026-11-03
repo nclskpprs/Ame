@@ -32,9 +32,14 @@ How a version of Ame gets built and published. The workflow is
    | macOS    | `.dmg` and `.app.tar.gz` (universal: Apple silicon + Intel)         |
    | Linux    | `.AppImage`, `.deb`, `.rpm` (built on Ubuntu 22.04)                 |
    | Windows  | NSIS installer `.exe`, `.msi`, and `Ame_<version>_x64_portable.zip` |
+   | Updater  | `.sig` signatures and `latest.json`                                 |
 
 5. Check the draft (download and start at least one build per platform),
-   then publish it on GitHub. Versions `0.x` are marked as pre-release.
+   then publish it on GitHub. Only versions with a `-` are marked as
+   pre-release: the in-app updater reads `latest.json` from the **latest
+   full release** (`releases/latest/download/latest.json`), so 0.x
+   versions must be full releases, and a draft is invisible to it until it
+   is published.
 
 To rebuild an existing tag, run the workflow by hand
 (_Actions → Release → Run workflow_) with the tag name.
@@ -62,6 +67,26 @@ file is next to the executable, Ame keeps its settings, workspace and web
 view data in a `data` folder beside it (ADR 0011). Delete the file to use
 the normal config directory.
 
+## In-app updates
+
+Ame checks the endpoint on start and every six hours (setting _Updates_),
+shows a notice in the sidebar and installs with "Install and restart"
+(ADR 0026). The artifacts are signed with the updater key: the private key
+and its password are the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
+`TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (key file `~/.tauri/ame.key` on the
+maintainer's Linux machine); the public key is `plugins.updater.pubkey` in
+`tauri.conf.json`. **Losing the private key means installed versions can
+no longer be updated** — keep a backup. Without the secrets, the release
+and preview workflows fail, because `createUpdaterArtifacts` needs them.
+
+The portable Windows build, Linux `.deb`/`.rpm` installs and debug builds
+cannot replace themselves; they get a link to the release page instead.
+
+A local `pnpm tauri build` with bundles needs the key too
+(`TAURI_SIGNING_PRIVATE_KEY=$(cat ~/.tauri/ame.key)` and the password).
+Without it, build with `--no-bundle` or turn the updater artifacts off for
+that build: `pnpm tauri build -c '{"bundle":{"createUpdaterArtifacts":false}}'`.
+
 ## Not yet
 
 - **Code signing:** macOS builds are only ad-hoc signed
@@ -70,10 +95,3 @@ the normal config directory.
   Settings → Privacy & Security → Open Anyway_, or run
   `xattr -dr com.apple.quarantine /Applications/Ame.app`. Windows builds
   are unsigned and show a SmartScreen warning (_More info → Run anyway_).
-- **In-app updates:** need the updater signing key. The maintainer creates
-  it with `pnpm tauri signer generate -w ~/.tauri/ame.key`, stores the
-  private key and its password as the repository secrets
-  `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, and
-  hands over the public key (`~/.tauri/ame.key.pub`) for
-  `tauri.conf.json`. Then the workflow also produces signed updater
-  artifacts and `latest.json`.

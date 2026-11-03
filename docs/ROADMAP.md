@@ -121,12 +121,11 @@ milestones and marked with 💡.
       auto-update follows with the in-app updates
 - [x] Preview workflow: rolling pre-release "Ame Preview" built by hand
       from a branch, no version bump (`docs/RELEASING.md`)
-- [ ] In-app updates (maintainer request): check on start and periodically
-      (setting + "Check for Updates" command), inline notice and OS
-      notification when an update exists, "Install and restart" with
-      `tauri-plugin-updater` and signed GitHub release artifacts; the
-      portable `.exe` gets a download link instead. The maintainer creates
-      the signing key and stores it as a GitHub secret.
+- [x] In-app updates (maintainer request): check on start and every 6 h
+      (setting + "Check for Updates" command), sidebar notice and OS
+      notification, "Install and restart" with `tauri-plugin-updater` and
+      signed GitHub release artifacts; portable, `.deb`/`.rpm` and debug
+      builds get a download link (ADR 0026)
 - [ ] Docs, screenshots, first publication — README and screenshots
       updated; publication waits for the first release
 
@@ -159,7 +158,7 @@ milestones and marked with 💡.
 - [x] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
       per project, prepared from configurable templates, started by hand
       with a picked agent (ADR 0025)
-- Then: in-app updates (M6) and the 0.1.0 release
+- Then: the 0.1.0 release
 
 ## Later
 

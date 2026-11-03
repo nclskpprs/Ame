@@ -20,6 +20,7 @@ use crate::git::commands::CheckpointsChanged;
 use crate::pty::commands as pty;
 use crate::pty::commands::SessionsChanged;
 use crate::scripts::commands as scripts;
+use crate::update::commands as update;
 use crate::workspace::commands;
 
 /// Path of the generated TypeScript bindings.
@@ -70,6 +71,9 @@ pub fn builder() -> Builder<Wry> {
             board::list_packages,
             board::save_package,
             board::delete_package,
+            update::update_support,
+            update::check_update,
+            update::install_update,
             git::git_branches,
             git::git_switch,
             git::list_checkpoints,

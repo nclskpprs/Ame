@@ -5,6 +5,7 @@
   import { handleShortcut } from '$lib/commands/registry';
   import CloseGuardBar from '$lib/components/CloseGuardBar.svelte';
   import Board from '$lib/components/Board.svelte';
+  import { updates } from '$lib/update/update.svelte';
   import Dashboard from '$lib/components/Dashboard.svelte';
   import ContextMenu from '$lib/components/ContextMenu.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
@@ -61,6 +62,7 @@
   let reducedMotion = $state(systemPrefersReducedMotion());
 
   $effect(() => registerAppCommands());
+  $effect(() => updates.schedule(() => settings.value.updateCheck));
 
   $effect(() => usage.start());
 

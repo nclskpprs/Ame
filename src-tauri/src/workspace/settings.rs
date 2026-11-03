@@ -52,6 +52,8 @@ pub struct Settings {
     /// Agent profile started when a project is shown for the first time and
     /// has no sessions; empty for none.
     pub start_agent: String,
+    /// Look for a new version of Ame on start and every few hours.
+    pub update_check: bool,
     /// The hint that Ame keeps running in the background was shown.
     pub background_hint_shown: bool,
     /// Custom agent profiles; one with a built-in id replaces that profile.
@@ -118,6 +120,7 @@ impl Default for Settings {
             close_action: CloseAction::default(),
             checkpoints: true,
             start_agent: String::new(),
+            update_check: true,
             background_hint_shown: false,
             agents: Vec::new(),
             prompts: Vec::new(),

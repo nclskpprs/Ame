@@ -141,6 +141,14 @@
       "delete": "Delete",
       "confirmDelete": "Delete template",
       "add": "Add template"
+    },
+    "updates": {
+      "title": "Updates",
+      "version": "Version {version}",
+      "label": "Check for updates automatically",
+      "description": "On start and every six hours. Nothing is installed without your click.",
+      "checkNow": "Check now",
+      "checking": "Checking…"
     }
   },
   "projectMenu": {
@@ -217,7 +225,9 @@
     "copyEntryRelativePath": "Copy Relative Path of File",
     "copyProjectPath": "Copy Project Path",
     "showBoard": "Show Board",
-    "newPackage": "New Work Package"
+    "newPackage": "New Work Package",
+    "checkForUpdates": "Check for Updates",
+    "installUpdate": "Install Update and Restart"
   },
   "sidePanel": {
     "label": "Side panel",
@@ -553,5 +563,26 @@
     "saveFailed": "Could not save the board: {message}",
     "sendFailed": "Could not send the package: {message}",
     "menu": "Package actions"
+  },
+  "update": {
+    "label": "Update",
+    "available": "Ame {version} is available",
+    "installHint": "Installs the new version and restarts Ame.",
+    "downloadHint": "This build cannot update itself; download the new version from GitHub.",
+    "install": "Install and restart",
+    "download": "Download",
+    "later": "Later",
+    "downloading": "Downloading the update…",
+    "downloadingShare": "Downloading the update… {percent} %",
+    "installing": "Installing; Ame restarts in a moment…",
+    "confirmSessions": "Running terminals and agents ({count}) end with the restart.",
+    "installAnyway": "Install and restart",
+    "cancel": "Cancel",
+    "upToDate": "Ame is up to date.",
+    "checkFailed": "Could not check for updates: {message}",
+    "installFailed": "Could not install the update: {message}",
+    "openFailed": "Could not open the download page: {message}",
+    "notifyTitle": "Ame {version} is available",
+    "notifyBody": "Install it from the sidebar when it suits you."
   }
 }

@@ -61,6 +61,7 @@ src-tauri/            Rust backend
     git/              status, diff, worktrees
     scripts/          package.json / composer.json discovery + runner
     board/            work packages for agents (board.json)
+    update/           in-app updates (tauri-plugin-updater)
     notify/           OS notifications, dock/taskbar badge
     ipc/              Tauri commands + events (typed)
 src/                  Svelte frontend
@@ -257,6 +258,18 @@ Module: `src-tauri/src/pty/` (see
   optimistically and sends a package through the prompt queue to a running
   agent or to a new one picked in the palette. `Board.svelte` is an
   overlay like the dashboard (Mod+Shift+B, "New Work Package").
+
+## In-app updates — implemented (M6)
+
+- `tauri-plugin-updater` against `latest.json` of the latest full GitHub
+  release ([ADR 0026](decisions/0026-in-app-updates-from-github-releases.md)).
+  `update/commands.rs`: `update_support` (in-app or download link),
+  `check_update`, `install_update` (progress channel, ends all sessions,
+  restarts).
+- `lib/update/update.svelte.ts` schedules checks (setting `updateCheck`),
+  `UpdateNotice.svelte` in the sidebar footer installs or links to the
+  downloads; "Check for Updates" and "Install Update and Restart" in the
+  palette.
 
 ## Checkpoints — implemented (M4)
 

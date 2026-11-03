@@ -9,6 +9,7 @@
   import ProjectList from './ProjectList.svelte';
   import StatusDot from './StatusDot.svelte';
   import ThemeSwitcher from './ThemeSwitcher.svelte';
+  import UpdateNotice from './UpdateNotice.svelte';
 
   const overall = $derived(combinedState(sessions.list));
   const rain = $derived(combinedRain(sessions.list));
@@ -50,6 +51,7 @@
   </div>
 
   <footer class="footer">
+    <UpdateNotice />
     {#if settings.saveError}
       <p class="notice error" role="alert">
         {t('settings.saveFailed', { message: settings.saveError })}

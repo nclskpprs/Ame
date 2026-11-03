@@ -19,6 +19,7 @@
   import AgentSettings from './AgentSettings.svelte';
   import PromptSettings from './PromptSettings.svelte';
   import TemplateSettings from './TemplateSettings.svelte';
+  import { updates } from '$lib/update/update.svelte';
   import SegmentedControl from './SegmentedControl.svelte';
 
   let root: HTMLElement | undefined = $state();
@@ -215,6 +216,39 @@
       <h2 id="settings-templates">{t('settings.templates.title')}</h2>
       <p class="intro">{t('settings.templates.description')}</p>
       <TemplateSettings />
+    </section>
+    <section class="group" aria-labelledby="settings-updates">
+      <h2 id="settings-updates">{t('settings.updates.title')}</h2>
+      <div class="row">
+        <div class="text">
+          <span class="label">{t('settings.updates.label')}</span>
+          <span class="description">{t('settings.updates.description')}</span>
+        </div>
+        <SegmentedControl
+          name="settings-update-check"
+          label={t('settings.updates.label')}
+          options={[
+            { value: 'on', label: t('settings.fileIcons.on') },
+            { value: 'off', label: t('settings.fileIcons.off') },
+          ]}
+          value={settings.value.updateCheck ? 'on' : 'off'}
+          onchange={(value) => void settings.update({ updateCheck: value === 'on' })}
+        />
+      </div>
+      <div class="row">
+        <span class="label">
+          {t('settings.updates.version', { version: settings.appInfo?.version ?? '' })}
+        </span>
+        <button
+          class="select"
+          disabled={updates.phase !== 'idle'}
+          onclick={() => void updates.check(true)}
+        >
+          {updates.phase === 'checking'
+            ? t('settings.updates.checking')
+            : t('settings.updates.checkNow')}
+        </button>
+      </div>
     </section>
   </div>
 </section>

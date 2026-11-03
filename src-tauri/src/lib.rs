@@ -14,6 +14,7 @@ pub mod ipc;
 pub mod notify;
 pub mod pty;
 pub mod scripts;
+pub mod update;
 pub mod workspace;
 
 use tauri::{App, Manager, RunEvent, WebviewWindowBuilder};
@@ -65,6 +66,8 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(update::PendingUpdate::default())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             if cfg!(debug_assertions) {

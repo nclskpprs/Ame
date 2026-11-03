@@ -169,6 +169,11 @@ and this project adheres to
   pick, running or newly started, when you are ready. Packages move from
   Open to Started to Done. Templates with your own fields and prompt are
   set up in the settings. Packages stay on your machine.
+- In-app updates: Ame looks for a new version on start and every six hours
+  (can be turned off in the settings), tells you in the sidebar and with a
+  notification, and installs it with "Install and restart". The portable
+  Windows build and Linux `.deb`/`.rpm` installs link to the download page
+  instead.
 
 ### Changed
 

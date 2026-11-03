@@ -9,7 +9,7 @@ import {
   openBroadcast,
   openGroupAgentPicker,
 } from '$lib/agents/group';
-import { sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
+import { isRunning, sessions as terminalSessions } from '$lib/terminal/sessions.svelte';
 import { sendSelectionToAgent } from '$lib/agents/send';
 import { showSession } from '$lib/agents/show';
 import { nextUnread, unread } from '$lib/agents/unread.svelte';
@@ -18,6 +18,7 @@ import { paper } from '$lib/rain/paper.svelte';
 import { notices } from '$lib/stores/notices.svelte';
 import { copyPath, revealCommandTitles, revealEntry } from '$lib/fs/reveal';
 import { board } from '$lib/board/board.svelte';
+import { updates } from '$lib/update/update.svelte';
 import { t } from '$lib/i18n';
 import { palette } from '$lib/palette/palette.svelte';
 import { everythingSource, fileSource } from '$lib/palette/sources';
@@ -401,6 +402,17 @@ export function registerAppCommands(): () => void {
       shortcut: 'Mod+Shift+D',
       terminal: true,
       run: () => view.toggle('dashboard'),
+    },
+    {
+      id: 'app.checkForUpdates',
+      title: 'commands.checkForUpdates',
+      run: () => updates.check(true),
+    },
+    {
+      id: 'app.installUpdate',
+      title: 'commands.installUpdate',
+      when: () => updates.available !== null && updates.phase === 'idle',
+      run: () => updates.requestInstall(terminalSessions.list.filter(isRunning).length),
     },
     {
       id: 'board.toggle',

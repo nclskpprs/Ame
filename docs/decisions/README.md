@@ -31,3 +31,4 @@ afterwards; a new ADR supersedes an old one and both are linked.
 | [0023](0023-checkpoints-on-hidden-git-refs.md)                         | Checkpoints on hidden git refs                         | Accepted         |
 | [0024](0024-watch-whole-projects-where-it-is-cheap.md)                 | Watch whole projects where it is cheap                 | Accepted         |
 | [0025](0025-board-packages-in-the-config-directory.md)                 | Board packages in the config directory                 | Accepted         |
+| [0026](0026-in-app-updates-from-github-releases.md)                    | In-app updates from GitHub releases                    | Accepted         |

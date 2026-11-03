@@ -5,7 +5,7 @@ is open, what comes next.
 
 ## Current state
 
-- **Milestones:** M0–M5b, M6b and M6c are complete (extras skipped for now: review mode
+- **Milestones:** M0–M5b, M6b and M6c are complete (maintainer-tested) (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
   icon, UX review, release workflow, README and in-app updates are done;
   the 0.1.0 release is open.
@@ -28,6 +28,10 @@ is open, what comes next.
   no Apple Developer ID, Windows stays unsigned.
 - **CI:** green on macOS, Linux and Windows. The benchmark runs under
   `dbus-run-session`; startup in CI is ~920 ms against a 1 s budget.
+- **Updater key:** the repository secrets `TAURI_SIGNING_PRIVATE_KEY` and
+  `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` are set; the key files are with the
+  maintainer. A preview from `feat/m6c-feedback` built and signed on all
+  three platforms.
 - **Development machines:** Linux (WSL) so far, macOS from now on. Locally
   only the own platform is checked; Windows-only (`cfg(windows)`) code is
   first compiled in CI, so watch the Windows job after such changes.
@@ -36,12 +40,21 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Maintainer review of M6b and M6c** (branch `feat/m6c-feedback`):
-   test the items on the Mac, ideally from a preview build.
-2. **Release 0.1.0** with a plain version (see `docs/RELEASING.md`), then
-   the first publication.
+1. **Release 0.1.0:** merge `chore/release-0.1.0`, push the tag `v0.1.0`
+   (maintainer), check the draft and publish it as a full release (see
+   `docs/RELEASING.md`).
+2. **First updater test:** the installed preview (version `0.0.0`) should
+   offer 0.1.0 and install it once 0.1.0 is published.
 
 ## Log
+
+### 2026-11-03 — Release 0.1.0 prepared
+
+- **Done:** the maintainer tested the preview build of M6b/M6c on the Mac
+  and merged PR #8. Version set to `0.1.0` in `Cargo.toml` and
+  `package.json`; the changelog has a `0.1.0` section.
+- **Open:** tag `v0.1.0`, check and publish the draft; then test the
+  update from the preview to 0.1.0.
 
 ### 2026-11-03 — In-app updates (M6)
 

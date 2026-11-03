@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-03
+
 ### Added
 
 - Project foundation: licenses (MIT OR Apache-2.0), contribution guidelines,

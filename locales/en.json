@@ -16,7 +16,8 @@
     "groupName": "Group name",
     "dismiss": "Dismiss",
     "settings": "Settings",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "dropToUngroup": "Drop here to take it out of its group"
   },
   "emptyState": {
     "title": "Open a folder to get started",

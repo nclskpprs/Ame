@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Project } from '$lib/ipc/types';
-import { groupNames, orderedProjects, projectSections } from './sections';
+import { groupNames, orderedProjects, projectSections, sectionDrop } from './sections';
 
 function project(name: string, extra: Partial<Project> = {}): Project {
   return {
@@ -64,5 +64,31 @@ describe('groupNames', () => {
       project('c', { group: 'B' }),
     ];
     expect(groupNames(projects)).toEqual(['A', 'B']);
+  });
+});
+
+describe('sectionDrop', () => {
+  const free = { pinned: false, group: null };
+  const grouped = { pinned: false, group: 'Client A' };
+  const pinned = { pinned: true, group: 'Client A' };
+  const groupA = { kind: 'group' as const, title: 'Client A' };
+  const groupB = { kind: 'group' as const, title: 'Client B' };
+
+  it('moves projects into, between and out of groups', () => {
+    expect(sectionDrop(free, groupA)).toEqual({ group: 'Client A' });
+    expect(sectionDrop(grouped, groupB)).toEqual({ group: 'Client B' });
+    expect(sectionDrop(grouped, { kind: 'projects' })).toEqual({ group: null });
+  });
+
+  it('pins and unpins', () => {
+    expect(sectionDrop(grouped, { kind: 'pinned' })).toEqual({ pinned: true });
+    expect(sectionDrop(pinned, groupA)).toEqual({ pinned: false });
+    expect(sectionDrop(pinned, { kind: 'projects' })).toEqual({ pinned: false, group: null });
+  });
+
+  it('ignores drops on the own section', () => {
+    expect(sectionDrop(free, { kind: 'projects' })).toBeNull();
+    expect(sectionDrop(grouped, groupA)).toBeNull();
+    expect(sectionDrop(pinned, { kind: 'pinned' })).toBeNull();
   });
 });

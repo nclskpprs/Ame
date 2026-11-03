@@ -44,3 +44,26 @@ export function orderedProjects(projects: readonly Project[]): Project[] {
 export function groupNames(projects: readonly Project[]): string[] {
   return [...new Set(projects.flatMap((p) => (p.group ? [p.group] : [])))].sort();
 }
+
+/** What dropping a dragged project on a section changes, or `null` for nothing. */
+export interface SectionDrop {
+  pinned?: boolean;
+  group?: string | null;
+}
+
+/**
+ * Moving a project by dropping it on a sidebar section: the pinned section
+ * pins it, a group section moves it into that group, and the plain projects
+ * section takes it out of its group. Leaving the pinned section unpins it.
+ */
+export function sectionDrop(
+  project: Pick<Project, 'pinned' | 'group'>,
+  target: Pick<ProjectSection, 'kind' | 'title'>,
+): SectionDrop | null {
+  const group = project.group ?? null;
+  if (target.kind === 'pinned') return project.pinned ? null : { pinned: true };
+  const change: SectionDrop = project.pinned ? { pinned: false } : {};
+  const wanted = target.kind === 'group' ? (target.title ?? null) : null;
+  if (wanted !== group) change.group = wanted;
+  return Object.keys(change).length ? change : null;
+}

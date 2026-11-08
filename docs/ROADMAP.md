@@ -160,6 +160,15 @@ milestones and marked with 💡.
       with a picked agent (ADR 0025)
 - [x] The 0.1.0 release (published 2026-11-03; updater tested from 0.0.0 to 0.1.0)
 
+## M7 — Navigation and UX feedback (maintainer, 2026-11-08)
+
+- [x] The sidebar navigates like pages: one current entry, clicks show a
+      page instead of toggling it
+- [x] The board is reachable by mouse (sidebar entry, project menu)
+- [x] Fold and unfold project groups (remembered, status stays visible)
+- [x] One button system with hover, press and disabled states
+- [ ] Maintainer test in a preview build
+
 ## Later
 
 - 💡 Background daemon: PTY sessions live in a small Rust process and

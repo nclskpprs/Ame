@@ -40,10 +40,46 @@ is open, what comes next.
 
 ## Next steps
 
-1. Collect feedback on 0.1.0 and plan the next milestone with the
+1. **M7 (navigation and UX feedback):** the maintainer tries branch
+   `feat/navigation-ux` in a preview build (page navigation, board entry,
+   folding groups, button system) and merges it.
+2. Collect more feedback on 0.1.0 and plan the next milestone with the
    maintainer.
 
 ## Log
+
+### 2026-11-08 — Navigation and UX feedback (M7)
+
+The maintainer listed what they noticed while working with 0.1.0 (items
+3–6 of their list). Branch `feat/navigation-ux`, one commit per item.
+
+**Done**
+
+- **Page navigation:** the sidebar behaves like pages. Dashboard, Board,
+  the projects and Settings show their page on click instead of toggling;
+  clicking the active project leaves the dashboard (before, nothing
+  happened because the active path did not change). `view.page` and
+  `view.showProject(path, overlay?)` in `stores/view.svelte.ts`, the pure
+  `currentPage` in `stores/navigation.ts`. Shortcuts still toggle.
+- **Board by mouse:** a "Board" entry for the active project below
+  Dashboard and "Open board" in the project menu. Rule for the future: every
+  feature must also be reachable with the mouse (DESIGN.md).
+- **Folding groups:** every sidebar section header folds its section; a
+  folded one shows its count, unread mark and most urgent status and keeps
+  the active project visible. New setting `collapsedSections`; palette
+  commands fold or unfold all.
+- **UX pass with the taste skill:** the skill targets marketing sites, so
+  only its app-relevant rules were applied (one system, hover and press
+  feedback, consistent states). Result: a global button system (`.btn`,
+  `.icon-btn` in `app.css`) replaces twelve per-component copies, most of
+  which had no hover, press or disabled state; softer sidebar hovers.
+
+**Open**
+
+- Not checked by hand in the running app: screen capture is not allowed
+  in this session, so the new sidebar entries, the folding and the button
+  states were only checked with svelte-check, tests and lint.
+- Items 1 and 2 of the maintainer's list were not in the message.
 
 ### 2026-11-03 — Release 0.1.0 published
 

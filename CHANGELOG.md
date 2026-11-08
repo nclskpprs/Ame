@@ -8,6 +8,21 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- A "Board" entry in the sidebar and "Open board" in the project menu, so
+  the board no longer needs its shortcut.
+- Sidebar sections fold and unfold with a click on their header; a folded
+  group still shows its agent status and unread results. Palette commands
+  fold or unfold all sections.
+
+### Changed
+
+- The sidebar works like page navigation: clicking Dashboard, Board, a
+  project or Settings shows that page, and clicking a project always
+  leaves the dashboard.
+- All buttons share one style with hover, press and disabled feedback.
+
 ## [0.1.0] - 2026-11-03
 
 ### Added

@@ -21,8 +21,12 @@
     groupNames,
     projectSections,
     sectionDrop,
+    sectionId,
+    toggleCollapsed,
+    visibleProjects,
     type ProjectSection,
   } from '$lib/workspace/sections';
+  import { settings } from '$lib/stores/settings.svelte';
 
   const sections = $derived(projectSections(workspace.projects));
   /** The most urgent agent state per project with sessions. */
@@ -59,6 +63,24 @@
 
   /** The project whose page (or board) is shown; none on the dashboard. */
   const current = $derived(pageProject(view.page));
+
+  const collapsed = $derived(new Set(settings.value.collapsedSections));
+
+  function toggleSection(section: ProjectSection) {
+    void settings.update({
+      collapsedSections: toggleCollapsed(settings.value.collapsedSections, sectionId(section)),
+    });
+  }
+
+  /** What a folded section still tells: the most urgent state and unread results. */
+  function foldedSummary(section: ProjectSection) {
+    const list = section.projects.flatMap((project) => sessions.forProject(project.path));
+    return {
+      state: combinedState(list),
+      rain: combinedRain(list),
+      unread: section.projects.some((project) => unreadProjects.has(project.path)),
+    };
+  }
 
   let editingGroupOf = $state<string | null>(null);
 
@@ -216,6 +238,7 @@
 {/if}
 
 {#each shownSections as section (sectionKey(section))}
+  {@const folded = collapsed.has(sectionId(section)) && section.projects.length > 0}
   <section
     class="section"
     class:group={section.kind === 'group'}
@@ -225,12 +248,40 @@
     ondragleave={(event) => ondragleave(event, section)}
     ondrop={(event) => ondrop(event, section)}
   >
-    <h2 class="section-label">{sectionTitle(section)}</h2>
+    <h2 class="section-label">
+      <button
+        class="section-toggle"
+        aria-expanded={!folded}
+        title={t(folded ? 'sidebar.expandSection' : 'sidebar.collapseSection')}
+        onclick={() => toggleSection(section)}
+      >
+        <svg class="chevron" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+        <span class="section-title">{sectionTitle(section)}</span>
+        {#if folded}
+          {@const summary = foldedSummary(section)}
+          <span class="section-count">{section.projects.length}</span>
+          {#if summary.unread}<UnreadMark />{/if}
+          {#if summary.state}
+            <StatusDot
+              state={summary.state}
+              intensity={summary.rain.intensity}
+              prompts={summary.rain.prompts}
+              label={t('status.projectLabel', {
+                project: sectionTitle(section),
+                state: t(stateLabels[summary.state]),
+              })}
+            />
+          {/if}
+        {/if}
+      </button>
+    </h2>
     {#if section.projects.length === 0}
       <p class="drop-hint">{t('sidebar.dropToUngroup')}</p>
     {/if}
     <ul>
-      {#each section.projects as project (project.path)}
+      {#each visibleProjects(section, folded, current) as project (project.path)}
         <li>
           <button
             class="project"
@@ -310,10 +361,6 @@
     background: color-mix(in srgb, var(--ame-bg) 35%, transparent);
   }
 
-  .section.group .section-label {
-    color: var(--ame-text);
-  }
-
   .section.drop {
     border-color: var(--ame-accent);
     border-style: dashed;
@@ -332,15 +379,65 @@
 
   .section-label {
     margin: 0 0 var(--ame-space-1);
+    font-size: inherit;
+  }
+
+  .section-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--ame-space-1);
+    width: 100%;
     padding: 0 var(--ame-space-1);
-    overflow: hidden;
+    border: 0;
+    border-radius: var(--ame-radius);
+    background: transparent;
     color: var(--ame-text-muted);
+    font: inherit;
     font-size: var(--ame-font-size-small);
     font-weight: 600;
     letter-spacing: 0.06em;
-    text-overflow: ellipsis;
+    text-align: left;
     text-transform: uppercase;
+  }
+
+  .section-toggle:hover {
+    color: var(--ame-text);
+  }
+
+  .section.group .section-toggle {
+    color: var(--ame-text);
+  }
+
+  .section-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .section-count {
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+
+  .chevron {
+    flex: none;
+    transform: rotate(90deg);
+    transition: transform var(--ame-transition);
+  }
+
+  .section-toggle[aria-expanded='false'] .chevron {
+    transform: none;
+  }
+
+  .chevron path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   ul {

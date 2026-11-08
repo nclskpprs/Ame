@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Project } from '$lib/ipc/types';
-import { groupNames, orderedProjects, projectSections, sectionDrop } from './sections';
+import {
+  groupNames,
+  orderedProjects,
+  projectSections,
+  sectionDrop,
+  sectionId,
+  toggleCollapsed,
+  visibleProjects,
+} from './sections';
 
 function project(name: string, extra: Partial<Project> = {}): Project {
   return {
@@ -90,5 +98,25 @@ describe('sectionDrop', () => {
     expect(sectionDrop(free, { kind: 'projects' })).toBeNull();
     expect(sectionDrop(grouped, groupA)).toBeNull();
     expect(sectionDrop(pinned, { kind: 'pinned' })).toBeNull();
+  });
+});
+
+describe('folding sections', () => {
+  it('gives every section a stable id', () => {
+    expect(sectionId({ kind: 'pinned' })).toBe('pinned');
+    expect(sectionId({ kind: 'projects' })).toBe('projects');
+    expect(sectionId({ kind: 'group', title: 'Work' })).toBe('group:Work');
+  });
+
+  it('toggles a section in the folded list', () => {
+    expect(toggleCollapsed([], 'pinned')).toEqual(['pinned']);
+    expect(toggleCollapsed(['pinned', 'group:A'], 'pinned')).toEqual(['group:A']);
+  });
+
+  it('keeps only the active project in a folded section', () => {
+    const section = { kind: 'group' as const, title: 'A', projects: [project('a'), project('b')] };
+    expect(visibleProjects(section, false, null)).toHaveLength(2);
+    expect(visibleProjects(section, true, '/p/b').map((p) => p.name)).toEqual(['b']);
+    expect(visibleProjects(section, true, '/p/x')).toEqual([]);
   });
 });

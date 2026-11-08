@@ -29,7 +29,7 @@ import { settings } from '$lib/stores/settings.svelte';
 import { DEFAULT_ZOOM, nextZoom } from '$lib/theme/zoom';
 import { view } from '$lib/stores/view.svelte';
 import { workspace } from '$lib/stores/workspace.svelte';
-import { orderedProjects } from '$lib/workspace/sections';
+import { orderedProjects, projectSections, sectionId } from '$lib/workspace/sections';
 import { registerCommands, type Command } from './registry';
 
 function switchTo(offset: number): void {
@@ -402,6 +402,21 @@ export function registerAppCommands(): () => void {
       shortcut: 'Mod+Shift+D',
       terminal: true,
       run: () => view.toggle('dashboard'),
+    },
+    {
+      id: 'sidebar.collapseSections',
+      title: 'commands.collapseSections',
+      when: () => projectSections(workspace.projects).length > 0,
+      run: () =>
+        settings.update({
+          collapsedSections: projectSections(workspace.projects).map(sectionId),
+        }),
+    },
+    {
+      id: 'sidebar.expandSections',
+      title: 'commands.expandSections',
+      when: () => settings.value.collapsedSections.length > 0,
+      run: () => settings.update({ collapsedSections: [] }),
     },
     {
       id: 'app.checkForUpdates',

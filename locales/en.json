@@ -19,7 +19,9 @@
     "dashboard": "Dashboard",
     "dropToUngroup": "Drop here to take it out of its group",
     "board": "Board",
-    "boardOf": "Board of {project}"
+    "boardOf": "Board of {project}",
+    "collapseSection": "Collapse section",
+    "expandSection": "Expand section"
   },
   "emptyState": {
     "title": "Open a folder to get started",
@@ -230,7 +232,9 @@
     "showBoard": "Show Board",
     "newPackage": "New Work Package",
     "checkForUpdates": "Check for Updates",
-    "installUpdate": "Install Update and Restart"
+    "installUpdate": "Install Update and Restart",
+    "collapseSections": "Collapse All Sidebar Sections",
+    "expandSections": "Expand All Sidebar Sections"
   },
   "sidePanel": {
     "label": "Side panel",

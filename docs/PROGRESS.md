@@ -8,8 +8,8 @@ is open, what comes next.
 - **Milestones:** M0–M5b, M6b and M6c are complete (maintainer-tested) (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
   icon, UX review, release workflow, README and in-app updates are done;
-  0.1.0 is released. M7 (navigation and UX feedback) is merged; 0.2.0
-  is being prepared.
+  0.1.0 is released. M7 (navigation and UX feedback) is released as
+  0.2.0.
 - **Branches:** PR #2 (M1–M6) is merged into `main`. Work goes on short
   branches from `main` (`feat/…`, `fix/…`, `chore/…`), one Conventional
   Commit per task, never directly on `main`.
@@ -41,12 +41,21 @@ is open, what comes next.
 
 ## Next steps
 
-1. **Release 0.2.0:** merge `chore/release-0.2.0`, push the tag `v0.2.0`
-   (maintainer), check the draft and publish it as a full release (see
-   `docs/RELEASING.md`). An installed 0.1.0 should then offer the update.
+1. **Updater test:** an installed 0.1.0 should offer 0.2.0 and install
+   it (maintainer).
 2. Collect more feedback and plan the next milestone with the maintainer.
 
 ## Log
+
+### 2026-11-08 — Release 0.2.0 published
+
+- **Done:** tag `v0.2.0` pushed by the maintainer. The Linux job failed
+  once with an HTTP 504 from GitHub while downloading AppRun for the
+  AppImage; rerunning only the failed job fixed it. The draft (all three
+  platforms, `latest.json` with Windows, macOS and Linux) is published as
+  the latest full release; `releases/latest/download/latest.json` serves
+  0.2.0.
+- **Open:** the in-app update from 0.1.0 to 0.2.0.
 
 ### 2026-11-08 — Dependabot alert: minimatch (GHSA-g3hv-75wg-m249)
 

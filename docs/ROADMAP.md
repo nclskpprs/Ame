@@ -170,7 +170,7 @@ milestones and marked with 💡.
 - [x] Component tests for the sidebar and the view (ADR 0027)
 - [ ] 💡 End-to-end tests with `tauri-driver` in a Linux CI job
 - [x] Maintainer test in a preview build (PR #11 merged)
-- [ ] The 0.2.0 release (version set; tag and publication open)
+- [x] The 0.2.0 release (published 2026-11-08)
 
 ## Later
 

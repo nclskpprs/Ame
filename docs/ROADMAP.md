@@ -169,7 +169,8 @@ milestones and marked with 💡.
 - [x] One button system with hover, press and disabled states
 - [x] Component tests for the sidebar and the view (ADR 0027)
 - [ ] 💡 End-to-end tests with `tauri-driver` in a Linux CI job
-- [ ] Maintainer test in a preview build
+- [x] Maintainer test in a preview build (PR #11 merged)
+- [ ] The 0.2.0 release (version set; tag and publication open)
 
 ## Later
 

@@ -8,7 +8,8 @@ is open, what comes next.
 - **Milestones:** M0–M5b, M6b and M6c are complete (maintainer-tested) (extras skipped for now: review mode
   in M4, dev server detection and `.ame.json` in M5). M6 — Release 0.1:
   icon, UX review, release workflow, README and in-app updates are done;
-  0.1.0 is released.
+  0.1.0 is released. M7 (navigation and UX feedback) is merged; 0.2.0
+  is being prepared.
 - **Branches:** PR #2 (M1–M6) is merged into `main`. Work goes on short
   branches from `main` (`feat/…`, `fix/…`, `chore/…`), one Conventional
   Commit per task, never directly on `main`.
@@ -40,13 +41,20 @@ is open, what comes next.
 
 ## Next steps
 
-1. **M7 (navigation and UX feedback):** the maintainer tries branch
-   `feat/navigation-ux` in a preview build (page navigation, board entry,
-   folding groups, button system) and merges it.
-2. Collect more feedback on 0.1.0 and plan the next milestone with the
-   maintainer.
+1. **Release 0.2.0:** merge `chore/release-0.2.0`, push the tag `v0.2.0`
+   (maintainer), check the draft and publish it as a full release (see
+   `docs/RELEASING.md`). An installed 0.1.0 should then offer the update.
+2. Collect more feedback and plan the next milestone with the maintainer.
 
 ## Log
+
+### 2026-11-08 — Release 0.2.0 prepared
+
+- **Done:** the maintainer tested M7 and merged PR #11. Version set to
+  `0.2.0` in `Cargo.toml` and `package.json` (minor bump: new features
+  since 0.1.0); the changelog has a `0.2.0` section.
+- **Open:** tag `v0.2.0`, check and publish the draft; then test the
+  in-app update from 0.1.0 to 0.2.0.
 
 ### 2026-11-08 — Navigation and UX feedback (M7)
 

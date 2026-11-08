@@ -104,6 +104,9 @@ Read these before you change anything substantial:
   on raw text in components.
 - **No hard-coded colors.** Use the CSS custom properties from the design
   tokens (`var(--ame-…)`, see `src/lib/theme/tokens.ts`).
+- UI behavior gets **component tests** (`@vitest-environment jsdom`,
+  `@testing-library/svelte`, backend faked with `src/lib/test/backend.ts`,
+  ADR 0027). Every feature must also be reachable with the mouse.
 - Hidden terminals have no xterm.js instance; their output stays in the
   Rust ring buffer and is replayed when shown.
 

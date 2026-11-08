@@ -167,6 +167,8 @@ milestones and marked with 💡.
 - [x] The board is reachable by mouse (sidebar entry, project menu)
 - [x] Fold and unfold project groups (remembered, status stays visible)
 - [x] One button system with hover, press and disabled states
+- [x] Component tests for the sidebar and the view (ADR 0027)
+- [ ] 💡 End-to-end tests with `tauri-driver` in a Linux CI job
 - [ ] Maintainer test in a preview build
 
 ## Later

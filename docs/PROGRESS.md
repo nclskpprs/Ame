@@ -74,6 +74,15 @@ The maintainer listed what they noticed while working with 0.1.0 (items
   `.icon-btn` in `app.css`) replaces twelve per-component copies, most of
   which had no hover, press or disabled state; softer sidebar hovers.
 
+- **Component tests (ADR 0027):** `@testing-library/svelte` + jsdom, the
+  backend faked with `mockIPC` (`src/lib/test/backend.ts`). Tests for the
+  sidebar (current page, dashboard/settings/board clicks, project switch,
+  board from the project menu, folding, folded active project, the fold
+  palette commands), `view.showProject` together with the overlay-closing
+  effect of `App.svelte`, and a guard for the button system. Mutation
+  checks: going back to toggling, or an old-style button, fails them.
+  End-to-end tests with `tauri-driver` stay open (no macOS support).
+
 **Open**
 
 - Not checked by hand in the running app: screen capture is not allowed

@@ -48,6 +48,16 @@ is open, what comes next.
 
 ## Log
 
+### 2026-11-08 — Dependabot alert: minimatch (GHSA-g3hv-75wg-m249)
+
+- **Done:** minimatch 10.2.6 (DoS through glob pattern amplification,
+  fixed in 11.0.1) came in only through ESLint and typescript-eslint, i.e.
+  only as a dev dependency, never in the app. ESLint still requires
+  `^10`, so a pnpm override in `pnpm-workspace.yaml` forces `^11.0.1`.
+  ESLint works with it (lints all files, still reports errors).
+- **Open:** remove the override once ESLint and typescript-eslint depend
+  on minimatch 11 themselves.
+
 ### 2026-11-08 — Release 0.2.0 prepared
 
 - **Done:** the maintainer tested M7 and merged PR #11. Version set to

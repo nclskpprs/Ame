@@ -30,7 +30,7 @@
       <span class="tagline">{t('app.tagline')}</span>
     </div>
     <button
-      class="icon-button"
+      class="icon-btn"
       title={t('sidebar.openFolder')}
       aria-label={t('sidebar.openFolder')}
       onclick={() => void workspace.openFolder()}
@@ -91,7 +91,7 @@
       <p class="notice" class:error={notice.kind === 'error'} role="alert">
         <span>{notice.message}</span>
         <button
-          class="dismiss"
+          class="icon-btn dismiss"
           aria-label={t('sidebar.dismiss')}
           title={t('sidebar.dismiss')}
           onclick={() => notices.dismiss(notice.id)}
@@ -105,8 +105,7 @@
     <div class="footer-row">
       <div class="theme"><ThemeSwitcher /></div>
       <button
-        class="icon-button"
-        class:active={page.kind === 'settings'}
+        class="icon-btn"
         title={t('sidebar.settings')}
         aria-label={t('sidebar.settings')}
         aria-current={page.kind === 'settings' ? 'page' : undefined}
@@ -163,24 +162,6 @@
     color: var(--ame-text-muted);
   }
 
-  .icon-button,
-  .dismiss {
-    display: grid;
-    place-items: center;
-    padding: var(--ame-space-1);
-    border: 0;
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text-muted);
-  }
-
-  .icon-button:hover,
-  .icon-button.active,
-  .dismiss:hover {
-    background: var(--ame-bg);
-    color: var(--ame-text);
-  }
-
   .footer-row {
     display: flex;
     align-items: center;
@@ -217,7 +198,17 @@
     text-align: left;
   }
 
-  .nav:hover,
+  .nav {
+    transition:
+      background-color var(--ame-transition),
+      color var(--ame-transition);
+  }
+
+  .nav:hover {
+    background: color-mix(in srgb, var(--ame-bg) 55%, transparent);
+    color: var(--ame-text);
+  }
+
   .nav.active {
     background: var(--ame-bg);
     color: var(--ame-text);

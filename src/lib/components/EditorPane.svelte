@@ -57,19 +57,21 @@
       aria-label={t('editor.closePrompt', { name: pending.name })}
     >
       <span>{t('editor.closePrompt', { name: pending.name })}</span>
-      <button class="primary" onclick={() => void saveAndClose(pending.path)}>
+      <button class="btn primary" onclick={() => void saveAndClose(pending.path)}>
         {t('editor.save')}
       </button>
-      <button onclick={() => group.close(pending.path, true)}>{t('editor.dontSave')}</button>
-      <button onclick={() => (group.pendingClose = null)}>{t('editor.cancel')}</button>
+      <button class="btn" onclick={() => group.close(pending.path, true)}
+        >{t('editor.dontSave')}</button
+      >
+      <button class="btn" onclick={() => (group.pendingClose = null)}>{t('editor.cancel')}</button>
     </div>
   {:else if file?.conflict}
     <div class="bar" role="alert">
       <span>{t('editor.changedOnDisk')}</span>
-      <button class="primary" onclick={() => void group.reload(file.path)}>
+      <button class="btn primary" onclick={() => void group.reload(file.path)}>
         {t('editor.reload')}
       </button>
-      <button onclick={() => group.keepMine(file.path)}>{t('editor.keepMine')}</button>
+      <button class="btn" onclick={() => group.keepMine(file.path)}>{t('editor.keepMine')}</button>
     </div>
   {:else if file?.deleted}
     <div class="bar" role="status"><span>{t('editor.deletedOnDisk')}</span></div>
@@ -156,19 +158,6 @@
 
   .bar span {
     flex: 1;
-  }
-
-  .bar button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .bar button.primary {
-    border-color: var(--ame-accent);
   }
 
   .content {

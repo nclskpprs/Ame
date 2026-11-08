@@ -49,12 +49,12 @@
       <CraneIcon size={12} />
       <span>{t('queue.waiting', { count: session.queue.length })}</span>
       {#if session.queue.length > 1}
-        <button class="text" onclick={() => void clearPromptQueue(session)}>
+        <button class="btn small" onclick={() => void clearPromptQueue(session)}>
           {t('queue.clear')}
         </button>
       {/if}
       {#if !group.composing}
-        <button class="text" onclick={() => (group.composing = true)}>
+        <button class="btn small" onclick={() => (group.composing = true)}>
           {t('queue.add')}
         </button>
       {/if}
@@ -110,13 +110,13 @@
         {onkeydown}></textarea>
       <div class="actions">
         <span class="hint">{t('queue.hint')}</span>
-        <button class="primary" disabled={!text.trim()} onclick={() => void submit()}>
+        <button class="btn primary" disabled={!text.trim()} onclick={() => void submit()}>
           {t('queue.submit')}
         </button>
-        <button disabled={!text.trim()} onclick={() => void saveToLibrary(text)}>
+        <button class="btn" disabled={!text.trim()} onclick={() => void saveToLibrary(text)}>
           {t('prompts.saveToLibrary')}
         </button>
-        <button onclick={close}>{t('queue.done')}</button>
+        <button class="btn" onclick={close}>{t('queue.done')}</button>
       </div>
     </div>
   {/if}
@@ -229,24 +229,5 @@
     flex: 1;
     color: var(--ame-text-muted);
     font-size: var(--ame-font-size-small);
-  }
-
-  .actions button,
-  .text {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .text {
-    padding: 0 var(--ame-space-2);
-    font-size: var(--ame-font-size-small);
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
   }
 </style>

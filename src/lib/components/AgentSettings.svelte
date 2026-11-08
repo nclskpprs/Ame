@@ -128,8 +128,10 @@
       <p class="invalid" role="alert">{t('settings.agents.invalid')}</p>
     {/if}
     <div class="actions">
-      <button class="primary" type="submit">{t('settings.agents.save')}</button>
-      <button type="button" onclick={() => (draft = null)}>{t('settings.agents.cancel')}</button>
+      <button class="btn primary" type="submit">{t('settings.agents.save')}</button>
+      <button class="btn" type="button" onclick={() => (draft = null)}
+        >{t('settings.agents.cancel')}</button
+      >
     </div>
   </form>
 {/snippet}
@@ -153,11 +155,11 @@
           </span>
         </div>
         <div class="buttons">
-          <button onclick={() => edit(agent.profile)}>
+          <button class="btn" onclick={() => edit(agent.profile)}>
             {changed ? t('settings.agents.edit') : t('settings.agents.customize')}
           </button>
           {#if changed}
-            <button onclick={() => void reset(agent.profile.id)}>
+            <button class="btn" onclick={() => void reset(agent.profile.id)}>
               {agent.builtin ? t('settings.agents.reset') : t('settings.agents.remove')}
             </button>
           {/if}
@@ -173,7 +175,7 @@
 {#if draft && draft.id === ''}
   {@render form(draft)}
 {:else}
-  <button class="add" onclick={add}>{t('settings.agents.add')}</button>
+  <button class="btn add" onclick={add}>{t('settings.agents.add')}</button>
 {/if}
 
 <style>
@@ -231,19 +233,6 @@
   .actions {
     display: flex;
     gap: var(--ame-space-2);
-  }
-
-  button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
   }
 
   .add {

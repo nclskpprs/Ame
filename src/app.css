@@ -66,6 +66,101 @@ body {
   outline-offset: 2px;
 }
 
+/* The one button system. Every text button is `.btn` (variants `.primary`,
+   `.danger`, sizes `.small`, `.large`); every bare icon button is
+   `.icon-btn`. Both answer hover and press the same way everywhere. */
+
+.btn,
+.icon-btn {
+  border-radius: var(--ame-radius);
+  font: inherit;
+  transition:
+    background-color var(--ame-transition),
+    border-color var(--ame-transition),
+    color var(--ame-transition),
+    transform var(--ame-transition);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ame-space-1);
+  padding: 2px var(--ame-space-3);
+  border: 1px solid var(--ame-border);
+  background: var(--ame-bg);
+  color: var(--ame-text);
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--ame-text-muted);
+  background: color-mix(in srgb, var(--ame-text) 6%, var(--ame-bg));
+}
+
+.btn.primary {
+  border-color: var(--ame-accent);
+}
+
+.btn.primary:hover:not(:disabled) {
+  border-color: var(--ame-accent);
+  background: color-mix(in srgb, var(--ame-accent) 16%, var(--ame-bg));
+}
+
+.btn.danger {
+  border-color: var(--ame-error);
+  color: var(--ame-error);
+}
+
+.btn.danger:hover:not(:disabled) {
+  border-color: var(--ame-error);
+  background: color-mix(in srgb, var(--ame-error) 14%, var(--ame-bg));
+}
+
+.btn.small {
+  padding: 0 var(--ame-space-2);
+  font-size: var(--ame-font-size-small);
+}
+
+.btn.large {
+  gap: var(--ame-space-2);
+  padding: var(--ame-space-2) var(--ame-space-4);
+}
+
+.icon-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: var(--ame-space-1);
+  border: 0;
+  background: transparent;
+  color: var(--ame-text-muted);
+}
+
+.icon-btn:hover:not(:disabled),
+.icon-btn[aria-current='page'] {
+  background: color-mix(in srgb, var(--ame-text) 8%, transparent);
+  color: var(--ame-text);
+}
+
+/* Paths set their own stroke-width attribute. */
+.icon-btn svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn:active:not(:disabled),
+.icon-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled,
+.icon-btn:disabled {
+  opacity: 0.5;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

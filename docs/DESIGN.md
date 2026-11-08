@@ -89,14 +89,31 @@ test in `src/lib/theme/contrast.test.ts` guards all of this.
   native and costs nothing.
 - Code font: bundled JetBrains Mono (OFL license), configurable.
 
+### Controls
+
+One button system for the whole app, defined globally in `src/app.css`:
+
+- `.btn` for every text button, with the variants `.primary` (accent
+  border) and `.danger` (error color) and the sizes `.small` and `.large`.
+- `.icon-btn` for every bare icon button (close, dismiss, more, sidebar
+  icons).
+- Both answer the pointer the same way: a tinted background on hover, a
+  1 px press on click, 50 % opacity when disabled, transitions of
+  `--ame-transition`. Components only add layout (margins, alignment),
+  never their own button look.
+
 ## UX principles
 
 - **Calm over noise:** no toolbars full of icons; features via the command
   palette and context menus.
 - **Status without searching:** sidebar, dashboard, window title and
   dock/taskbar badge.
-- **Keyboard first:** every action has a shortcut; all are findable in the
-  palette.
+- **Keyboard first, never keyboard only:** every action has a shortcut and
+  is findable in the palette, and every view and feature is also reachable
+  with the mouse (a sidebar entry, a button or a context menu).
+- **The sidebar is page navigation:** Dashboard, Board, the projects and
+  Settings each show their page on click; exactly one entry is current.
+  Clicking never hides the page that is shown (shortcuts may toggle).
 - **No modal dialogs for routine work:** inline confirmation and undo instead
   of "Are you sure?".
 - **Instant response:** interactions under 50 ms, no splash screen, spinner

@@ -460,7 +460,14 @@
     text-align: left;
   }
 
+  .project {
+    transition:
+      background-color var(--ame-transition),
+      color var(--ame-transition);
+  }
+
   .project:hover {
+    background: color-mix(in srgb, var(--ame-bg) 55%, transparent);
     color: var(--ame-text);
   }
 

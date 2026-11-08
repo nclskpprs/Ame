@@ -172,8 +172,8 @@
     {#if invalid}<p class="error" role="alert">{t('board.titleRequired')}</p>{/if}
     <div class="form-actions">
       <span class="hint">{t('board.formHint', { shortcut: saveShortcut })}</span>
-      <button type="button" class="button" onclick={cancel}>{t('board.cancel')}</button>
-      <button type="submit" class="button primary">{t('board.save')}</button>
+      <button type="button" class="btn" onclick={cancel}>{t('board.cancel')}</button>
+      <button type="submit" class="btn primary">{t('board.save')}</button>
     </div>
   </form>
 {/snippet}
@@ -187,13 +187,13 @@
       <span class="summary">{t('board.summary', counts)}</span>
     </div>
     <button
-      class="close"
+      class="icon-btn close"
       aria-label={t('board.close')}
       title={t('board.close')}
       onclick={() => view.close()}
     >
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-        <path d="M4 4l8 8M12 4l-8 8" />
+        <path d="M4 4l8 8M12 4l-8 8" stroke-width="1.5" />
       </svg>
     </button>
   </header>
@@ -202,7 +202,7 @@
     <div class="empty">
       <DropMark size={48} />
       <p>{t('board.empty')}</p>
-      <button class="button primary" onclick={startNew}>{t('board.newPackage')}</button>
+      <button class="btn primary" onclick={startNew}>{t('board.newPackage')}</button>
     </div>
   {:else}
     <div class="columns">
@@ -229,11 +229,11 @@
                   <div class="card confirm" role="alertdialog" aria-label={t('board.delete')}>
                     <span>{t('board.deletePrompt', { title: item.title })}</span>
                     <div class="form-actions">
-                      <button class="button" onclick={() => (deleting = null)} use:focus>
+                      <button class="btn" onclick={() => (deleting = null)} use:focus>
                         {t('board.cancel')}
                       </button>
                       <button
-                        class="button danger"
+                        class="btn danger"
                         onclick={() => {
                           deleting = null;
                           void board.remove(item);
@@ -276,20 +276,20 @@
                     {/if}
                     <div class="card-actions">
                       {#if item.state === 'open'}
-                        <button class="button primary" onclick={() => board.pickAgent(item)}>
+                        <button class="btn primary" onclick={() => board.pickAgent(item)}>
                           {t('board.start')}
                         </button>
                       {:else if item.state === 'started'}
-                        <button class="button" onclick={() => board.setState(item, 'done')}>
+                        <button class="btn" onclick={() => board.setState(item, 'done')}>
                           {t('board.markDone')}
                         </button>
                       {:else}
-                        <button class="button" onclick={() => board.setState(item, 'open')}>
+                        <button class="btn" onclick={() => board.setState(item, 'open')}>
                           {t('board.reopen')}
                         </button>
                       {/if}
                       <button
-                        class="more"
+                        class="icon-btn more"
                         aria-label={t('board.menu')}
                         title={t('board.menu')}
                         onclick={(event) => contextMenu.show(event, item.title, menuFor(item))}
@@ -355,30 +355,6 @@
     color: var(--ame-text-muted);
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .close,
-  .more {
-    display: grid;
-    place-items: center;
-    padding: var(--ame-space-1);
-    border: 0;
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text-muted);
-  }
-
-  .close:hover,
-  .more:hover {
-    background: var(--ame-bg);
-    color: var(--ame-text);
-  }
-
-  .close path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.5;
-    stroke-linecap: round;
   }
 
   .more circle {
@@ -529,29 +505,6 @@
   .add:hover {
     border-color: var(--ame-accent);
     color: var(--ame-text);
-  }
-
-  .button {
-    padding: var(--ame-space-1) var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .button:hover {
-    border-color: var(--ame-text-muted);
-  }
-
-  .button.primary {
-    border-color: var(--ame-accent);
-    color: var(--ame-accent);
-  }
-
-  .button.danger {
-    border-color: var(--ame-error);
-    color: var(--ame-error);
   }
 
   .field {

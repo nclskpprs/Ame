@@ -53,18 +53,22 @@
 <div class="bar" role="alertdialog" aria-label={prompt} tabindex="-1" {onkeydown}>
   <span>{prompt}</span>
   {#if files.length > 0}
-    <button class="primary" bind:this={primary} onclick={() => void closeGuard.saveAndClose()}>
+    <button class="btn primary" bind:this={primary} onclick={() => void closeGuard.saveAndClose()}>
       {isApp ? t('closeGuard.saveAndQuit') : t('closeGuard.saveAndClose')}
     </button>
-    <button onclick={() => void closeGuard.discardAndClose()}>
+    <button class="btn" onclick={() => void closeGuard.discardAndClose()}>
       {isApp ? t('closeGuard.quitWithoutSaving') : t('closeGuard.closeWithoutSaving')}
     </button>
   {:else}
-    <button class="primary" bind:this={primary} onclick={() => void closeGuard.discardAndClose()}>
+    <button
+      class="btn primary"
+      bind:this={primary}
+      onclick={() => void closeGuard.discardAndClose()}
+    >
       {isApp ? t('closeGuard.quit') : t('closeGuard.closeProject')}
     </button>
   {/if}
-  <button onclick={() => closeGuard.cancel()}>{t('closeGuard.cancel')}</button>
+  <button class="btn" onclick={() => closeGuard.cancel()}>{t('closeGuard.cancel')}</button>
 </div>
 
 <style>
@@ -82,18 +86,5 @@
     flex: 1;
     min-width: 0;
     overflow-wrap: anywhere;
-  }
-
-  button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
   }
 </style>

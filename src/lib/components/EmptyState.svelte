@@ -12,7 +12,7 @@
   <DropMark size={56} />
   <h1 class="title">{t('emptyState.title')}</h1>
   <p class="description">{t('emptyState.description')}</p>
-  <button class="primary" onclick={() => void workspace.openFolder()}>
+  <button class="btn large primary" onclick={() => void workspace.openFolder()}>
     {t('emptyState.openFolder')}
     {#if shortcut}<kbd>{formatShortcut(shortcut)}</kbd>{/if}
   </button>
@@ -42,20 +42,7 @@
   }
 
   .primary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ame-space-2);
     margin-top: var(--ame-space-3);
-    padding: var(--ame-space-2) var(--ame-space-4);
-    border: 1px solid var(--ame-accent);
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .primary:hover {
-    background: var(--ame-surface);
   }
 
   kbd {

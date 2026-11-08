@@ -9,6 +9,8 @@
   import { copyPath, revealEntry, revealLabel } from '$lib/fs/reveal';
   import { combinedRain, combinedState, stateLabels } from '$lib/agents/state';
   import { sessions } from '$lib/terminal/sessions.svelte';
+  import { view } from '$lib/stores/view.svelte';
+  import { pageProject } from '$lib/stores/navigation';
   import { workspace } from '$lib/stores/workspace.svelte';
   import StatusDot from './StatusDot.svelte';
   import UnreadMark from './UnreadMark.svelte';
@@ -54,6 +56,9 @@
   const unreadProjects = $derived(
     new Set(unread.among(sessions.list).map((session) => session.project)),
   );
+
+  /** The project whose page (or board) is shown; none on the dashboard. */
+  const current = $derived(pageProject(view.page));
 
   let editingGroupOf = $state<string | null>(null);
 
@@ -136,6 +141,12 @@
             { kind: 'separator' as const },
           ]
         : []),
+      {
+        kind: 'action',
+        label: t('projectMenu.openBoard'),
+        run: () => view.showProject(project.path, 'board'),
+      },
+      { kind: 'separator' },
       {
         kind: 'action',
         label: t(project.pinned ? 'projectMenu.unpin' : 'projectMenu.pin'),
@@ -223,14 +234,14 @@
         <li>
           <button
             class="project"
-            class:active={project.path === workspace.activePath}
-            aria-current={project.path === workspace.activePath ? 'page' : undefined}
+            class:active={project.path === current}
+            aria-current={project.path === current ? 'page' : undefined}
             class:dragging={dragging === project.path}
             title={project.path}
             draggable="true"
             ondragstart={(event) => ondragstart(event, project)}
             {ondragend}
-            onclick={() => void workspace.activate(project.path)}
+            onclick={() => void view.showProject(project.path)}
             oncontextmenu={(event) => showMenu(event, project)}
           >
             <span class="name" class:unread={unreadProjects.has(project.path)}>{project.name}</span>

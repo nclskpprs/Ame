@@ -17,7 +17,9 @@
     "dismiss": "Dismiss",
     "settings": "Settings",
     "dashboard": "Dashboard",
-    "dropToUngroup": "Drop here to take it out of its group"
+    "dropToUngroup": "Drop here to take it out of its group",
+    "board": "Board",
+    "boardOf": "Board of {project}"
   },
   "emptyState": {
     "title": "Open a folder to get started",
@@ -152,6 +154,7 @@
     }
   },
   "projectMenu": {
+    "openBoard": "Open board",
     "pin": "Pin",
     "unpin": "Unpin",
     "moveToGroup": "Move to group",

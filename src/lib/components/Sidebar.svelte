@@ -5,6 +5,8 @@
   import { view } from '$lib/stores/view.svelte';
   import { workspace } from '$lib/stores/workspace.svelte';
   import { combinedRain, combinedState } from '$lib/agents/state';
+  import { shortcutOf } from '$lib/commands/registry';
+  import { formatShortcut } from '$lib/commands/shortcuts';
   import { sessions } from '$lib/terminal/sessions.svelte';
   import ProjectList from './ProjectList.svelte';
   import StatusDot from './StatusDot.svelte';
@@ -13,6 +15,12 @@
 
   const overall = $derived(combinedState(sessions.list));
   const rain = $derived(combinedRain(sessions.list));
+  const page = $derived(view.page);
+
+  function hint(command: string): string {
+    const shortcut = shortcutOf(command);
+    return shortcut ? formatShortcut(shortcut) : '';
+  }
 </script>
 
 <nav class="sidebar" aria-label={t('sidebar.label')}>
@@ -33,18 +41,40 @@
     </button>
   </header>
 
-  <button
-    class="nav"
-    class:active={view.dashboardOpen}
-    aria-pressed={view.dashboardOpen}
-    onclick={() => view.toggle('dashboard')}
-  >
-    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-      <path d="M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5h-4.5zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5h-4.5z" />
-    </svg>
-    <span class="label">{t('sidebar.dashboard')}</span>
-    {#if overall}<StatusDot state={overall} intensity={rain.intensity} />{/if}
-  </button>
+  <div class="pages">
+    <button
+      class="nav"
+      class:active={page.kind === 'dashboard'}
+      aria-current={page.kind === 'dashboard' ? 'page' : undefined}
+      onclick={() => view.open('dashboard')}
+    >
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path
+          d="M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5h-4.5zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5h-4.5z"
+        />
+      </svg>
+      <span class="label">{t('sidebar.dashboard')}</span>
+      <kbd class="hint">{hint('dashboard.toggle')}</kbd>
+      {#if overall}<StatusDot state={overall} intensity={rain.intensity} />{/if}
+    </button>
+
+    {#if workspace.active}
+      {@const project = workspace.active}
+      <button
+        class="nav"
+        class:active={page.kind === 'board'}
+        aria-current={page.kind === 'board' ? 'page' : undefined}
+        title={t('sidebar.boardOf', { project: project.name })}
+        onclick={() => void view.showProject(project.path, 'board')}
+      >
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M2.5 2.5h3v11h-3zM6.5 2.5h3v7h-3zM10.5 2.5h3v4.5h-3z" />
+        </svg>
+        <span class="label">{t('sidebar.board')}</span>
+        <kbd class="hint">{hint('board.toggle')}</kbd>
+      </button>
+    {/if}
+  </div>
 
   <div class="projects">
     <ProjectList />
@@ -76,11 +106,11 @@
       <div class="theme"><ThemeSwitcher /></div>
       <button
         class="icon-button"
-        class:active={view.settingsOpen}
+        class:active={page.kind === 'settings'}
         title={t('sidebar.settings')}
         aria-label={t('sidebar.settings')}
-        aria-pressed={view.settingsOpen}
-        onclick={() => view.toggleSettings()}
+        aria-current={page.kind === 'settings' ? 'page' : undefined}
+        onclick={() => view.openSettings()}
       >
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
           <path
@@ -167,11 +197,17 @@
     stroke: currentColor;
   }
 
+  .pages {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: calc(var(--ame-space-2) * -1) 0;
+  }
+
   .nav {
     display: flex;
     align-items: center;
     gap: var(--ame-space-2);
-    margin: calc(var(--ame-space-2) * -1) 0;
     padding: var(--ame-space-1) var(--ame-space-2);
     border: 0;
     border-radius: var(--ame-radius);
@@ -189,6 +225,19 @@
 
   .nav .label {
     flex: 1;
+  }
+
+  .hint {
+    color: var(--ame-text-muted);
+    font-family: inherit;
+    font-size: var(--ame-font-size-small);
+    opacity: 0;
+    transition: opacity var(--ame-transition);
+  }
+
+  .nav:hover .hint,
+  .nav:focus-visible .hint {
+    opacity: 1;
   }
 
   .nav path {

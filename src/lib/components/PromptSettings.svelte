@@ -83,8 +83,10 @@
       <p class="invalid" role="alert">{t('settings.prompts.invalid')}</p>
     {/if}
     <div class="actions">
-      <button class="primary" type="submit">{t('settings.prompts.save')}</button>
-      <button type="button" onclick={() => (draft = null)}>{t('settings.prompts.cancel')}</button>
+      <button class="btn primary" type="submit">{t('settings.prompts.save')}</button>
+      <button class="btn" type="button" onclick={() => (draft = null)}
+        >{t('settings.prompts.cancel')}</button
+      >
     </div>
   </form>
 {/snippet}
@@ -112,15 +114,17 @@
         </div>
         <div class="buttons">
           {#if deleting === prompt.id}
-            <button class="danger" onclick={() => void remove(prompt.id)}>
+            <button class="btn danger" onclick={() => void remove(prompt.id)}>
               {t('settings.prompts.confirmDelete')}
             </button>
-            <button use:focusNow onclick={() => (deleting = null)}
+            <button class="btn" use:focusNow onclick={() => (deleting = null)}
               >{t('settings.prompts.cancel')}</button
             >
           {:else}
-            <button onclick={() => edit(prompt)}>{t('settings.prompts.edit')}</button>
-            <button onclick={() => (deleting = prompt.id)}>{t('settings.prompts.delete')}</button>
+            <button class="btn" onclick={() => edit(prompt)}>{t('settings.prompts.edit')}</button>
+            <button class="btn" onclick={() => (deleting = prompt.id)}
+              >{t('settings.prompts.delete')}</button
+            >
           {/if}
         </div>
       </div>
@@ -134,7 +138,7 @@
 {#if draft && draft.id === ''}
   {@render form(draft)}
 {:else}
-  <button class="add" onclick={add}>{t('settings.prompts.add')}</button>
+  <button class="btn add" onclick={add}>{t('settings.prompts.add')}</button>
 {/if}
 
 <style>
@@ -187,23 +191,6 @@
     display: flex;
     flex: none;
     gap: var(--ame-space-2);
-  }
-
-  button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
-  }
-
-  button.danger {
-    border-color: var(--ame-error);
   }
 
   .add {

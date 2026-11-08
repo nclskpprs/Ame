@@ -119,12 +119,12 @@
             <input type="checkbox" bind:checked={field.multiline} />
             <span>{t('settings.templates.multiline')}</span>
           </label>
-          <button type="button" onclick={() => removeField(index)}>
+          <button class="btn" type="button" onclick={() => removeField(index)}>
             {t('settings.templates.removeField')}
           </button>
         </div>
       {/each}
-      <button type="button" class="add-field" onclick={addField}>
+      <button type="button" class="btn add-field" onclick={addField}>
         {t('settings.templates.addField')}
       </button>
     </fieldset>
@@ -139,8 +139,8 @@
       <p class="invalid" role="alert">{t('settings.templates.invalid')}</p>
     {/if}
     <div class="actions">
-      <button class="primary" type="submit">{t('settings.templates.save')}</button>
-      <button type="button" onclick={cancel}>{t('settings.templates.cancel')}</button>
+      <button class="btn primary" type="submit">{t('settings.templates.save')}</button>
+      <button class="btn" type="button" onclick={cancel}>{t('settings.templates.cancel')}</button>
     </div>
   </form>
 {/snippet}
@@ -157,16 +157,18 @@
         </div>
         <div class="buttons">
           {#if deleting === template.id}
-            <button class="danger" onclick={() => void remove(template.id)}>
+            <button class="btn danger" onclick={() => void remove(template.id)}>
               {t('settings.templates.confirmDelete')}
             </button>
-            <button use:focusNow onclick={() => (deleting = null)}>
+            <button class="btn" use:focusNow onclick={() => (deleting = null)}>
               {t('settings.templates.cancel')}
             </button>
           {:else}
-            <button onclick={() => edit(template)}>{t('settings.templates.edit')}</button>
+            <button class="btn" onclick={() => edit(template)}
+              >{t('settings.templates.edit')}</button
+            >
             {#if settings.value.templates.length > 0}
-              <button onclick={() => (deleting = template.id)}>
+              <button class="btn" onclick={() => (deleting = template.id)}>
                 {t('settings.templates.delete')}
               </button>
             {/if}
@@ -183,7 +185,7 @@
 {#if draft && editingId === ''}
   {@render form(draft)}
 {:else}
-  <button class="add" onclick={add}>{t('settings.templates.add')}</button>
+  <button class="btn add" onclick={add}>{t('settings.templates.add')}</button>
 {/if}
 
 <style>
@@ -222,23 +224,6 @@
     display: flex;
     flex: none;
     gap: var(--ame-space-2);
-  }
-
-  button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
-  }
-
-  button.danger {
-    border-color: var(--ame-error);
   }
 
   .add {

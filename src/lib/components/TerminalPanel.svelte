@@ -181,26 +181,30 @@
       aria-label={t('terminal.stopPrompt', { title: pending.title })}
     >
       <span>{t('terminal.stopPrompt', { title: pending.title })}</span>
-      <button class="primary" onclick={() => void group.close(pending.id, true)}>
+      <button class="btn primary" onclick={() => void group.close(pending.id, true)}>
         {t('terminal.stopAndClose')}
       </button>
-      <button onclick={() => (group.pendingClose = null)}>{t('terminal.cancel')}</button>
+      <button class="btn" onclick={() => (group.pendingClose = null)}>{t('terminal.cancel')}</button
+      >
     </div>
   {:else if active && !isRunning(active)}
     <div class="notice" role="status">
       <span>{exitText(active)}</span>
       {#if activeAgent && canResume(activeAgent)}
-        <button class="primary" onclick={() => void group.restart(active.id, true)}>
+        <button class="btn primary" onclick={() => void group.restart(active.id, true)}>
           {t('terminal.resume')}
         </button>
       {/if}
       <button
+        class="btn"
         class:primary={!activeAgent || !canResume(activeAgent)}
         onclick={() => void group.restart(active.id)}
       >
         {t('terminal.restart')}
       </button>
-      <button onclick={() => void group.close(active.id)}>{t('terminal.closeExited')}</button>
+      <button class="btn" onclick={() => void group.close(active.id)}
+        >{t('terminal.closeExited')}</button
+      >
     </div>
   {/if}
 
@@ -214,17 +218,18 @@
         <p>{t('terminal.previousSession', { title: restoring.title })}</p>
         <div class="agents">
           {#if restoringAgent?.path && canResume(restoringAgent)}
-            <button class="primary" onclick={() => void group.restore(restoring.key, true)}>
+            <button class="btn primary" onclick={() => void group.restore(restoring.key, true)}>
               {t('terminal.resume')}
             </button>
           {/if}
           <button
+            class="btn"
             class:primary={!restoringAgent?.path || !canResume(restoringAgent)}
             onclick={() => void group.restore(restoring.key, false)}
           >
             {t('terminal.startAgain')}
           </button>
-          <button onclick={() => group.dismissRestorable(restoring.key)}>
+          <button class="btn" onclick={() => group.dismissRestorable(restoring.key)}>
             {t('terminal.dismissShort')}
           </button>
         </div>
@@ -239,6 +244,7 @@
         <div class="agents">
           {#each installed as agent, index (agent.profile.id)}
             <button
+              class="btn"
               class:primary={index === 0}
               title={agent.path}
               onclick={() => void group.start(agent.profile.id)}
@@ -371,20 +377,6 @@
   .notice span {
     flex: 1;
     color: var(--ame-text-muted);
-  }
-
-  .notice button,
-  .empty button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
   }
 
   .body {

@@ -105,13 +105,13 @@
       <span class="summary">{summary}</span>
     </div>
     <button
-      class="close"
+      class="icon-btn close"
       aria-label={t('dashboard.close')}
       title={t('dashboard.close')}
       onclick={() => view.close()}
     >
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-        <path d="M4 4l8 8M12 4l-8 8" />
+        <path d="M4 4l8 8M12 4l-8 8" stroke-width="1.5" />
       </svg>
     </button>
   </header>
@@ -218,28 +218,6 @@
     color: var(--ame-text-muted);
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .close {
-    display: grid;
-    place-items: center;
-    padding: var(--ame-space-1);
-    border: 0;
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text-muted);
-  }
-
-  .close:hover {
-    background: var(--ame-surface);
-    color: var(--ame-text);
-  }
-
-  .close path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.5;
-    stroke-linecap: round;
   }
 
   .content {

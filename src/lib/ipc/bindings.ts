@@ -923,6 +923,11 @@ export type Settings_Deserialize = {
 	updateCheck?: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown?: boolean,
+	/**
+	 *  Sidebar sections the user folded, by section id (`pinned`,
+	 *  `projects` or `group:<name>`).
+	 */
+	collapsedSections?: string[],
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents?: AgentProfile_Deserialize[],
 	/**
@@ -975,6 +980,11 @@ export type Settings_Serialize = {
 	updateCheck: boolean,
 	/**  The hint that Ame keeps running in the background was shown. */
 	backgroundHintShown: boolean,
+	/**
+	 *  Sidebar sections the user folded, by section id (`pinned`,
+	 *  `projects` or `group:<name>`).
+	 */
+	collapsedSections: string[],
 	/**  Custom agent profiles; one with a built-in id replaces that profile. */
 	agents: AgentProfile_Serialize[],
 	/**

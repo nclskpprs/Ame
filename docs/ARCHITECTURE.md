@@ -78,7 +78,8 @@ src/                  Svelte frontend
   lib/palette/        palette state, sources, fuzzy matching
   lib/project/        per-project sessions: file tree, editors, search
   lib/settings/       option lists for the settings view
-  lib/stores/         app-wide state: settings, workspace, view, notices
+  lib/stores/         app-wide state: settings, workspace, view, navigation, notices
+  lib/test/           fake Tauri backend for component tests (ADR 0027)
   lib/terminal/       xterm.js view, input queue, terminal theme, sessions
   lib/theme/          design tokens and theme logic
 locales/en.json       source of truth for UI strings
@@ -94,6 +95,16 @@ docs/                 vision, architecture, design, roadmap, progress, ADRs
 - All IPC types are **generated from Rust** with `tauri-specta`, so frontend
   and backend stay type-safe. Debug builds and `cargo test` regenerate
   `src/lib/ipc/bindings.ts`; CI fails if the committed file is stale.
+
+## Tests — implemented
+
+- Rust: unit tests next to the code, integration tests in `src-tauri/tests`.
+- Frontend: unit tests of pure functions next to the code (`*.test.ts`,
+  `node` environment) and component tests (ADR 0027): real components in
+  jsdom with `@testing-library/svelte`, the backend faked with `mockIPC`
+  via `src/lib/test/backend.ts`. Rune-based tests use `*.test.svelte.ts`.
+- Guard tests scan the sources: no raw UI text, no literal colors, one
+  button system (`components/buttons.test.ts`).
 
 ## Settings and portable mode — implemented (M0)
 

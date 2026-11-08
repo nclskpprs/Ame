@@ -67,3 +67,25 @@ export function sectionDrop(
   if (wanted !== group) change.group = wanted;
   return Object.keys(change).length ? change : null;
 }
+
+/** Stable id of a section, used to remember that it is folded. */
+export function sectionId(section: Pick<ProjectSection, 'kind' | 'title'>): string {
+  return section.kind === 'group' ? `group:${section.title ?? ''}` : section.kind;
+}
+
+/** The folded section ids after folding or unfolding `id`. */
+export function toggleCollapsed(collapsed: readonly string[], id: string): string[] {
+  return collapsed.includes(id) ? collapsed.filter((other) => other !== id) : [...collapsed, id];
+}
+
+/**
+ * Projects listed in a section: all of them, or for a folded section only
+ * the active project, so the current project never disappears.
+ */
+export function visibleProjects(
+  section: ProjectSection,
+  collapsed: boolean,
+  active: string | null,
+): Project[] {
+  return collapsed ? section.projects.filter((p) => p.path === active) : section.projects;
+}

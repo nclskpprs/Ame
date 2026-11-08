@@ -159,7 +159,7 @@
         {onkeydown}></textarea>
       <button
         type="submit"
-        class="primary"
+        class="btn primary"
         disabled={!message.trim() || staged.length === 0 || git.busy}
         title={staged.length === 0 ? t('changes.nothingStaged') : t('changes.commitHint')}
       >
@@ -179,10 +179,16 @@
   {#if checkpoints.undo}
     <div class="restored" role="status">
       <span>{t('checkpoints.restored')}</span>
-      <button disabled={checkpoints.busy} onclick={() => void checkpoints.undoRestore()}>
+      <button
+        class="btn"
+        disabled={checkpoints.busy}
+        onclick={() => void checkpoints.undoRestore()}
+      >
         {t('checkpoints.undo')}
       </button>
-      <button onclick={() => (checkpoints.undo = null)}>{t('checkpoints.dismiss')}</button>
+      <button class="btn" onclick={() => (checkpoints.undo = null)}
+        >{t('checkpoints.dismiss')}</button
+      >
     </div>
   {/if}
   {#if checkpoints.list.length}
@@ -229,19 +235,19 @@
                   <div class="confirm" role="alertdialog" aria-label={t('checkpoints.confirm')}>
                     <span>{t('checkpoints.confirm')}</span>
                     <button
-                      class="primary"
+                      class="btn primary"
                       disabled={checkpoints.busy}
                       onclick={() => void checkpoints.restore(checkpoint.id)}
                     >
                       {t('checkpoints.restore')}
                     </button>
-                    <button onclick={() => (checkpoints.confirming = null)}>
+                    <button class="btn" onclick={() => (checkpoints.confirming = null)}>
                       {t('checkpoints.cancel')}
                     </button>
                   </div>
                 {:else}
                   <button
-                    class="restore"
+                    class="btn restore"
                     disabled={checkpoints.busy}
                     onclick={() => (checkpoints.confirming = checkpoint.id)}
                   >
@@ -325,19 +331,9 @@
     font-size: var(--ame-font-size-small);
   }
 
-  .detail button,
-  .restored button {
+  .detail .btn,
+  .restored .btn {
     justify-self: start;
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .detail button.primary {
-    border-color: var(--ame-accent);
   }
 
   .branch {
@@ -391,20 +387,6 @@
     font: inherit;
     resize: vertical;
     user-select: text;
-  }
-
-  .commit button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-accent);
-    border-radius: var(--ame-radius);
-    background: var(--ame-bg);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .commit button:disabled {
-    border-color: var(--ame-border);
-    color: var(--ame-text-muted);
   }
 
   .section {

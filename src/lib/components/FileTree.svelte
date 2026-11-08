@@ -286,10 +286,10 @@
       {#if edit.kind === 'trash'}
         <span>{editLabel()}</span>
         <div class="buttons">
-          <button class="primary" disabled={busy} onclick={() => void submit()} use:focusButton>
+          <button class="btn primary" disabled={busy} onclick={() => void submit()} use:focusButton>
             {t('fileTree.trash')}
           </button>
-          <button onclick={cancel}>{t('fileTree.cancel')}</button>
+          <button class="btn" onclick={cancel}>{t('fileTree.cancel')}</button>
         </div>
       {:else}
         <label for="file-tree-edit">{editLabel()}</label>
@@ -446,19 +446,6 @@
   .edit .buttons {
     display: flex;
     gap: var(--ame-space-2);
-  }
-
-  .edit button {
-    padding: 2px var(--ame-space-3);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: var(--ame-surface);
-    color: var(--ame-text);
-    font: inherit;
-  }
-
-  .edit button.primary {
-    border-color: var(--ame-accent);
   }
 
   .row.selected {

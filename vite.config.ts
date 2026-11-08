@@ -1,13 +1,16 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath } from 'node:url';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { svelteTesting } from '@testing-library/svelte/vite';
 import { defineConfig } from 'vite';
 
 // Set by `tauri dev` when developing on a mobile device or a remote host.
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
-  plugins: [svelte()],
+  // svelteTesting resolves Svelte for the browser and cleans up after each
+  // component test (only active under Vitest).
+  plugins: [svelte(), ...(process.env.VITEST ? [svelteTesting()] : [])],
   resolve: {
     alias: {
       $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
@@ -33,7 +36,7 @@ export default defineConfig({
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.svelte.ts'],
     environment: 'node',
   },
 });

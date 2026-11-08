@@ -42,18 +42,20 @@
     {:else if updates.confirming}
       <p class="detail">{t('update.confirmSessions', { count: running })}</p>
       <div class="actions">
-        <button class="primary" onclick={install}>{t('update.installAnyway')}</button>
-        <button use:focus onclick={() => (updates.confirming = false)}>{t('update.cancel')}</button>
+        <button class="btn small primary" onclick={install}>{t('update.installAnyway')}</button>
+        <button class="btn small" use:focus onclick={() => (updates.confirming = false)}
+          >{t('update.cancel')}</button
+        >
       </div>
     {:else}
       <p class="detail">
         {updates.support === 'inApp' ? t('update.installHint') : t('update.downloadHint')}
       </p>
       <div class="actions">
-        <button class="primary" onclick={install}>
+        <button class="btn small primary" onclick={install}>
           {updates.support === 'inApp' ? t('update.install') : t('update.download')}
         </button>
-        <button onclick={() => updates.dismiss()}>{t('update.later')}</button>
+        <button class="btn small" onclick={() => updates.dismiss()}>{t('update.later')}</button>
       </div>
     {/if}
   </section>
@@ -88,25 +90,6 @@
     flex-wrap: wrap;
     gap: var(--ame-space-2);
     margin-top: var(--ame-space-1);
-  }
-
-  button {
-    padding: 2px var(--ame-space-2);
-    border: 1px solid var(--ame-border);
-    border-radius: var(--ame-radius);
-    background: transparent;
-    color: var(--ame-text);
-    font: inherit;
-    font-size: var(--ame-font-size-small);
-  }
-
-  button:hover {
-    border-color: var(--ame-text-muted);
-  }
-
-  button.primary {
-    border-color: var(--ame-accent);
-    color: var(--ame-accent);
   }
 
   .bar {

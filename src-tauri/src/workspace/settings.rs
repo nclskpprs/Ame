@@ -56,6 +56,9 @@ pub struct Settings {
     pub update_check: bool,
     /// The hint that Ame keeps running in the background was shown.
     pub background_hint_shown: bool,
+    /// Sidebar sections the user folded, by section id (`pinned`,
+    /// `projects` or `group:<name>`).
+    pub collapsed_sections: Vec<String>,
     /// Custom agent profiles; one with a built-in id replaces that profile.
     pub agents: Vec<AgentProfile>,
     /// The user's own prompt library (placeholders are filled in by the
@@ -122,6 +125,7 @@ impl Default for Settings {
             start_agent: String::new(),
             update_check: true,
             background_hint_shown: false,
+            collapsed_sections: Vec::new(),
             agents: Vec::new(),
             prompts: Vec::new(),
             templates: Vec::new(),

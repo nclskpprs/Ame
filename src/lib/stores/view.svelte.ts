@@ -1,3 +1,7 @@
+import { tick } from 'svelte';
+import { currentPage, type Page } from './navigation';
+import { workspace } from './workspace.svelte';
+
 /** A view that replaces the active project in the main area. */
 export type Overlay = 'settings' | 'dashboard' | 'board';
 
@@ -13,6 +17,25 @@ class ViewState {
 
   get dashboardOpen(): boolean {
     return this.overlay === 'dashboard';
+  }
+
+  /** The page the sidebar marks as current. */
+  get page(): Page {
+    return currentPage(this.overlay, workspace.activePath);
+  }
+
+  /**
+   * Shows a project's page, or its board: what a click on a sidebar entry
+   * does. Unlike `toggle` it never hides the page that is already shown.
+   */
+  async showProject(path: string, overlay: 'board' | null = null): Promise<void> {
+    if (path !== workspace.activePath) {
+      await workspace.activate(path);
+      // Switching projects closes overlays (App.svelte); open ours after that.
+      await tick();
+    }
+    if (overlay) this.open(overlay);
+    else this.close(false);
   }
 
   open(overlay: Overlay): void {

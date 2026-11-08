@@ -158,7 +158,18 @@ milestones and marked with 💡.
 - [x] 💡 Board (moved up from _Later_, needed for 0.1.0): work packages
       per project, prepared from configurable templates, started by hand
       with a picked agent (ADR 0025)
-- [ ] The 0.1.0 release (version set; tag and publication open)
+- [x] The 0.1.0 release (published 2026-11-03; updater tested from 0.0.0 to 0.1.0)
+
+## M7 — Navigation and UX feedback (maintainer, 2026-11-08)
+
+- [x] The sidebar navigates like pages: one current entry, clicks show a
+      page instead of toggling it
+- [x] The board is reachable by mouse (sidebar entry, project menu)
+- [x] Fold and unfold project groups (remembered, status stays visible)
+- [x] One button system with hover, press and disabled states
+- [x] Component tests for the sidebar and the view (ADR 0027)
+- [ ] 💡 End-to-end tests with `tauri-driver` in a Linux CI job
+- [ ] Maintainer test in a preview build
 
 ## Later
 
